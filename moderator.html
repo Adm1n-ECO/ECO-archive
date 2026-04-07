@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FMTO — Moderator System</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; frame-ancestors 'none';">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+/* ── Dev banner ── */
+.dev-banner{background:rgba(224,144,64,.08);border-bottom:1px solid rgba(224,144,64,.15);padding:5px 16px;font-size:10px;color:#A06020;display:flex;align-items:center;gap:8px;}
+.dev-banner strong{color:#E09040;}
+
+/* ── Nav ── */
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 20px;gap:10px;position:sticky;top:0;z-index:200;}
+.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.nav-logo-mark{width:20px;height:24px;}
+.nav-wordmark{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;color:#E8F4F0;}
+.nav-sep{width:1px;height:20px;background:rgba(0,229,204,.12);margin:0 4px;}
+.nav-link{font-size:12px;color:#3A5A54;text-decoration:none;padding:4px 8px;border-radius:6px;transition:color .12s;}
+.nav-link:hover{color:#00E5CC;}
+.nav-link.active{color:#00E5CC;}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#00E5CC,#00E040);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#070D14;}
+
+/* ── Page layout ── */
+.page{max-width:1080px;margin:0 auto;padding:36px 24px 80px;}
+
+/* ── Page header ── */
+.page-eyebrow{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#00E5CC;margin-bottom:8px;}
+.page-h{font-family:'DM Serif Display',serif;font-size:2rem;letter-spacing:-.02em;line-height:1.15;color:#E8F4F0;margin-bottom:8px;}
+.page-h em{font-style:italic;color:#00E040;}
+.page-sub{font-size:13px;color:#5A8A80;line-height:1.75;max-width:560px;margin-bottom:36px;}
+
+/* ── Section title ── */
+.section-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;margin-bottom:12px;}
+.section-h{font-family:'DM Serif Display',serif;font-size:1.2rem;letter-spacing:-.01em;color:#E8F4F0;margin-bottom:4px;}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:10px;padding:3px;margin-bottom:32px;width:fit-content;}
+.tab-btn{padding:7px 18px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:#5A8A80;transition:all .14s;font-family:'DM Sans',system-ui,sans-serif;}
+.tab-btn.active{background:#132030;color:#00E5CC;box-shadow:0 1px 4px rgba(0,0,0,.3);}
+.tab-btn:hover:not(.active){color:#C8D4D0;}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* ── Info callout ── */
+.callout{background:#0A1520;border:1px solid rgba(0,229,204,.12);border-left:3px solid #00E5CC;border-radius:0 8px 8px 0;padding:12px 16px;font-size:12px;color:#7AADA0;line-height:1.7;margin-bottom:24px;}
+.callout strong{color:#C8D4D0;}
+.callout-amber{border-left-color:#E09040;border-color:rgba(224,144,64,.15);background:#0E1008;}
+.callout-green{border-left-color:#00E040;border-color:rgba(0,224,64,.15);background:#040E08;}
+
+/* ── Nomination algorithm card ── */
+.algo-card{background:#0D1820;border:1px solid rgba(0,229,204,.12);border-radius:12px;padding:20px;margin-bottom:28px;}
+.algo-title{font-size:13px;font-weight:600;color:#C8D4D0;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.algo-title svg{width:14px;height:14px;stroke:#00E5CC;}
+.algo-rule{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(0,229,204,.06);}
+.algo-rule:last-child{border-bottom:none;padding-bottom:0;}
+.algo-num{width:22px;height:22px;border-radius:50%;background:rgba(0,229,204,.12);color:#00A090;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.algo-rule-text{font-size:12px;color:#7AADA0;line-height:1.65;}
+.algo-rule-text strong{color:#C8D4D0;}
+.algo-decided{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(0,224,64,.10);color:#009828;border:1px solid rgba(0,224,64,.20);padding:2px 8px;border-radius:999px;margin-left:8px;vertical-align:middle;}
+
+/* ── Candidate list ── */
+.cand-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.cand-card{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;transition:border-color .14s;}
+.cand-card:hover{border-color:rgba(0,229,204,.22);}
+.cand-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.rank-1{background:rgba(0,224,64,.15);color:#00A028;border:1.5px solid rgba(0,224,64,.30);}
+.rank-2{background:rgba(0,229,204,.12);color:#00A090;border:1.5px solid rgba(0,229,204,.25);}
+.rank-3{background:rgba(144,96,224,.12);color:#7050B0;border:1.5px solid rgba(144,96,224,.22);}
+.cand-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#070D14;flex-shrink:0;}
+.cand-info{flex:1;}
+.cand-name{font-size:14px;font-weight:500;color:#E8F4F0;}
+.cand-hh{font-size:11px;color:#5A8A80;margin-top:1px;}
+.cand-stats{display:flex;gap:12px;margin-top:6px;}
+.cand-stat{display:flex;align-items:center;gap:5px;font-size:11px;color:#5A8A80;}
+.cand-stat svg{width:11px;height:11px;stroke:currentColor;flex-shrink:0;}
+.cand-stat span{font-family:'JetBrains Mono',monospace;color:#7AADA0;}
+.cand-actions{display:flex;gap:7px;flex-shrink:0;}
+.cand-btn{height:32px;padding:0 14px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;transition:all .13s;font-family:'DM Sans',system-ui,sans-serif;border:none;}
+.btn-invite{background:#00E5CC;color:#070D14;}
+.btn-invite:hover{filter:brightness(1.08);}
+.btn-skip{background:#0A1520;border:1px solid rgba(0,229,204,.14);color:#5A8A80;}
+.btn-skip:hover{border-color:rgba(0,229,204,.28);color:#C8D4D0;}
+.cand-score-bar{width:80px;height:4px;background:rgba(0,229,204,.10);border-radius:99px;overflow:hidden;margin-top:8px;}
+.cand-score-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#00E5CC,#00E040);}
+
+/* ── Active moderators ── */
+.mod-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
+@media(max-width:640px){.mod-grid{grid-template-columns:1fr;}}
+.mod-card{background:#0D1820;border:1px solid rgba(0,229,204,.12);border-radius:12px;padding:18px;}
+.mod-card-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.mod-av{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#070D14;flex-shrink:0;}
+.mod-name{font-size:14px;font-weight:600;color:#E8F4F0;}
+.mod-role{font-size:11px;color:#5A8A80;margin-top:1px;}
+.mod-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-top:6px;}
+.mb-active{background:rgba(0,224,64,.10);color:#009828;border:1px solid rgba(0,224,64,.22);}
+.mb-you{background:rgba(0,229,204,.10);color:#007A74;border:1px solid rgba(0,229,204,.20);}
+.mod-powers{display:flex;flex-direction:column;gap:5px;}
+.mod-power{display:flex;align-items:center;gap:8px;font-size:12px;color:#5A8A80;}
+.mod-power svg{width:13px;height:13px;stroke:#00E5CC;flex-shrink:0;}
+.mod-since{font-size:10px;color:#3A5A54;font-family:'JetBrains Mono',monospace;margin-top:10px;}
+
+/* ── Volunteer prompt (what a nominated user sees) ── */
+.prompt-frame{background:#070D14;border:1.5px solid rgba(0,229,204,.18);border-radius:16px;overflow:hidden;margin-bottom:28px;}
+.prompt-frame-label{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);padding:9px 16px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#3A5A54;display:flex;align-items:center;gap:8px;}
+.prompt-frame-label span{width:8px;height:8px;border-radius:50%;background:#E09040;display:inline-block;}
+.prompt-body{padding:28px 28px 24px;}
+.prompt-icon{width:52px;height:52px;background:rgba(0,229,204,.10);border:1.5px solid rgba(0,229,204,.22);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px;}
+.prompt-h{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#E8F4F0;margin-bottom:8px;letter-spacing:-.01em;}
+.prompt-sub{font-size:13px;color:#7AADA0;line-height:1.75;margin-bottom:20px;max-width:480px;}
+.prompt-powers{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;}
+@media(max-width:480px){.prompt-powers{grid-template-columns:1fr;}}
+.pp-item{background:#0A1520;border:1px solid rgba(0,229,204,.09);border-radius:9px;padding:12px;}
+.pp-item-icon{font-size:18px;margin-bottom:6px;}
+.pp-item-title{font-size:12px;font-weight:600;color:#C8D4D0;margin-bottom:2px;}
+.pp-item-desc{font-size:11px;color:#3A5A54;line-height:1.55;}
+.prompt-actions{display:flex;gap:10px;}
+.prompt-accept{height:42px;padding:0 24px;background:#00E040;color:#070D14;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;transition:filter .13s;}
+.prompt-accept:hover{filter:brightness(1.08);}
+.prompt-decline{height:42px;padding:0 18px;background:transparent;border:1px solid rgba(0,229,204,.16);color:#5A8A80;border-radius:9px;font-size:13px;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;transition:all .13s;}
+.prompt-decline:hover{border-color:rgba(0,229,204,.30);color:#C8D4D0;}
+.prompt-note{font-size:11px;color:#3A5A54;margin-top:12px;line-height:1.6;}
+
+/* ── Powers reference ── */
+.powers-table{width:100%;border-collapse:collapse;margin-bottom:28px;}
+.powers-table th{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#3A5A54;padding:8px 12px;text-align:left;border-bottom:1px solid rgba(0,229,204,.08);}
+.powers-table td{font-size:12px;color:#7AADA0;padding:10px 12px;border-bottom:1px solid rgba(0,229,204,.05);}
+.powers-table tr:last-child td{border-bottom:none;}
+.powers-table td:first-child{color:#C8D4D0;font-weight:500;}
+.powers-table td:nth-child(2){font-family:'JetBrains Mono',monospace;font-size:10px;}
+.pt-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;}
+.pt-mod{background:rgba(0,229,204,.10);color:#007A74;border:1px solid rgba(0,229,204,.18);}
+.pt-admin{background:rgba(224,144,64,.10);color:#906030;border:1px solid rgba(224,144,64,.20);}
+.pt-any{background:rgba(0,224,64,.10);color:#008020;border:1px solid rgba(0,224,64,.18);}
+
+/* ── Dispute queue ── */
+.dispute-card{background:#0D1820;border:1px solid rgba(224,144,64,.18);border-radius:12px;padding:16px;margin-bottom:10px;}
+.dispute-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.dispute-title{font-size:13px;font-weight:600;color:#E8F4F0;}
+.dispute-type{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(224,144,64,.10);color:#906030;border:1px solid rgba(224,144,64,.20);white-space:nowrap;}
+.dispute-meta{font-size:11px;color:#5A8A80;line-height:1.6;margin-bottom:12px;}
+.dispute-actions{display:flex;gap:8px;}
+.da-btn{height:30px;padding:0 14px;border-radius:7px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;transition:all .13s;border:none;}
+.da-resolve{background:#00E5CC;color:#070D14;}
+.da-resolve:hover{filter:brightness(1.08);}
+.da-hold{background:#0A1520;border:1px solid rgba(0,229,204,.14);color:#5A8A80;}
+.da-hold:hover{border-color:rgba(0,229,204,.28);color:#C8D4D0;}
+.da-escalate{background:rgba(224,144,64,.10);border:1px solid rgba(224,144,64,.20);color:#906030;}
+
+/* ── Empty state ── */
+.empty-state{padding:32px;text-align:center;color:#3A5A54;font-size:13px;border:1px dashed rgba(0,229,204,.10);border-radius:10px;}
+.empty-icon{font-size:32px;margin-bottom:8px;opacity:.4;}
+</style>
+</head>
+<body>
+
+<div class="dev-banner">
+  <strong>Design review</strong> · Mock data · No backend · <a href="../index.html" style="color:#A06020;">← Back to hub</a>
+</div>
+
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">
+    <svg class="nav-logo-mark" viewBox="0 0 44 52" fill="none">
+      <ellipse cx="30" cy="20" rx="8" ry="11" fill="#00E5CC" opacity=".45"/>
+      <ellipse cx="30" cy="12" rx="5" ry="6" fill="#00E5CC" opacity=".35"/>
+      <rect x="28.5" y="29" width="3" height="8" rx="1.5" fill="#00E5CC" opacity=".35"/>
+      <ellipse cx="18" cy="22" rx="11" ry="14" fill="#00E040"/>
+      <ellipse cx="18" cy="11" rx="7" ry="8" fill="#00E040"/>
+      <ellipse cx="10" cy="18" rx="5" ry="7" fill="#00E040" opacity=".7"/>
+      <ellipse cx="26" cy="18" rx="5" ry="7" fill="#00E040" opacity=".7"/>
+      <rect x="16.5" y="34" width="3" height="10" rx="1.5" fill="#00A028"/>
+    </svg>
+    <span class="nav-wordmark">FINDMYTREE</span>
+  </a>
+  <div class="nav-sep"></div>
+  <a class="nav-link" href="tree.html">Tree</a>
+  <a class="nav-link active" href="moderator.html">Moderators</a>
+  <a class="nav-link" href="#">Settings</a>
+  <div class="nav-r">
+    <div class="nav-avatar">VB</div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="page-eyebrow">Network health</div>
+  <h1 class="page-h">Moderator <em>system</em></h1>
+  <p class="page-sub">Moderators are trusted members of your network who volunteer to keep the tree healthy. The system identifies the top 3 most active users and invites them to step forward. No fixed threshold — the algorithm adapts to your tree's size.</p>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('candidates')">Candidates</button>
+    <button class="tab-btn" onclick="switchTab('active')">Active moderators</button>
+    <button class="tab-btn" onclick="switchTab('prompt')">Volunteer prompt</button>
+    <button class="tab-btn" onclick="switchTab('powers')">Powers &amp; scope</button>
+    <button class="tab-btn" onclick="switchTab('disputes')">Dispute queue <span id="dispute-badge" style="background:rgba(224,144,64,.25);color:#E09040;font-size:9px;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px;">2</span></button>
+  </div>
+
+  <!-- ── TAB: Candidates ── -->
+  <div class="tab-pane active" id="tab-candidates">
+
+    <div class="callout">
+      <strong>Decision 31 — locked.</strong> The system nominates the <strong>top 3 most active users</strong> in your network. Activity is scored by logins, content additions, connections initiated, and events shared. No fixed threshold — a 5-person family tree and a 200-node network each get the right number of candidates automatically.
+    </div>
+
+    <div class="algo-card">
+      <div class="algo-title">
+        <svg viewBox="0 0 14 14" fill="none" stroke-width="1.8"><path d="M1 13l3-4 3 2 3-5 3 3"/></svg>
+        Activity scoring algorithm
+      </div>
+      <div class="algo-rule">
+        <div class="algo-num">1</div>
+        <div class="algo-rule-text"><strong>Login frequency</strong> — weighted by recency. A login yesterday scores higher than one last month. Exponential decay over 90 days.</div>
+      </div>
+      <div class="algo-rule">
+        <div class="algo-num">2</div>
+        <div class="algo-rule-text"><strong>Content contributions</strong> — profile updates, photos uploaded, life events posted, household bio written.</div>
+      </div>
+      <div class="algo-rule">
+        <div class="algo-num">3</div>
+        <div class="algo-rule-text"><strong>Network engagement</strong> — connections initiated, invitations sent, merge requests reviewed.</div>
+      </div>
+      <div class="algo-rule">
+        <div class="algo-num">4</div>
+        <div class="algo-rule-text"><strong>Top 3 only</strong> — candidates ranked, top 3 surface. Existing moderators are excluded from the pool. <span class="algo-decided">Decided S2</span></div>
+      </div>
+    </div>
+
+    <p class="section-eyebrow">Current candidates — Bakshi network</p>
+    <div class="cand-grid">
+
+      <!-- Candidate 1 -->
+      <div class="cand-card">
+        <div class="cand-rank rank-1">#1</div>
+        <div class="cand-av" style="background:rgba(0,229,204,.20);color:#00E5CC;border:1.5px solid rgba(0,229,204,.35);">RB</div>
+        <div class="cand-info">
+          <div class="cand-name">Rajan Bakshi</div>
+          <div class="cand-hh">Bakshi (London) · joined 14 months ago</div>
+          <div class="cand-stats">
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><rect x="1" y="3" width="10" height="8" rx="1.5"/><path d="M4 3V2a2 2 0 014 0v1"/></svg><span>48</span> logins</div>
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><path d="M6 1v10M1 6h10"/></svg><span>17</span> contributions</div>
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><circle cx="4" cy="4" r="2.5"/><path d="M8.5 8a4.5 4.5 0 00-9 0"/><circle cx="9" cy="5" r="1.5"/><path d="M12 9a2.5 2.5 0 00-5 0"/></svg><span>9</span> connections</div>
+          </div>
+          <div class="cand-score-bar"><div class="cand-score-fill" style="width:88%;"></div></div>
+        </div>
+        <div class="cand-actions">
+          <button class="cand-btn btn-invite" onclick="sendInvite('Rajan Bakshi')">Send invite</button>
+          <button class="cand-btn btn-skip" onclick="skipCandidate(this)">Skip</button>
+        </div>
+      </div>
+
+      <!-- Candidate 2 -->
+      <div class="cand-card">
+        <div class="cand-rank rank-2">#2</div>
+        <div class="cand-av" style="background:rgba(144,96,224,.15);color:#9060E0;border:1.5px solid rgba(144,96,224,.28);">SC</div>
+        <div class="cand-info">
+          <div class="cand-name">Sunita Chopra</div>
+          <div class="cand-hh">Chopra (Chandigarh) · joined 9 months ago</div>
+          <div class="cand-stats">
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><rect x="1" y="3" width="10" height="8" rx="1.5"/><path d="M4 3V2a2 2 0 014 0v1"/></svg><span>36</span> logins</div>
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><path d="M6 1v10M1 6h10"/></svg><span>12</span> contributions</div>
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><circle cx="4" cy="4" r="2.5"/><path d="M8.5 8a4.5 4.5 0 00-9 0"/><circle cx="9" cy="5" r="1.5"/><path d="M12 9a2.5 2.5 0 00-5 0"/></svg><span>6</span> connections</div>
+          </div>
+          <div class="cand-score-bar"><div class="cand-score-fill" style="width:67%;"></div></div>
+        </div>
+        <div class="cand-actions">
+          <button class="cand-btn btn-invite" onclick="sendInvite('Sunita Chopra')">Send invite</button>
+          <button class="cand-btn btn-skip" onclick="skipCandidate(this)">Skip</button>
+        </div>
+      </div>
+
+      <!-- Candidate 3 — knowledge game winner -->
+      <div class="cand-card" style="border-color:rgba(0,224,64,.18);">
+        <div class="cand-rank rank-3">#3</div>
+        <div class="cand-av" style="background:rgba(0,224,64,.15);color:#00E040;border:1.5px solid rgba(0,224,64,.28);">NP</div>
+        <div class="cand-info">
+          <div class="cand-name">Nisha Patel</div>
+          <div class="cand-hh">Patel (Toronto) · joined 11 months ago</div>
+          <div class="cand-stats">
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><rect x="1" y="3" width="10" height="8" rx="1.5"/><path d="M4 3V2a2 2 0 014 0v1"/></svg><span>29</span> logins</div>
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><path d="M6 1v10M1 6h10"/></svg><span>8</span> contributions</div>
+            <div class="cand-stat"><svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><circle cx="4" cy="4" r="2.5"/><path d="M8.5 8a4.5 4.5 0 00-9 0"/><circle cx="9" cy="5" r="1.5"/><path d="M12 9a2.5 2.5 0 00-5 0"/></svg><span>5</span> connections</div>
+          </div>
+          <div class="cand-score-bar"><div class="cand-score-fill" style="width:51%;"></div></div>
+        </div>
+        <div class="cand-actions">
+          <button class="cand-btn btn-invite" onclick="sendInvite('Nisha Patel')">Send invite</button>
+          <button class="cand-btn btn-skip" onclick="skipCandidate(this)">Skip</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="callout callout-amber">
+      <strong>Invitations are non-coercive.</strong> Candidates receive a single email explaining the role. Accepting is entirely voluntary. Declining has no effect on their standing in the network. The system will surface the next most active user if all three decline.
+    </div>
+
+  </div>
+
+  <!-- ── TAB: Active moderators ── -->
+  <div class="tab-pane" id="tab-active">
+
+    <div class="callout callout-green">
+      <strong>1 of 3 moderator slots filled.</strong> Vikas Bakshi (you) is moderator by default as the tree owner. The system has identified 3 candidates to fill the remaining slots.
+    </div>
+
+    <div class="mod-grid">
+
+      <!-- You (owner) -->
+      <div class="mod-card" style="border-color:rgba(0,224,64,.20);">
+        <div class="mod-card-head">
+          <div class="mod-av" style="background:linear-gradient(135deg,#00E5CC,#00E040);">VB</div>
+          <div>
+            <div class="mod-name">Vikas Bakshi</div>
+            <div class="mod-role">Bakshi (Delhi) · Tree owner</div>
+            <span class="mod-badge mb-you">You · Owner</span>
+          </div>
+        </div>
+        <div class="mod-powers">
+          <div class="mod-power"><svg viewBox="0 0 14 14" fill="none" stroke-width="1.8"><path d="M7 1l1.8 3.6L13 5.4l-3 2.9.7 4.1L7 10.4l-3.7 2 .7-4.1-3-2.9 4.2-.8z"/></svg>Full moderator powers</div>
+          <div class="mod-power"><svg viewBox="0 0 14 14" fill="none" stroke-width="1.8"><path d="M1 7h12M7 1v12"/></svg>Invite new moderators</div>
+          <div class="mod-power"><svg viewBox="0 0 14 14" fill="none" stroke-width="1.8"><circle cx="7" cy="5" r="3"/><path d="M1 13s1-3 6-3 6 3 6 3"/></svg>Manage subscriptions</div>
+        </div>
+        <div class="mod-since">Moderator since day 1</div>
+      </div>
+
+      <!-- Empty slot 2 -->
+      <div class="mod-card" style="border-style:dashed;border-color:rgba(0,229,204,.12);opacity:.65;">
+        <div class="mod-card-head">
+          <div class="mod-av" style="background:rgba(0,229,204,.05);border:1.5px dashed rgba(0,229,204,.18);color:#3A5A54;font-size:20px;">+</div>
+          <div>
+            <div class="mod-name" style="color:#5A8A80;">Slot 2 — open</div>
+            <div class="mod-role">Candidate: Rajan Bakshi</div>
+            <span class="mod-badge" style="background:rgba(224,144,64,.10);color:#906030;border:1px solid rgba(224,144,64,.20);">Invite pending</span>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#3A5A54;line-height:1.65;">Invitation sent to Rajan Bakshi. Awaiting volunteer confirmation.</div>
+      </div>
+
+      <!-- Empty slot 3 -->
+      <div class="mod-card" style="border-style:dashed;border-color:rgba(0,229,204,.08);opacity:.45;">
+        <div class="mod-card-head">
+          <div class="mod-av" style="background:rgba(0,229,204,.04);border:1.5px dashed rgba(0,229,204,.12);color:#3A5A54;font-size:20px;">+</div>
+          <div>
+            <div class="mod-name" style="color:#3A5A54;">Slot 3 — open</div>
+            <div class="mod-role">No invite sent yet</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:#3A5A54;line-height:1.65;">Go to the Candidates tab to send an invitation.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TAB: Volunteer prompt ── -->
+  <div class="tab-pane" id="tab-prompt">
+
+    <p style="font-size:12px;color:#5A8A80;line-height:1.7;margin-bottom:20px;">This is the screen a nominated user sees when they click the invitation link. It explains the role, lists the powers, and gives them a single accept/decline choice.</p>
+
+    <div class="prompt-frame">
+      <div class="prompt-frame-label"><span></span> What Rajan Bakshi sees when he opens his invitation</div>
+      <div class="prompt-body">
+        <div class="prompt-icon">🌿</div>
+        <div class="prompt-h">You've been nominated as a network moderator</div>
+        <p class="prompt-sub">The Bakshi network has identified you as one of its most active members. Moderators are trusted volunteers who help keep the tree healthy, resolve disputes, and care for profiles whose owners are no longer active.</p>
+        <div class="prompt-powers">
+          <div class="pp-item">
+            <div class="pp-item-icon">🕊️</div>
+            <div class="pp-item-title">Stewardship</div>
+            <div class="pp-item-desc">Approve or reassign stewards for shadow and dormant profiles.</div>
+          </div>
+          <div class="pp-item">
+            <div class="pp-item-icon">⚖️</div>
+            <div class="pp-item-title">Dispute resolution</div>
+            <div class="pp-item-desc">Arbitrate conflicts over profile content between family members.</div>
+          </div>
+          <div class="pp-item">
+            <div class="pp-item-icon">🕯️</div>
+            <div class="pp-item-title">In Memoriam</div>
+            <div class="pp-item-desc">Mark profiles as In Memoriam with a 7-day confirmation window.</div>
+          </div>
+          <div class="pp-item">
+            <div class="pp-item-icon">🛡️</div>
+            <div class="pp-item-title">Content moderation</div>
+            <div class="pp-item-desc">Remove inappropriate content from any profile in the network.</div>
+          </div>
+        </div>
+        <div class="prompt-actions">
+          <button class="prompt-accept" onclick="acceptPrompt()">Yes, I'd like to volunteer</button>
+          <button class="prompt-decline" onclick="declinePrompt()">No thank you</button>
+        </div>
+        <p class="prompt-note">This is entirely voluntary. Declining has no effect on your account or standing in the network. You can step down at any time from your settings.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Design note:</strong> The prompt is sent as a Resend email and also appears as an in-app notification. The link expires after 14 days. If the user declines, the system moves to the next candidate automatically — no manual intervention needed from the tree owner.
+    </div>
+
+  </div>
+
+  <!-- ── TAB: Powers ── -->
+  <div class="tab-pane" id="tab-powers">
+
+    <div class="callout callout-green">
+      <strong>Decision 30 — locked.</strong> Full moderator scope. All 5 powers below are available to any active moderator.
+    </div>
+
+    <table class="powers-table">
+      <thead>
+        <tr>
+          <th>Power</th>
+          <th>Who can use it</th>
+          <th>Reversible?</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Approve stewardship</td>
+          <td><span class="pt-tag pt-mod">Moderator</span></td>
+          <td>Yes</td>
+          <td>Approve, reassign, or remove stewards from shadow and kept-alive profiles.</td>
+        </tr>
+        <tr>
+          <td>Dispute arbitration</td>
+          <td><span class="pt-tag pt-mod">Moderator</span></td>
+          <td>Yes</td>
+          <td>Make a binding ruling on content disputes. Either party can appeal to the tree owner.</td>
+        </tr>
+        <tr>
+          <td>Mark In Memoriam</td>
+          <td><span class="pt-tag pt-mod">Moderator</span> <span class="pt-tag pt-any">+ Direct conn.</span></td>
+          <td>7-day window</td>
+          <td>Opens a 7-day window for acknowledgement before the status is finalised. Can be contested by any direct connection during the window.</td>
+        </tr>
+        <tr>
+          <td>Content removal</td>
+          <td><span class="pt-tag pt-mod">Moderator</span></td>
+          <td>Yes (30 days)</td>
+          <td>Remove photos, bios, or events deemed inappropriate. Removed content is soft-deleted for 30 days before permanent erasure.</td>
+        </tr>
+        <tr>
+          <td>Nominate new moderators</td>
+          <td><span class="pt-tag pt-mod">Moderator</span></td>
+          <td>—</td>
+          <td>Invite additional volunteers from the system-generated candidate list. Cannot exceed 3 active moderators per tree.</td>
+        </tr>
+        <tr>
+          <td>Remove a moderator</td>
+          <td><span class="pt-tag pt-admin">Owner only</span></td>
+          <td>Yes</td>
+          <td>Only the tree owner can revoke moderator status. Prevents moderators from removing each other.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-amber">
+      <strong>Moderators cannot:</strong> delete households, change subscription status, access billing information, view private-tier connection details, or act on profiles outside their own network segment.
+    </div>
+
+  </div>
+
+  <!-- ── TAB: Dispute queue ── -->
+  <div class="tab-pane" id="tab-disputes">
+
+    <p class="section-eyebrow" style="margin-bottom:16px;">Open disputes — Bakshi network</p>
+
+    <div class="dispute-card">
+      <div class="dispute-head">
+        <div class="dispute-title">Profile content dispute — Kiran Bakshi</div>
+        <span class="dispute-type">Content</span>
+      </div>
+      <div class="dispute-meta">
+        <strong style="color:#C8D4D0;">Raised by:</strong> Priya Bakshi · 3 days ago<br>
+        Two family members disagree on the bio text for Kiran Bakshi's profile. Priya wants to include childhood anecdotes. The profile's steward (Rajan) wants to keep it factual only. Both have editing access as co-stewards.
+      </div>
+      <div class="dispute-actions">
+        <button class="da-btn da-resolve" onclick="resolveDispute(this)">Review &amp; resolve</button>
+        <button class="da-btn da-hold">Place on hold</button>
+        <button class="da-btn da-escalate">Escalate to owner</button>
+      </div>
+    </div>
+
+    <div class="dispute-card">
+      <div class="dispute-head">
+        <div class="dispute-title">In Memoriam contest — Arvind Sharma</div>
+        <span class="dispute-type">In Memoriam</span>
+      </div>
+      <div class="dispute-meta">
+        <strong style="color:#C8D4D0;">Raised by:</strong> Auto-system · 1 day ago<br>
+        Sunita Chopra marked Arvind Sharma as In Memoriam yesterday. Two direct connections have contested the status within the 7-day window. The moderator must review before the status is finalised.
+      </div>
+      <div class="dispute-actions">
+        <button class="da-btn da-resolve" onclick="resolveDispute(this)">Review &amp; resolve</button>
+        <button class="da-btn da-hold">Extend window</button>
+        <button class="da-btn da-escalate">Escalate to owner</button>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <p class="section-eyebrow" style="margin-bottom:12px;">Resolved — last 30 days</p>
+      <div class="empty-state">
+        <div class="empty-icon">✓</div>
+        No resolved disputes yet. Resolved cases will appear here with a full audit trail.
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /page -->
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){
+    b.classList.toggle('active', ['candidates','active','prompt','powers','disputes'][i] === id);
+  });
+  document.querySelectorAll('.tab-pane').forEach(function(p){
+    p.classList.toggle('active', p.id === 'tab-' + id);
+  });
+}
+
+function sendInvite(name) {
+  alert('Invitation sent to ' + name + '.\n\nIn production: Resend email dispatched. Candidate appears in Active Moderators tab with "Invite pending" status.');
+}
+
+function skipCandidate(btn) {
+  const card = btn.closest('.cand-card');
+  card.style.opacity = '.35';
+  card.style.pointerEvents = 'none';
+  const name = card.querySelector('.cand-name').textContent;
+  setTimeout(function(){ alert(name + ' skipped. The system will surface the next most active user.'); }, 100);
+}
+
+function acceptPrompt() {
+  alert('Volunteer confirmed.\n\nIn production: moderator status applied to account, welcome email sent, moderator badge appears on tree node.');
+}
+
+function declinePrompt() {
+  alert('Declined.\n\nIn production: system moves to next candidate automatically. No notification sent to tree owner.');
+}
+
+function resolveDispute(btn) {
+  alert('Dispute resolution flow — opens a full review panel with both parties\' content, moderation history, and a ruling form. Coming in Phase 1.');
+}
+</script>
+
+</body>
+</html>

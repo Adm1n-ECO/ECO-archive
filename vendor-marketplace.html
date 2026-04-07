@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO — Partner Services</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-ancestors 'none';">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;}
+
+.dev-banner{background:rgba(224,144,64,.08);border-bottom:1px solid rgba(224,144,64,.15);padding:5px 16px;font-size:10px;color:#A06020;display:flex;align-items:center;gap:8px;}
+.dev-banner strong{color:#E09040;}
+
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 20px;gap:10px;position:sticky;top:0;z-index:200;}
+.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.nav-mark{width:20px;height:24px;}
+.nav-word{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;color:#E8F4F0;}
+.nav-sep{width:1px;height:20px;background:rgba(0,229,204,.12);margin:0 4px;}
+.nav-link{font-size:12px;color:#3A5A54;text-decoration:none;padding:4px 8px;border-radius:6px;}
+.nav-link:hover,.nav-link.active{color:#00E5CC;}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#00E5CC,#00E040);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#070D14;}
+
+.page{max-width:980px;margin:0 auto;padding:40px 24px 100px;}
+
+.eyebrow{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px;}
+.ey-amber{color:#E09040;}
+.ey-cyan{color:#00E5CC;}
+.ey-green{color:#00E040;}
+
+.page-h{font-family:'DM Serif Display',serif;font-size:2rem;letter-spacing:-.02em;line-height:1.15;color:#E8F4F0;margin-bottom:8px;}
+.page-h em{font-style:italic;color:#00E040;}
+.page-sub{font-size:13px;color:#5A8A80;line-height:1.8;max-width:580px;margin-bottom:40px;}
+
+/* ── Model cards ── */
+.model-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:48px;}
+@media(max-width:680px){.model-strip{grid-template-columns:1fr;}}
+.model-card{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:12px;padding:18px;}
+.model-card.chosen{border-color:rgba(0,224,64,.28);background:rgba(0,224,64,.04);}
+.mc-label{font-size:9px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;margin-bottom:8px;}
+.mc-title{font-size:14px;font-weight:600;color:#E8F4F0;margin-bottom:6px;}
+.mc-desc{font-size:11px;color:#5A8A80;line-height:1.65;margin-bottom:10px;}
+.mc-badge{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:999px;display:inline-block;}
+.mc-chosen{background:rgba(0,224,64,.12);color:#009828;border:1px solid rgba(0,224,64,.22);}
+.mc-no{background:rgba(90,138,128,.10);color:#3A5A54;border:1px solid rgba(90,138,128,.15);}
+
+/* ── Flow diagram ── */
+.flow-section{margin-bottom:48px;}
+.flow-h{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;margin-bottom:16px;}
+.flow-row{display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:8px;}
+.flow-row::-webkit-scrollbar{height:4px;}
+.flow-row::-webkit-scrollbar-thumb{background:rgba(0,229,204,.15);border-radius:99px;}
+.flow-step{background:#0D1820;border:1px solid rgba(0,229,204,.12);border-radius:10px;padding:14px 16px;min-width:150px;flex-shrink:0;}
+.flow-step.highlight{border-color:rgba(0,224,64,.30);background:rgba(0,224,64,.05);}
+.fs-num{width:22px;height:22px;border-radius:50%;background:rgba(0,229,204,.12);color:#00A090;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.fs-title{font-size:12px;font-weight:600;color:#C8D4D0;margin-bottom:3px;}
+.fs-desc{font-size:10px;color:#5A8A80;line-height:1.55;}
+.flow-arrow{width:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#3A5A54;font-size:18px;}
+
+/* ── Category cards ── */
+.categories-h{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;margin-bottom:16px;}
+.categories{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:48px;}
+@media(max-width:600px){.categories{grid-template-columns:1fr;}}
+
+.cat-card{border-radius:14px;overflow:hidden;border:1px solid rgba(0,229,204,.10);}
+.cat-card.live{border-color:rgba(0,224,64,.22);}
+.cat-card.planned{border-color:rgba(0,229,204,.12);opacity:.85;}
+.cat-card.future{border-color:rgba(90,138,128,.10);opacity:.6;}
+
+.cat-header{padding:16px 18px 14px;display:flex;align-items:flex-start;gap:14px;}
+.cat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.ci-book{background:rgba(224,144,64,.12);border:1px solid rgba(224,144,64,.22);}
+.ci-announce{background:rgba(0,229,204,.10);border:1px solid rgba(0,229,204,.20);}
+.ci-photo{background:rgba(144,96,224,.10);border:1px solid rgba(144,96,224,.20);}
+.ci-travel{background:rgba(0,224,64,.10);border:1px solid rgba(0,224,64,.18);}
+.ci-catering{background:rgba(224,80,96,.10);border:1px solid rgba(224,80,96,.20);}
+.ci-legal{background:rgba(90,138,128,.10);border:1px solid rgba(90,138,128,.18);}
+.cat-meta{flex:1;}
+.cat-title{font-size:14px;font-weight:600;color:#E8F4F0;margin-bottom:2px;}
+.cat-partner{font-size:10px;color:#5A8A80;font-style:italic;margin-bottom:5px;}
+.cat-phase{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;display:inline-block;}
+.ph-launch{background:rgba(0,224,64,.10);color:#009828;border:1px solid rgba(0,224,64,.20);}
+.ph-phase2{background:rgba(0,229,204,.10);color:#007A74;border:1px solid rgba(0,229,204,.18);}
+.ph-phase3{background:rgba(90,138,128,.08);color:#3A5A54;border:1px solid rgba(90,138,128,.15);}
+
+.cat-body{padding:0 18px 16px;}
+.cat-desc{font-size:12px;color:#7AADA0;line-height:1.7;margin-bottom:12px;}
+
+.cat-features{display:flex;flex-direction:column;gap:5px;}
+.cf{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:#5A8A80;}
+.cf-check{color:#00A090;flex-shrink:0;margin-top:1px;}
+.cf-x{color:#3A5A54;flex-shrink:0;}
+
+.cat-cta{margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,229,204,.07);display:flex;gap:8px;align-items:center;}
+.cat-btn-primary{height:32px;padding:0 16px;background:#00E5CC;color:#070D14;border:none;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;}
+.cat-btn-primary:hover{filter:brightness(1.08);}
+.cat-btn-ghost{height:32px;padding:0 12px;background:transparent;border:1px solid rgba(0,229,204,.16);color:#5A8A80;border-radius:7px;font-size:11px;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;}
+.cat-btn-ghost:hover{border-color:rgba(0,229,204,.30);color:#C8D4D0;}
+.cat-coming{font-size:10px;color:#3A5A54;font-style:italic;}
+
+/* ── Book builder ── */
+.book-section{background:#0D1820;border:1px solid rgba(224,144,64,.18);border-radius:14px;overflow:hidden;margin-bottom:48px;}
+.book-header{background:#0A1008;padding:16px 20px;border-bottom:1px solid rgba(224,144,64,.12);display:flex;align-items:center;gap:10px;}
+.book-header-icon{font-size:20px;}
+.book-header-title{font-size:13px;font-weight:600;color:#C8D4D0;}
+.book-header-sub{font-size:10px;color:#5A8A80;margin-top:1px;}
+.book-body{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+@media(max-width:640px){.book-body{grid-template-columns:1fr;}}
+.book-panel{padding:20px;}
+.book-panel:first-child{border-right:1px solid rgba(0,229,204,.07);}
+.bp-title{font-size:11px;font-weight:600;color:#7AADA0;margin-bottom:14px;text-transform:uppercase;letter-spacing:.09em;font-size:9px;}
+
+/* Member selector */
+.member-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.ml-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#070D14;border:1px solid rgba(0,229,204,.08);border-radius:8px;cursor:pointer;transition:border-color .12s;}
+.ml-item:hover{border-color:rgba(0,229,204,.20);}
+.ml-item.selected{border-color:rgba(0,229,204,.30);background:rgba(0,229,204,.04);}
+.ml-check{width:16px;height:16px;border-radius:4px;border:1.5px solid rgba(0,229,204,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ml-item.selected .ml-check{background:#00E5CC;border-color:#00E5CC;}
+.ml-check-mark{font-size:10px;color:#070D14;display:none;}
+.ml-item.selected .ml-check-mark{display:block;}
+.ml-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#070D14;flex-shrink:0;}
+.ml-name{font-size:12px;color:#C8D4D0;flex:1;}
+.ml-gen{font-size:10px;color:#3A5A54;font-family:'JetBrains Mono',monospace;}
+.ml-count{font-size:11px;color:#5A8A80;}
+
+/* Book preview */
+.book-preview{background:#0A0E08;border:1px solid rgba(224,144,64,.15);border-radius:10px;padding:16px;margin-bottom:14px;}
+.bp-cover{background:linear-gradient(135deg,#1A1208,#0E1A08);border:1px solid rgba(224,144,64,.25);border-radius:8px;padding:20px;text-align:center;margin-bottom:12px;}
+.bp-cover-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:#E09040;margin-bottom:4px;}
+.bp-cover-sub{font-size:10px;color:#7A5A30;font-family:'JetBrains Mono',monospace;}
+.bp-cover-ornament{font-size:28px;margin:10px 0;}
+.bp-specs{display:flex;flex-direction:column;gap:5px;}
+.bp-spec{display:flex;justify-content:space-between;font-size:11px;}
+.bp-spec-label{color:#5A8A80;}
+.bp-spec-val{color:#C8D4D0;font-family:'JetBrains Mono',monospace;}
+
+.book-order-btn{width:100%;height:38px;background:#E09040;color:#070D14;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;transition:filter .13s;}
+.book-order-btn:hover{filter:brightness(1.08);}
+.book-note{font-size:10px;color:#3A5A54;text-align:center;margin-top:8px;line-height:1.55;}
+
+/* ── Revenue model ── */
+.rev-section{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:12px;padding:20px;margin-bottom:40px;}
+.rev-title{font-size:11px;font-weight:600;color:#7AADA0;margin-bottom:16px;text-transform:uppercase;letter-spacing:.09em;font-size:9px;}
+.rev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(max-width:560px){.rev-grid{grid-template-columns:1fr;}}
+.rev-item{background:#070D14;border-radius:8px;padding:12px;}
+.rev-item-label{font-size:10px;color:#3A5A54;margin-bottom:4px;}
+.rev-item-val{font-size:18px;font-weight:600;font-family:'JetBrains Mono',monospace;color:#00E5CC;}
+.rev-item-desc{font-size:10px;color:#5A8A80;margin-top:3px;line-height:1.5;}
+
+.callout{background:#0A1520;border:1px solid rgba(0,229,204,.12);border-left:3px solid #00E5CC;border-radius:0 8px 8px 0;padding:12px 16px;font-size:12px;color:#7AADA0;line-height:1.7;margin-bottom:20px;}
+.callout strong{color:#C8D4D0;}
+.callout-amber{border-left-color:#E09040;border-color:rgba(224,144,64,.15);background:#0E1008;}
+</style>
+</head>
+<body>
+
+<div class="dev-banner">
+  <strong>Design review</strong> · Mock data · Decision 39 locked · <a href="../index.html" style="color:#A06020;">← Back to hub</a>
+</div>
+
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">
+    <svg class="nav-mark" viewBox="0 0 44 52" fill="none">
+      <ellipse cx="30" cy="20" rx="8" ry="11" fill="#00E5CC" opacity=".45"/>
+      <ellipse cx="30" cy="12" rx="5" ry="6" fill="#00E5CC" opacity=".35"/>
+      <rect x="28.5" y="29" width="3" height="8" rx="1.5" fill="#00E5CC" opacity=".35"/>
+      <ellipse cx="18" cy="22" rx="11" ry="14" fill="#00E040"/>
+      <ellipse cx="18" cy="11" rx="7" ry="8" fill="#00E040"/>
+      <ellipse cx="10" cy="18" rx="5" ry="7" fill="#00E040" opacity=".7"/>
+      <ellipse cx="26" cy="18" rx="5" ry="7" fill="#00E040" opacity=".7"/>
+      <rect x="16.5" y="34" width="3" height="10" rx="1.5" fill="#00A028"/>
+    </svg>
+    <span class="nav-word">ETERNALCURRENT</span>
+  </a>
+  <div class="nav-sep"></div>
+  <a class="nav-link active" href="#">Partner services</a>
+  <div class="nav-r"><div class="nav-av">VB</div></div>
+</nav>
+
+<div class="page">
+
+  <div class="eyebrow ey-amber">Partner services</div>
+  <h1 class="page-h">Your family story, <em>made tangible</em></h1>
+  <p class="page-sub">EternalCurrent partners with one carefully selected provider per service category. We negotiate the deal, set the quality standard, and hand off fulfillment. You get a trusted service; we stay focused on the network.</p>
+
+  <!-- Partnership model -->
+  <p style="font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;margin-bottom:14px;">The partnership model</p>
+  <div class="model-strip" style="margin-bottom:32px;">
+    <div class="model-card">
+      <div class="mc-label" style="color:#3A5A54;">Not this</div>
+      <div class="mc-title">Open marketplace</div>
+      <div class="mc-desc">Any vendor can list. Quality varies. Users navigate dozens of options. Race to the bottom on price.</div>
+      <span class="mc-badge mc-no">Rejected</span>
+    </div>
+    <div class="model-card">
+      <div class="mc-label" style="color:#3A5A54;">Not this</div>
+      <div class="mc-title">Curated directory</div>
+      <div class="mc-desc">Multiple vendors per category. Still requires users to evaluate. Dilutes negotiating position.</div>
+      <span class="mc-badge mc-no">Rejected</span>
+    </div>
+    <div class="model-card chosen">
+      <div class="mc-label" style="color:#009828;">Decided</div>
+      <div class="mc-title">Exclusive partnership</div>
+      <div class="mc-desc">One vendor per category. Negotiated quality standards, pricing, and revenue share. ECO's endorsement means something.</div>
+      <span class="mc-badge mc-chosen">Decision 39 locked</span>
+    </div>
+  </div>
+
+  <!-- How it works flow -->
+  <div class="flow-section">
+    <p class="flow-h">How a vendor partnership works</p>
+    <div class="flow-row">
+      <div class="flow-step">
+        <div class="fs-num">1</div>
+        <div class="fs-title">ECO vets vendor</div>
+        <div class="fs-desc">Quality audit, pricing review, contract negotiation. We set the standard.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight">
+        <div class="fs-num">2</div>
+        <div class="fs-title">User configures order</div>
+        <div class="fs-desc">Selects members, segments, options. All inside ECO — no third-party account needed.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="fs-num">3</div>
+        <div class="fs-title">ECO sends brief</div>
+        <div class="fs-desc">Structured data packet (names, photos, tree structure) sent to vendor API.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="fs-num">4</div>
+        <div class="fs-title">Vendor fulfills</div>
+        <div class="fs-desc">Prints, ships, delivers. Tracking number returned to ECO dashboard.</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step highlight">
+        <div class="fs-num">5</div>
+        <div class="fs-title">Revenue share</div>
+        <div class="fs-desc">Commission or referral fee. ECO never touches inventory or fulfillment.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service categories -->
+  <p class="categories-h">Service categories</p>
+  <div class="categories">
+
+    <!-- Family Book -->
+    <div class="cat-card live">
+      <div class="cat-header">
+        <div class="cat-icon ci-book">📖</div>
+        <div class="cat-meta">
+          <div class="cat-title">Printed family book</div>
+          <div class="cat-partner">Partner TBD — Artifact Uprising or equivalent</div>
+          <span class="cat-phase ph-launch">Launch category</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-desc">Hardcover, high-quality printed book built from the family river. User selects which members to include, which photos, which life events. The result is a permanent physical artefact — the kind families keep on the shelf for generations.</div>
+        <div class="cat-features">
+          <div class="cf"><span class="cf-check">✓</span>User selects members to include (not forced to include everyone)</div>
+          <div class="cf"><span class="cf-check">✓</span>Generational layout mirrors the tree structure</div>
+          <div class="cf"><span class="cf-check">✓</span>Life events, photos, household bios pulled automatically</div>
+          <div class="cf"><span class="cf-check">✓</span>Hardcover options: linen, leather, photo wrap</div>
+          <div class="cf"><span class="cf-check">✓</span>Multiple copies — gift to family members</div>
+          <div class="cf"><span class="cf-check">✓</span>Ships worldwide</div>
+        </div>
+        <div class="cat-cta">
+          <button class="cat-btn-primary" onclick="openBookBuilder()">Design your book</button>
+          <button class="cat-btn-ghost" onclick="previewBook()">Preview</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Announcements -->
+    <div class="cat-card live">
+      <div class="cat-header">
+        <div class="cat-icon ci-announce">✉️</div>
+        <div class="cat-meta">
+          <div class="cat-title">Printed announcements</div>
+          <div class="cat-partner">Partner TBD — Minted or equivalent</div>
+          <span class="cat-phase ph-launch">Launch category</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-desc">Wedding announcements, birth announcements, milestone cards — printed and mailed directly to selected segments of your tree. Choose which branches receive them. The vendor handles printing, addressing, and postage.</div>
+        <div class="cat-features">
+          <div class="cf"><span class="cf-check">✓</span>Send to any segment or individual subset of your tree</div>
+          <div class="cf"><span class="cf-check">✓</span>Addresses auto-populated from household profiles</div>
+          <div class="cf"><span class="cf-check">✓</span>Wedding, birth, graduation, memorial card templates</div>
+          <div class="cf"><span class="cf-check">✓</span>Premium paper stocks, foil, custom design</div>
+          <div class="cf"><span class="cf-check">✓</span>Delivery confirmation back to ECO dashboard</div>
+          <div class="cf cf-x"><span class="cf-x">○</span>International postage varies by destination</div>
+        </div>
+        <div class="cat-cta">
+          <button class="cat-btn-primary" onclick="openAnnouncement()">Create announcement</button>
+          <button class="cat-btn-ghost" onclick="previewAnnouncement()">See templates</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photo books -->
+    <div class="cat-card planned">
+      <div class="cat-header">
+        <div class="cat-icon ci-photo">📸</div>
+        <div class="cat-meta">
+          <div class="cat-title">Photo restoration</div>
+          <div class="cat-partner">Partner TBD — professional restoration service</div>
+          <span class="cat-phase ph-phase2">Phase 2</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-desc">Upload old, damaged, or faded family photos. A professional restoration service repairs and enhances them. Restored versions replace the originals in the tree and are returned as high-resolution prints.</div>
+        <div class="cat-features">
+          <div class="cf"><span class="cf-check">✓</span>AI pre-processing + human artisan finish</div>
+          <div class="cf"><span class="cf-check">✓</span>Colourisation option for black-and-white originals</div>
+          <div class="cf"><span class="cf-check">✓</span>High-res digital + optional printed return</div>
+        </div>
+        <div class="cat-cta"><span class="cat-coming">Coming in Phase 2 — partner negotiation pending</span></div>
+      </div>
+    </div>
+
+    <!-- Travel -->
+    <div class="cat-card planned">
+      <div class="cat-header">
+        <div class="cat-icon ci-travel">✈️</div>
+        <div class="cat-meta">
+          <div class="cat-title">Family reunion planning</div>
+          <div class="cat-partner">Partner TBD — travel or event planning service</div>
+          <span class="cat-phase ph-phase2">Phase 2</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-desc">ECO knows where everyone in the tree is located. A travel partner uses that data to suggest optimal reunion locations, handle bookings, and coordinate across time zones.</div>
+        <div class="cat-features">
+          <div class="cf"><span class="cf-check">✓</span>Geographic centre-of-gravity calculation from tree data</div>
+          <div class="cf"><span class="cf-check">✓</span>Group accommodation and venue booking</div>
+          <div class="cf"><span class="cf-check">✓</span>RSVP and headcount managed in ECO</div>
+        </div>
+        <div class="cat-cta"><span class="cat-coming">Coming in Phase 2</span></div>
+      </div>
+    </div>
+
+    <!-- DNA -->
+    <div class="cat-card future">
+      <div class="cat-header">
+        <div class="cat-icon ci-catering">🧬</div>
+        <div class="cat-meta">
+          <div class="cat-title">DNA ancestry (referral)</div>
+          <div class="cat-partner">Partner TBD — AncestryDNA or 23andMe</div>
+          <span class="cat-phase ph-phase3">Phase 3</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-desc">Referral partnership only. ECO never handles DNA data. When a user wants to find more relatives, we refer them to a DNA partner and receive a referral commission. Discovered relatives are then invited back to ECO.</div>
+        <div class="cat-cta"><span class="cat-coming">Phase 3 — referral model only, no data handling</span></div>
+      </div>
+    </div>
+
+    <!-- Legal -->
+    <div class="cat-card future">
+      <div class="cat-header">
+        <div class="cat-icon ci-legal">⚖️</div>
+        <div class="cat-meta">
+          <div class="cat-title">Estate &amp; will services</div>
+          <div class="cat-partner">Partner TBD — online legal service</div>
+          <span class="cat-phase ph-phase3">Phase 3</span>
+        </div>
+      </div>
+      <div class="cat-body">
+        <div class="cat-desc">Families with multi-generational trees often have estate planning needs. A legal partner can offer discounted will preparation and estate planning services, with family structure pre-populated from ECO data.</div>
+        <div class="cat-cta"><span class="cat-coming">Phase 3 — exploratory</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Book builder mockup -->
+  <div class="callout callout-amber" style="margin-bottom:24px;">
+    <strong>Interactive mockup below:</strong> The book builder lets users select exactly which members to include. Addresses, photos, and bios are pulled automatically from the tree. The vendor never sees the full tree — only the data for selected members.
+  </div>
+
+  <div class="book-section" id="bookBuilderSection" style="display:none;">
+    <div class="book-header">
+      <span class="book-header-icon">📖</span>
+      <div>
+        <div class="book-header-title">Family book builder — Adeyemi–Whitfield</div>
+        <div class="book-header-sub">Select the members to include · estimated 48 pages</div>
+      </div>
+    </div>
+    <div class="book-body">
+      <div class="book-panel">
+        <div class="bp-title">Select members to include</div>
+        <div class="member-list" id="memberList"></div>
+        <div style="font-size:11px;color:#3A5A54;"><span id="selectedCount">0</span> members selected · <span id="pageEst">0</span> estimated pages</div>
+      </div>
+      <div class="book-panel">
+        <div class="bp-title">Book preview</div>
+        <div class="book-preview">
+          <div class="bp-cover">
+            <div class="bp-cover-ornament">🌿</div>
+            <div class="bp-cover-title">The Adeyemi–Whitfield Family</div>
+            <div class="bp-cover-sub" id="yearRange">1890 – 2024</div>
+          </div>
+          <div class="bp-specs">
+            <div class="bp-spec"><span class="bp-spec-label">Format</span><span class="bp-spec-val">8.5 × 11" hardcover</span></div>
+            <div class="bp-spec"><span class="bp-spec-label">Cover</span><span class="bp-spec-val">Linen — forest</span></div>
+            <div class="bp-spec"><span class="bp-spec-label">Pages</span><span class="bp-spec-val" id="pageCount">—</span></div>
+            <div class="bp-spec"><span class="bp-spec-label">Generations</span><span class="bp-spec-val" id="genCount">—</span></div>
+            <div class="bp-spec"><span class="bp-spec-label">Estimated price</span><span class="bp-spec-val" id="priceEst">—</span></div>
+          </div>
+        </div>
+        <button class="book-order-btn" onclick="placeOrder()">Order via partner →</button>
+        <div class="book-note">Fulfilled by our exclusive print partner. Delivery 7–10 business days. ECO only shares data for selected members.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Revenue model -->
+  <div class="rev-section">
+    <div class="rev-title">Revenue model — vendor services</div>
+    <div class="rev-grid">
+      <div class="rev-item">
+        <div class="rev-item-label">Family book commission</div>
+        <div class="rev-item-val">15%</div>
+        <div class="rev-item-desc">Of order value. Average order ~$80. ~$12 per book to ECO.</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-item-label">Announcement referral</div>
+        <div class="rev-item-val">12%</div>
+        <div class="rev-item-desc">Of order value. Average order ~$120. ~$14 per order.</div>
+      </div>
+      <div class="rev-item">
+        <div class="rev-item-label">DNA referral (Phase 3)</div>
+        <div class="rev-item-val">$18</div>
+        <div class="rev-item-desc">Fixed referral fee per kit purchased. No ongoing relationship.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>What ECO never does:</strong> Holds inventory · Handles returns · Accesses payment card data · Shares full tree data with vendors · Takes responsibility for fulfillment quality. The vendor contract includes quality guarantees and a re-print policy that ECO enforces on behalf of users.
+  </div>
+
+</div>
+
+<script>
+const MEMBERS = [
+  {id:'gg1', name:'Solomon Adeyemi',    gen:0, av:'#8050C0', initials:'SA', status:'memoriam'},
+  {id:'g1',  name:'Emmanuel Adeyemi',   gen:1, av:'#8050C0', initials:'EA', status:'memoriam'},
+  {id:'p1',  name:'Victor Adeyemi',     gen:2, av:'#8050C0', initials:'VA', status:'memoriam'},
+  {id:'p2',  name:'Comfort Adeyemi',    gen:2, av:'#0090C8', initials:'CA', status:'kept'},
+  {id:'p4',  name:'Marion Whitfield',   gen:2, av:'#00E040', initials:'MW', status:'active'},
+  {id:'a1',  name:'Taiwo Adeyemi',      gen:3, av:'#00E5CC', initials:'TA', status:'active'},
+  {id:'a2',  name:'Ngozi Adeyemi',      gen:3, av:'#00E5CC', initials:'NA', status:'active'},
+  {id:'a3',  name:'Kolade Adeyemi',     gen:3, av:'#00E040', initials:'KA', status:'active'},
+  {id:'a7',  name:'Isaiah Adeyemi',     gen:3, av:'#00E040', initials:'IA', status:'active'},
+  {id:'a8',  name:'Priya Adeyemi',      gen:3, av:'#9060E0', initials:'PA', status:'active'},
+  {id:'k1',  name:'Zara Adeyemi',       gen:4, av:'#E05080', initials:'ZA', status:'active'},
+  {id:'k2',  name:'Marcus Adeyemi',     gen:4, av:'#00E5CC', initials:'MA', status:'active'},
+  {id:'gc1', name:'Nia Adeyemi',        gen:5, av:'#00E040', initials:'NA', status:'active'},
+];
+
+const selected = new Set(['gg1','g1','p1','p2','p4','a1','a2','a3','a7','a8','k1','k2','gc1']);
+
+function renderMembers() {
+  const list = document.getElementById('memberList');
+  list.innerHTML = MEMBERS.map(m => {
+    const on = selected.has(m.id);
+    return '<div class="ml-item' + (on?' selected':'') + '" onclick="toggleMember(\'' + m.id + '\')">' +
+      '<div class="ml-check"><span class="ml-check-mark">✓</span></div>' +
+      '<div class="ml-av" style="background:' + m.av + '22;border:1px solid ' + m.av + '44;color:' + m.av + ';">' + m.initials + '</div>' +
+      '<div class="ml-name">' + m.name + '</div>' +
+      '<div class="ml-gen">Gen ' + m.gen + '</div>' +
+      '</div>';
+  }).join('');
+  updateStats();
+}
+
+function toggleMember(id) {
+  if (selected.has(id)) selected.delete(id);
+  else selected.add(id);
+  renderMembers();
+}
+
+function updateStats() {
+  const n = selected.size;
+  const pages = Math.max(20, n * 3 + 12);
+  const gens = new Set([...selected].map(id => MEMBERS.find(m=>m.id===id)?.gen).filter(g=>g!=null)).size;
+  const price = 49 + pages * 0.65;
+  document.getElementById('selectedCount').textContent = n;
+  document.getElementById('pageEst').textContent = pages;
+  document.getElementById('pageCount').textContent = pages + ' pages';
+  document.getElementById('genCount').textContent = gens + ' generations';
+  document.getElementById('priceEst').textContent = '$' + price.toFixed(2);
+}
+
+function openBookBuilder() {
+  document.getElementById('bookBuilderSection').style.display = 'block';
+  document.getElementById('bookBuilderSection').scrollIntoView({behavior:'smooth', block:'start'});
+  renderMembers();
+}
+
+function previewBook()      { alert('Full preview PDF — shows cover, sample pages, layout. Coming in Phase 2 integration.'); }
+function openAnnouncement() { alert('Announcement builder — select template, choose recipients from tree segments, configure text. Coming in Phase 1.'); }
+function previewAnnouncement() { alert('Template gallery — wedding, birth, graduation, memorial. Powered by partner design system. Coming in Phase 1.'); }
+function placeOrder()       { alert('Order sent to print partner.\n\nIn production: structured data packet (selected members only) sent to vendor API. Tracking number returned to dashboard within 24h.'); }
+</script>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eternal Currents — Galaxy</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#04060d;--surface:#090d18;--surface2:#0f1520;--border:#1a2030;--text:#e8eaf0;--muted:#6b7280;--accent:#ffd86f;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+#header_bar{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+#site_title{font-family:'Space Mono',monospace;font-size:.85rem;font-weight:700;color:var(--accent);letter-spacing:.05em;flex:1;white-space:nowrap;}
+#style_buttons{display:flex;gap:8px;flex-wrap:wrap;}
+.style_button{padding:6px 14px;border:1px solid transparent;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;transition:all .2s;white-space:nowrap;}
+.style_button:hover{opacity:.85;transform:translateY(-1px);}
+.style_button.active{outline:2px solid var(--accent);outline-offset:2px;}
+.btn_energetic{background:linear-gradient(135deg,#ff7ae0,#ffd86f,#7ae4ff);color:#000;}
+.btn_minimal{background:#1a2030;border-color:#2a3045;color:#c0c8e0;}
+.btn_cosmic{background:linear-gradient(135deg,#1a0a3d,#0a1a4d);color:#b8d4ff;border-color:#334;}
+.btn_organic{background:linear-gradient(135deg,#0a2d10,#1a3a0a);color:#b8ffb8;border-color:#2d4a1a;}
+#theme_switcher,#admin_button{padding:6px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.8rem;transition:background .2s;}
+#theme_switcher:hover,#admin_button:hover{background:var(--border);}
+#main_layout{display:flex;flex:1;overflow:hidden;min-height:0;}
+#visualization_container{flex:3;position:relative;overflow:hidden;display:block;}
+#network_canvas{display:block;position:absolute;top:0;left:0;cursor:default;}
+#info_panel{flex:1;min-width:180px;max-width:240px;background:var(--surface);padding:14px;overflow-y:auto;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:12px;}
+.info_block h2{font-family:'Space Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.info_block div{font-size:.8rem;line-height:1.7;color:var(--text);}
+.info_block{border-bottom:1px solid var(--border);padding-bottom:12px;}
+.info_block:last-child{border-bottom:none;}
+.leg{display:flex;align-items:center;gap:7px;margin-bottom:5px;font-size:.76rem;color:var(--muted);}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+#footer_bar{padding:7px 18px;background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);flex-shrink:0;font-family:'Space Mono',monospace;}
+#admin_link{cursor:pointer;color:var(--accent);}
+#tip{position:fixed;background:#0a0e1a;border:1px solid #2a3550;border-radius:6px;padding:6px 10px;font-size:.76rem;pointer-events:none;opacity:0;transition:opacity .12s;z-index:999;color:#e0e8ff;font-family:'Space Mono',monospace;}
+#center_hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:.65rem;color:rgba(255,255,255,0.25);pointer-events:none;white-space:nowrap;}
+</style>
+</head>
+<body>
+<header id="header_bar">
+  <div id="site_title">Eternal Currents</div>
+  <div id="style_buttons">
+    <button id="style_energetic" class="style_button btn_energetic active">Energetic</button>
+    <button id="style_minimal"   class="style_button btn_minimal">Minimal</button>
+    <button id="style_cosmic"    class="style_button btn_cosmic">Cosmic</button>
+    <button id="style_organic"   class="style_button btn_organic">Organic</button>
+  </div>
+  <button id="theme_switcher">Theme</button>
+  <button id="admin_button">Admin</button>
+</header>
+<main id="main_layout">
+  <section id="visualization_container">
+    <canvas id="network_canvas"></canvas>
+    <div id="style_label" style="position:absolute;top:12px;left:14px;font-family:'Space Mono',monospace;font-size:.68rem;color:#fff;opacity:.4;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.8)">Energetic &amp; Colorful</div>
+    <div id="center_hint">click any node to make them the center</div>
+  </section>
+  <aside id="info_panel">
+    <div class="info_block">
+      <h2>Center</h2>
+      <div id="nd_center" style="font-weight:600;color:var(--accent);">VB (You)</div>
+    </div>
+    <div class="info_block">
+      <h2>Selected Node</h2>
+      <div id="nd_name">Click a node</div>
+      <div id="nd_role"></div>
+      <div id="nd_conn"></div>
+    </div>
+    <div class="info_block">
+      <h2>Legend</h2>
+      <div class="leg"><span class="dot" style="background:#ffd86f"></span>You (VB) — the Sun</div>
+      <div class="leg"><span class="dot" style="background:#ff88cc"></span>Wife / Partner</div>
+      <div class="leg"><span class="dot" style="background:#55aaff"></span>Parents</div>
+      <div class="leg"><span class="dot" style="background:#44ffcc"></span>Children</div>
+      <div class="leg"><span class="dot" style="background:#ff8833"></span>Siblings</div>
+      <div class="leg"><span class="dot" style="background:#cc88ff"></span>Grandparents</div>
+      <div class="leg"><span class="dot" style="background:#88ffaa"></span>Nieces/Nephews</div>
+      <div class="leg"><span class="dot" style="background:#ffcc44"></span>In-laws</div>
+      <div class="leg"><span class="dot" style="background:#8899aa"></span>Extended family</div>
+      <div style="margin-top:8px;font-size:.72rem;color:var(--muted);line-height:1.6">Thick bright stream = influence flowing INTO you.<br>Thin cool stream = your influence going OUT.<br>Click a node to see IN/OUT %.</div>
+      <div style="margin-top:8px;font-size:.7rem;color:var(--muted);">v7.0 — Four Styles — Galaxy Engine</div>
+    </div>
+  </aside>
+</main>
+<footer id="footer_bar">
+  <span>v7.0</span>
+  <a id="admin_link">Admin Tools</a>
+  <span>© Eternal Currents</span>
+</footer>
+<div id="tip"></div>
+
+<script>
+
+/* ═══════════════════════════════════════════════════════════════
+   ETERNAL CURRENTS v7.0 — FOUR-STYLE HORIZONTAL FAN
+
+   Layout: VB (sun) is at horizontal center.
+   LEFT  fan: ancestors flowing in from left (grandparents outermost)
+   RIGHT fan: outward connections flowing right
+
+   Each of the 4 styles renders completely differently:
+     ENERGETIC — rainbow fire streams, thick glowing arcs
+     MINIMAL   — clean white/grey lines with coloured highlights
+     COSMIC    — deep space blue/purple starlanes
+     ORGANIC   — warm golden branching bioluminescent tendrils
+
+   Bidirectional flow:
+     INBOUND  stream — thick, bright, flows FROM node TOWARD center
+     OUTBOUND stream — thinner, flows FROM center TOWARD node
+═══════════════════════════════════════════════════════════════ */
+
+/* ─── SAFE RGBA ──────────────────────────────────────────────── */
+function rgba(hex, a) {
+  if (!hex || hex[0] !== '#') return `rgba(120,120,140,${+a.toFixed(4)})`;
+  const r=parseInt(hex.slice(1,3),16)||0, g=parseInt(hex.slice(3,5),16)||0, b=parseInt(hex.slice(5,7),16)||0;
+  return `rgba(${r},${g},${b},${+a.toFixed(4)})`;
+}
+
+/* ─── NODE DEFINITIONS ──────────────────────────────────────────
+   side:  'left' | 'right'
+   tier:  1=closest, 2=mid, 3=far, 4=distant
+   angle: degrees offset from horizontal (0=flat, +up, -down)
+          LEFT nodes: 180° ± angle  RIGHT nodes: 0° ± angle
+   inW:   inbound influence weight (how much they affect VB)
+   outW:  outbound influence weight (how much VB affects them)
+─────────────────────────────────────────────────────────────── */
+const NODES = [
+  { id:'VB',   label:'VB',            role:'self',    side:'center', tier:0, angle:0,   inW:0,    outW:0 },
+
+  // ── LEFT: Parents (tier 1) ──────────────────────────────────
+  { id:'NB',   label:'NB (Mom)',       role:'parent',  side:'left',   tier:1, angle:18,  inW:0.90, outW:0.45 },
+  { id:'MMB',  label:'MMB (Dad)',      role:'parent',  side:'left',   tier:1, angle:-18, inW:0.90, outW:0.45 },
+
+  // ── LEFT: Grandparents (tier 2) ────────────────────────────
+  { id:'KKD',  label:'KKD',           role:'gp',      side:'left',   tier:2, angle:38,  inW:0.55, outW:0.18 },
+  { id:'LD',   label:'LD',            role:'gp',      side:'left',   tier:2, angle:22,  inW:0.55, outW:0.18 },
+  { id:'BLB',  label:'BLB',           role:'gp',      side:'left',   tier:2, angle:-22, inW:0.55, outW:0.18 },
+  { id:'KBB',  label:'KBB',           role:'gp',      side:'left',   tier:2, angle:-38, inW:0.55, outW:0.18 },
+
+  // ── LEFT: Siblings (tier 1) ────────────────────────────────
+  { id:'AB',   label:'AB †',          role:'sibling', side:'left',   tier:1, angle:50,  inW:0.75, outW:0.65 },
+  { id:'PS',   label:'PS',            role:'sibling', side:'left',   tier:1, angle:65,  inW:0.70, outW:0.60 },
+  { id:'VS',   label:'VS',            role:'sibling', side:'left',   tier:1, angle:80,  inW:0.50, outW:0.45 },
+
+  // ── LEFT: Nieces off siblings (tier 2) ─────────────────────
+  { id:'AS1',  label:'AS',            role:'niece',   side:'left',   tier:2, angle:70,  inW:0.28, outW:0.50 },
+  { id:'AS2',  label:'AS',            role:'niece',   side:'left',   tier:2, angle:85,  inW:0.28, outW:0.50 },
+
+  // ── LEFT: Extended maternal cousins (tier 2) ───────────────
+  { id:'NV_S', label:'NV',            role:'cousin',  side:'left',   tier:2, angle:-48, inW:0.24, outW:0.18 },
+  { id:'DP',   label:'DP',            role:'cousin',  side:'left',   tier:2, angle:-62, inW:0.24, outW:0.18 },
+  { id:'BD',   label:'BD',            role:'extended',side:'left',   tier:2, angle:-72, inW:0.20, outW:0.14 },
+  { id:'PD',   label:'PD',            role:'extended',side:'left',   tier:2, angle:-82, inW:0.20, outW:0.14 },
+
+  // ── LEFT: Tier 3 — deeper extended ─────────────────────────
+  { id:'NV_K1',label:'NV',            role:'niece',   side:'left',   tier:3, angle:72,  inW:0.12, outW:0.24 },
+  { id:'NV_K2',label:'NV',            role:'niece',   side:'left',   tier:3, angle:80,  inW:0.12, outW:0.24 },
+  { id:'NV_K3',label:'NV',            role:'niece',   side:'left',   tier:3, angle:88,  inW:0.12, outW:0.24 },
+  { id:'AS_K1',label:'AS',            role:'niece',   side:'left',   tier:3, angle:-52, inW:0.10, outW:0.22 },
+  { id:'AS_K2',label:'AS',            role:'niece',   side:'left',   tier:3, angle:-60, inW:0.10, outW:0.22 },
+  { id:'HD',   label:'HD',            role:'cousin',  side:'left',   tier:3, angle:-74, inW:0.10, outW:0.14 },
+  { id:'MD',   label:'MD',            role:'cousin',  side:'left',   tier:3, angle:-84, inW:0.10, outW:0.14 },
+
+  // ── RIGHT: Wife (tier 1) ────────────────────────────────────
+  { id:'RS',   label:'RS (Wife)',      role:'wife',    side:'right',  tier:1, angle:0,   inW:0.92, outW:0.90 },
+
+  // ── RIGHT: Adopted son (tier 1) ────────────────────────────
+  { id:'IB',   label:'IB (Adopted)',   role:'child',   side:'right',  tier:1, angle:28,  inW:0.60, outW:0.92 },
+
+  // ── RIGHT: Bio Dad special (tier 2) ────────────────────────
+  { id:'BDAD', label:'Bio Dad',        role:'special', side:'right',  tier:2, angle:44,  inW:0.40, outW:0.10 },
+
+  // ── RIGHT: Wife's family (tier 2) ──────────────────────────
+  { id:'JS',   label:'JS',            role:'inlaw',   side:'right',  tier:2, angle:-20, inW:0.36, outW:0.22 },
+  { id:'NS',   label:'NS',            role:'inlaw',   side:'right',  tier:2, angle:-36, inW:0.36, outW:0.22 },
+  { id:'SS_R', label:'SS',            role:'inlaw',   side:'right',  tier:2, angle:-52, inW:0.26, outW:0.18 },
+  { id:'KS_R', label:'KS',            role:'inlaw',   side:'right',  tier:2, angle:-65, inW:0.26, outW:0.18 },
+
+  // ── RIGHT: Paternal extended (tier 2) ──────────────────────
+  { id:'AV',   label:'AV',            role:'extended',side:'right',  tier:2, angle:58,  inW:0.22, outW:0.14 },
+  { id:'SV',   label:'SV',            role:'extended',side:'right',  tier:2, angle:70,  inW:0.22, outW:0.14 },
+  { id:'PB',   label:'PB',            role:'extended',side:'right',  tier:2, angle:80,  inW:0.20, outW:0.12 },
+
+  // ── RIGHT: Tier 3 ───────────────────────────────────────────
+  { id:'SS_C', label:'SS',            role:'cousin',  side:'right',  tier:3, angle:-72, inW:0.08, outW:0.12 },
+  { id:'GS',   label:'GS',            role:'cousin',  side:'right',  tier:3, angle:-80, inW:0.08, outW:0.12 },
+  { id:'RG',   label:'RG',            role:'extended',side:'right',  tier:3, angle:86,  inW:0.10, outW:0.10 },
+];
+
+/* ─── ROLE COLOURS (per style, set dynamically) ─────────────── */
+const ROLE_COLS = {
+  energetic: {
+    self:'#ffffff', wife:'#ff88cc', parent:'#ff5500', gp:'#ff2200',
+    sibling:'#ffaa00', child:'#44ffcc', niece:'#88ffaa',
+    inlaw:'#ffcc44', cousin:'#ff7733', extended:'#ff4400', special:'#ff44aa',
+  },
+  minimal: {
+    self:'#333333', wife:'#1a9e75', parent:'#378add', gp:'#9c6fde',
+    sibling:'#e07020', child:'#20a060', niece:'#40b870',
+    inlaw:'#b08010', cousin:'#c06030', extended:'#707880', special:'#c03070',
+  },
+  cosmic: {
+    self:'#88ccff', wife:'#ff66cc', parent:'#4499ff', gp:'#aa66ff',
+    sibling:'#ff8844', child:'#44ffcc', niece:'#88ffcc',
+    inlaw:'#ffcc44', cousin:'#ff9966', extended:'#6688cc', special:'#ff44aa',
+  },
+  organic: {
+    self:'#ffd86f', wife:'#ffccaa', parent:'#ffaa44', gp:'#ff8833',
+    sibling:'#ccff66', child:'#aaffcc', niece:'#88ffaa',
+    inlaw:'#ffee88', cousin:'#aadd44', extended:'#88aa44', special:'#ffaa88',
+  },
+};
+
+let currentStyle = 'energetic';
+function getCol(role) { return (ROLE_COLS[currentStyle]||ROLE_COLS.energetic)[role]||'#8899aa'; }
+
+/* ─── LAYOUT ────────────────────────────────────────────────────
+   VB sits at exact center.
+   Left nodes: x decreases with tier, y offset by angle.
+   Right nodes: x increases with tier, y offset by angle.
+─────────────────────────────────────────────────────────────── */
+function buildLayout(W, H) {
+  const cx=W/2, cy=H/2;
+  const tierR = [0, Math.min(W,H)*0.22, Math.min(W,H)*0.40, Math.min(W,H)*0.56];
+  const pos = {};
+
+  NODES.forEach(n => {
+    if (n.side==='center') { pos[n.id]={x:cx,y:cy,side:'center',tier:0}; return; }
+    const r   = tierR[Math.min(n.tier,3)];
+    const rad = n.angle * Math.PI/180;
+    const baseX = n.side==='left' ? cx - r*Math.cos(rad) : cx + r*Math.cos(rad);
+    const baseY = cy - r*Math.sin(rad); // positive angle = upward
+    pos[n.id] = { x:baseX, y:baseY, side:n.side, tier:n.tier, angle:rad };
+  });
+
+  // Clamp
+  const mg = 62;
+  Object.values(pos).forEach(p=>{
+    p.x=Math.max(mg,Math.min(W-mg,p.x));
+    p.y=Math.max(mg,Math.min(H-mg,p.y));
+  });
+  return pos;
+}
+
+/* ─── NEBULA / BACKGROUND ───────────────────────────────────── */
+let nebCanvas=null, starField=[];
+
+function buildNebula(W, H) {
+  const nc=document.createElement('canvas'); nc.width=W; nc.height=H;
+  const ctx=nc.getContext('2d'); const cx=W/2, cy=H/2;
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
+
+  if (currentStyle==='minimal') {
+    // Light paper-white background
+    ctx.fillStyle='#f4f2ec'; ctx.fillRect(0,0,W,H);
+    // Subtle radial vignette
+    const v=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*0.7);
+    v.addColorStop(0,'rgba(240,238,232,0)'); v.addColorStop(1,'rgba(200,198,192,0.4)');
+    ctx.fillStyle=v; ctx.fillRect(0,0,W,H);
+    nebCanvas=nc;
+    starField=[];
+    return;
+  }
+
+  // Dark base gradient
+  const bgCols = {
+    energetic:['#1c0610','#0a0308','#020108'],
+    cosmic:   ['#02050e','#01030a','#010208'],
+    organic:  ['#050a02','#030602','#010301'],
+  };
+  const bc=bgCols[currentStyle]||bgCols.energetic;
+  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*0.85);
+  bg.addColorStop(0,bc[0]); bg.addColorStop(0.6,bc[1]); bg.addColorStop(1,bc[2]);
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Core glow
+  const coreCol = currentStyle==='organic'?'rgba(255,200,80,0.65)':
+                  currentStyle==='cosmic' ?'rgba(220,240,255,0.62)':
+                                           'rgba(255,240,220,0.68)';
+  const core=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.13);
+  core.addColorStop(0,coreCol); core.addColorStop(0.5,'rgba(120,160,255,0.18)'); core.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=core; ctx.fillRect(0,0,W,H);
+
+  // Nebula body
+  const bodyCol = currentStyle==='organic'?'rgba(40,80,10,0.18)':
+                  currentStyle==='cosmic' ?'rgba(30,50,200,0.18)':
+                                           'rgba(180,40,10,0.14)';
+  const body=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.min(W,H)*0.55);
+  body.addColorStop(0,bodyCol); body.addColorStop(0.5,'rgba(20,10,60,0.10)'); body.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=body; ctx.fillRect(0,0,W,H);
+
+  // LEFT fan filament glow (ancestor colours)
+  const leftCols = currentStyle==='organic'?['rgba(255,140,20,0.08)','rgba(200,80,10,0.06)']:
+                   currentStyle==='cosmic' ?['rgba(80,100,255,0.07)','rgba(150,50,255,0.06)']:
+                                            ['rgba(255,80,0,0.10)','rgba(255,160,0,0.08)'];
+  [-30,-15,0,15,30,50,65,80].forEach((a,i)=>{
+    const rad=a*Math.PI/180; const r=Math.min(W,H)*0.48;
+    const ex=cx-Math.cos(rad)*r, ey=cy-Math.sin(rad)*r;
+    const lg=ctx.createRadialGradient(cx,cy,0,ex,ey,r*0.35);
+    lg.addColorStop(0,rgba(leftCols[i%2].match(/rgba\((\d+),(\d+),(\d+)/)?`#${[1,2,3].map(j=>parseInt(leftCols[i%2].match(/rgba\((\d+),(\d+),(\d+)/)[j]).toString(16).padStart(2,'0')).join('')}`:'#ff5500',0.06));
+    lg.addColorStop(1,rgba('#000000',0));
+    ctx.fillStyle=leftCols[i%2]; ctx.fillRect(0,0,W,H);
+  });
+
+  // Warm outer shell blobs (JWST Crab style)
+  const warmCol = currentStyle==='organic'?'rgba(180,120,10,0.09)':
+                  currentStyle==='cosmic' ?'rgba(20,80,180,0.09)':
+                                           'rgba(200,60,10,0.10)';
+  [0.4,1.2,2.1,2.9,4.1,5.2].forEach((a,i)=>{
+    const r=Math.min(W,H)*(0.26+i%2*0.11);
+    const ex=cx+Math.cos(a)*r, ey=cy+Math.sin(a)*r;
+    const wr=Math.min(W,H)*0.20;
+    const wg=ctx.createRadialGradient(ex,ey,0,ex,ey,wr);
+    wg.addColorStop(0,warmCol); wg.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=wg; ctx.fillRect(0,0,W,H);
+  });
+
+  // Structural wisps
+  for(let i=0;i<20;i++){
+    const a=(i/20)*Math.PI*2; const r=Math.min(W,H)*(0.10+Math.abs(Math.sin(i*2.3))*0.42);
+    const wx=cx+Math.cos(a)*r, wy=cy+Math.sin(a)*r;
+    ctx.save(); ctx.translate(wx,wy); ctx.rotate(a+Math.PI/2);
+    const wh=Math.min(W,H)*0.17, ww=Math.min(W,H)*0.020;
+    const wg2=ctx.createRadialGradient(0,0,0,0,0,wh);
+    const wc=currentStyle==='organic'?'rgba(120,180,20,0.050)':
+             currentStyle==='cosmic' ?'rgba(60,120,255,0.055)':
+                                      'rgba(255,100,20,0.048)';
+    wg2.addColorStop(0,wc); wg2.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=wg2; ctx.beginPath(); ctx.ellipse(0,0,ww,wh,0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  nebCanvas=nc;
+
+  // Star field
+  starField=[];
+  const starCount = currentStyle==='organic'?180:currentStyle==='cosmic'?520:340;
+  for(let i=0;i<starCount;i++){
+    const type=Math.random();
+    const col = currentStyle==='organic'?
+        (type<0.5?'rgba(200,240,100,1)':'rgba(255,200,80,1)'):
+      currentStyle==='cosmic'?
+        (type<0.6?'rgba(180,210,255,1)':type<0.82?'rgba(255,180,100,1)':'rgba(140,200,255,1)'):
+        (type<0.6?'rgba(255,220,180,1)':'rgba(255,255,220,1)');
+    starField.push({x:Math.random()*W,y:Math.random()*H,r:0.10+Math.random()*1.55,
+      baseA:0.10+Math.random()*0.80,speed:0.3+Math.random()*3.0,phase:Math.random()*Math.PI*2,col});
+  }
+}
+
+function drawBg(ctx,W,H,t){
+  if(nebCanvas) ctx.drawImage(nebCanvas,0,0);
+  else{ctx.fillStyle=currentStyle==='minimal'?'#f4f2ec':'#000';ctx.fillRect(0,0,W,H);}
+  if(currentStyle!=='minimal'){
+    ctx.save();
+    starField.forEach(s=>{
+      const a=s.baseA*(0.38+0.62*Math.sin(t*s.speed+s.phase));
+      ctx.globalAlpha=Math.max(0,Math.min(1,a)); ctx.fillStyle=s.col;
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha=1; ctx.restore();
+  }
+}
+
+/* ─── STREAM RENDERER ───────────────────────────────────────────
+   Draws one tapered organic ribbon from (x0,y0)→(x1,y1).
+   width tapers from maxW at source to 0 at tip.
+   styleKey changes the glow/rendering behaviour.
+─────────────────────────────────────────────────────────────── */
+function drawStream(ctx, x0,y0, x1,y1, col, alpha, maxW, t, phase) {
+  const Dx=x1-x0, Dy=y1-y0, len=Math.sqrt(Dx*Dx+Dy*Dy)||1;
+  const nx=-Dy/len, ny=Dx/len;
+
+  const waveAmt = currentStyle==='organic'?0.24:currentStyle==='minimal'?0.06:0.18;
+  const w1=Math.sin(t*0.48+phase)*len*waveAmt;
+  const w2=Math.cos(t*0.34+phase+1.1)*len*(waveAmt*0.45);
+  const cp1x=x0+Dx*0.35+nx*w1, cp1y=y0+Dy*0.35+ny*w1;
+  const cp2x=x0+Dx*0.68+nx*w2, cp2y=y0+Dy*0.68+ny*w2;
+
+  const N=60;
+  const pts=[];
+  for(let i=0;i<=N;i++){
+    const u=i/N, mu=1-u;
+    const bx=mu*mu*mu*x0+3*mu*mu*u*cp1x+3*mu*u*u*cp2x+u*u*u*x1;
+    const by=mu*mu*mu*y0+3*mu*mu*u*cp1y+3*mu*u*u*cp2y+u*u*u*y1;
+    const u2=Math.min(u+0.001,1),mu2=1-u2;
+    const tx2=(mu2*mu2*mu2*x0+3*mu2*mu2*u2*cp1x+3*mu2*u2*u2*cp2x+u2*u2*u2*x1)-bx;
+    const ty2=(mu2*mu2*mu2*y0+3*mu2*mu2*u2*cp1y+3*mu2*u2*u2*cp2y+u2*u2*u2*y1)-by;
+    const tl=Math.sqrt(tx2*tx2+ty2*ty2)||1;
+    const pnx=-ty2/tl, pny=tx2/tl;
+    const w=maxW*Math.pow(1-u,0.60)*(0.87+0.13*Math.sin(t*2.6+phase+u*8));
+    pts.push({bx,by,pnx,pny,w});
+  }
+
+  const left =pts.map(p=>({x:p.bx+p.pnx*p.w,y:p.by+p.pny*p.w}));
+  const right=[...pts].reverse().map(p=>({x:p.bx-p.pnx*p.w,y:p.by-p.pny*p.w}));
+
+  ctx.save(); ctx.lineCap='round';
+
+  if (currentStyle==='minimal') {
+    // MINIMAL: clean thin line, colour only on selected/hovered
+    const spine=()=>{ctx.beginPath();ctx.moveTo(pts[0].bx,pts[0].by);pts.forEach(p=>ctx.lineTo(p.bx,p.by));};
+    spine(); ctx.strokeStyle=rgba(col,alpha*0.18); ctx.lineWidth=maxW*2.5; ctx.stroke();
+    spine(); ctx.strokeStyle=rgba(col,alpha*0.70); ctx.lineWidth=maxW*0.50; ctx.stroke();
+    if(alpha>0.55){ // highlighted
+      spine(); ctx.strokeStyle=rgba(col,alpha*0.25); ctx.lineWidth=maxW*5; ctx.stroke();
+      // Moving bead
+      const sp=((t*0.30+phase)%1+1)%1;
+      const si=Math.floor(sp*(pts.length-1));
+      const sp2=pts[Math.min(si,pts.length-1)];
+      ctx.beginPath(); ctx.arc(sp2.bx,sp2.by,maxW*0.8,0,Math.PI*2);
+      ctx.fillStyle=rgba(col,alpha*0.85); ctx.fill();
+    }
+    ctx.restore(); return;
+  }
+
+  // DARK STYLES: full glow ribbon
+  const lg=ctx.createLinearGradient(x0,y0,x1,y1);
+  lg.addColorStop(0,  rgba(col,alpha*0.85));
+  lg.addColorStop(0.3,rgba(col,alpha*0.60));
+  lg.addColorStop(0.65,rgba(col,alpha*0.28));
+  lg.addColorStop(1,  rgba(col,0));
+  ctx.beginPath();
+  ctx.moveTo(left[0].x,left[0].y);
+  left.forEach(p=>ctx.lineTo(p.x,p.y));
+  right.forEach(p=>ctx.lineTo(p.x,p.y));
+  ctx.closePath(); ctx.fillStyle=lg; ctx.fill();
+
+  const spine=()=>{ctx.beginPath();ctx.moveTo(pts[0].bx,pts[0].by);pts.forEach(p=>ctx.lineTo(p.bx,p.by));};
+
+  // Outer bloom
+  const bloomW = currentStyle==='organic'?maxW*7.5:maxW*5.5;
+  const bloomA = currentStyle==='organic'?alpha*0.055:alpha*0.048;
+  spine(); ctx.strokeStyle=rgba(col,bloomA); ctx.lineWidth=bloomW; ctx.stroke();
+  // Mid glow
+  spine(); ctx.strokeStyle=rgba(col,alpha*0.18); ctx.lineWidth=maxW*2.2; ctx.stroke();
+  // Bright core
+  const coreA = currentStyle==='energetic'?alpha*0.82:alpha*0.72;
+  spine(); ctx.strokeStyle=rgba(col,coreA); ctx.lineWidth=maxW*0.28; ctx.stroke();
+  // White spine near source
+  ctx.beginPath(); ctx.moveTo(pts[0].bx,pts[0].by);
+  for(let i=1;i<=Math.floor(N*0.22);i++) ctx.lineTo(pts[i].bx,pts[i].by);
+  const whiteA = currentStyle==='energetic'?alpha*0.55:alpha*0.42;
+  ctx.strokeStyle=rgba('#ffffff',whiteA); ctx.lineWidth=maxW*0.13; ctx.stroke();
+
+  // Travelling spark (faster for energetic, slower for organic)
+  const sparkSpeed = currentStyle==='organic'?0.20:currentStyle==='cosmic'?0.26:0.34;
+  const sp=((t*sparkSpeed+phase)%1+1)%1;
+  const si=Math.floor(sp*(pts.length-1));
+  const sp2=pts[Math.min(si,pts.length-1)];
+  const sparkA=alpha*(0.50+0.50*Math.sin(t*6+phase));
+  const sparkR=maxW*(0.18+0.82*(1-sp));
+  const sg=ctx.createRadialGradient(sp2.bx,sp2.by,0,sp2.bx,sp2.by,sparkR*3.5);
+  sg.addColorStop(0,rgba('#ffffff',sparkA*0.92)); sg.addColorStop(0.4,rgba(col,sparkA*0.72)); sg.addColorStop(1,rgba(col,0));
+  ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(sp2.bx,sp2.by,sparkR*3.5,0,Math.PI*2); ctx.fill();
+
+  ctx.restore();
+}
+
+/* ─── DRAW BOTH FLOWS ────────────────────────────────────────── */
+function drawBothFlows(ctx, vb, p, node, t, selId, hovId, W, H) {
+  const isSel=selId===node.id, isHov=hovId===node.id;
+  const dimmed=!!(selId&&!isSel&&!isHov);
+  const phase=node.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0)*0.19;
+  const col = getCol(node.role);
+
+  const b=Math.min(W,H);
+  const tierW=[0,b*0.052,b*0.027,b*0.013,b*0.007];
+  const baseW=tierW[Math.min(node.tier,4)];
+  const inW  = baseW*(isSel?1.7:1.0);
+  const outW = baseW*(isSel?0.60:0.38);
+
+  const flicker=0.88+0.12*Math.sin(t*1.8+phase);
+  const inAlpha  = dimmed?0.10:isSel?0.98:isHov?0.86:node.inW*flicker;
+  const outAlpha = dimmed?0.05:isSel?0.50:isHov?0.38:node.outW*0.42*flicker;
+
+  // INBOUND: node → VB (fat at node, taper to VB)
+  drawStream(ctx, p.x,p.y, vb.x,vb.y, col, inAlpha, inW, t, phase);
+  // OUTBOUND: VB → node (fat at VB, taper outward) — slightly different wave phase
+  drawStream(ctx, vb.x,vb.y, p.x,p.y, col, outAlpha, outW, t, phase+1.9);
+}
+
+/* ─── SUN BURST ─────────────────────────────────────────────── */
+function drawSun(ctx,cx,cy,t){
+  const c1=getCol('self'), c2=getCol('parent');
+
+  if(currentStyle==='minimal'){
+    // Clean white dot with concentric rings
+    for(let i=3;i>=1;i--){
+      ctx.beginPath(); ctx.arc(cx,cy,i*22,0,Math.PI*2);
+      ctx.strokeStyle=rgba('#888888',0.08); ctx.lineWidth=1; ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(cx,cy,9,0,Math.PI*2);
+    ctx.fillStyle='#333'; ctx.fill();
+    return;
+  }
+
+  // Dark styles: full halo
+  for(let i=6;i>=0;i--){
+    const r=10+i*26+10*Math.sin(t*1.55+i*0.55);
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    g.addColorStop(0,rgba('#ffffff',0.96-i*0.13));
+    g.addColorStop(0.35,rgba(c1,0.65-i*0.09));
+    g.addColorStop(0.75,rgba(c2,0.22-i*0.028));
+    g.addColorStop(1,rgba(c2,0));
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  }
+  for(let i=0;i<32;i++){
+    const a=(i/32)*Math.PI*2+t*0.07;
+    const len=13+30*Math.abs(Math.sin(t*1.9+i*0.58));
+    const w=0.4+1.9*Math.abs(Math.sin(t*1.3+i*0.72));
+    const c=i%4===0?'#ffffff':i%4===1?c1:i%4===2?c2:'#ffaa44';
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(a);
+    ctx.strokeStyle=rgba(c,0.20+0.34*Math.abs(Math.sin(t+i)));
+    ctx.lineWidth=w; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-len); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* ─── NODE STAR + LABEL ─────────────────────────────────────── */
+function drawNodeStar(ctx,x,y,label,col,tier,hov,sel,onRight,t){
+  const pulse=0.92+0.08*Math.sin(t*2.0+(x+y)*0.011);
+  const br=sel?5.5:hov?4.5:tier===1?4.0:tier===2?3.0:2.2;
+  const r=br*pulse;
+
+  if(currentStyle==='minimal'){
+    // Clean filled circle + grey label
+    ctx.beginPath(); ctx.arc(x,y,sel||hov?r*1.8:r*1.2,0,Math.PI*2);
+    ctx.fillStyle=sel?col:rgba(col,0.85); ctx.fill();
+    const fs=tier===1?11:10;
+    ctx.font=`${sel?'600':'400'} ${fs}px 'DM Sans',sans-serif`;
+    ctx.textBaseline='middle'; ctx.fillStyle=sel?col:'#444444';
+    const pad=r*1.2+5;
+    if(onRight){ctx.textAlign='left';ctx.fillText(label,x+pad,y);}
+    else{ctx.textAlign='right';ctx.fillText(label,x-pad,y);}
+    return;
+  }
+
+  // Dark styles: glowing star
+  const cg=ctx.createRadialGradient(x,y,0,x,y,r*7.5);
+  cg.addColorStop(0,rgba(col,sel?0.55:hov?0.42:0.20));
+  cg.addColorStop(0.5,rgba(col,0.06)); cg.addColorStop(1,rgba(col,0));
+  ctx.fillStyle=cg; ctx.beginPath(); ctx.arc(x,y,r*7.5,0,Math.PI*2); ctx.fill();
+
+  if(tier<=2){
+    [0,Math.PI/2].forEach(base=>{
+      const slen=r*(sel?7:5);
+      ctx.save(); ctx.translate(x,y); ctx.rotate(base+t*0.04);
+      ctx.strokeStyle=rgba('#ffffff',0.28+0.14*Math.sin(t+tier));
+      ctx.lineWidth=0.5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(0,-slen); ctx.lineTo(0,slen); ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  const sg=ctx.createRadialGradient(x,y,0,x,y,r*2.5);
+  sg.addColorStop(0,rgba('#ffffff',0.98)); sg.addColorStop(0.38,rgba(col,0.92)); sg.addColorStop(1,rgba(col,0));
+  ctx.fillStyle=sg; ctx.beginPath(); ctx.arc(x,y,r*2.5,0,Math.PI*2); ctx.fill();
+
+  const fs=tier===1?12:tier===2?11:10;
+  const pad=r*2.5+6;
+  ctx.save();
+  ctx.font=`${sel?'700':hov?'600':'500'} ${sel?fs+1:fs}px 'DM Sans',sans-serif`;
+  ctx.textBaseline='middle'; ctx.shadowColor=col; ctx.shadowBlur=sel?20:hov?12:6;
+  ctx.fillStyle=rgba('#ffffff',sel?1:hov?0.96:0.88);
+  if(onRight){ctx.textAlign='left';ctx.fillText(label,x+pad,y);}
+  else{ctx.textAlign='right';ctx.fillText(label,x-pad,y);}
+  ctx.shadowBlur=0; ctx.restore();
+}
+
+/* ─── MAIN RENDER ───────────────────────────────────────────── */
+function renderScene(ctx,pos,selId,hovId,W,H,t){
+  const vb=pos['VB']; if(!vb) return;
+
+  // Deepest tiers first
+  [4,3,2,1].forEach(tier=>{
+    NODES.forEach(n=>{
+      if(n.tier!==tier) return;
+      const p=pos[n.id]; if(!p) return;
+      drawBothFlows(ctx,vb,p,n,t,selId,hovId,W,H);
+    });
+  });
+
+  drawSun(ctx,vb.x,vb.y,t);
+
+  // VB label
+  const labelCol = currentStyle==='minimal'?'#222222':'#ffffff';
+  ctx.save();
+  ctx.font="700 13px 'DM Sans',sans-serif"; ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.shadowColor=currentStyle==='minimal'?'transparent':'#ffd86f'; ctx.shadowBlur=14;
+  ctx.fillStyle=labelCol; ctx.fillText('VB',vb.x,vb.y+36);
+  ctx.shadowBlur=0; ctx.restore();
+
+  NODES.forEach(n=>{
+    if(n.id==='VB') return;
+    const p=pos[n.id]; if(!p) return;
+    const col=getCol(n.role);
+    const onRight=n.side==='right';
+    drawNodeStar(ctx,p.x,p.y,n.label,col,n.tier,hovId===n.id,selId===n.id,onRight,t);
+  });
+}
+
+/* ─── ENGINE ────────────────────────────────────────────────── */
+let gCanvas,gCtx,animT=0,selId=null,hovId=null,gPos=null;
+
+function rebuild(){
+  if(!gCanvas) return;
+  const W=gCanvas.width,H=gCanvas.height;
+  gPos=buildLayout(W,H);
+  buildNebula(W,H);
+}
+function resizeCanvas(){
+  const c=document.getElementById('visualization_container'); if(!c||!gCanvas) return;
+  const rc=c.getBoundingClientRect();
+  gCanvas.width=Math.floor(rc.width); gCanvas.height=Math.floor(rc.height);
+  rebuild();
+}
+function nodeAt(mx,my){
+  if(!gPos) return null;
+  let best=null,bestD=30*30;
+  NODES.forEach(n=>{
+    const p=gPos[n.id]; if(!p) return;
+    const dx=p.x-mx,dy=p.y-my,d=dx*dx+dy*dy;
+    if(d<bestD){bestD=d;best=n;}
+  });
+  return best;
+}
+function updatePanel(node){
+  document.getElementById('nd_name').textContent=node?node.label:'Click a node';
+  document.getElementById('nd_role').textContent=node?`Role: ${node.role}`:'';
+  if(node){
+    document.getElementById('nd_conn').textContent=
+      `Influence IN: ${Math.round(node.inW*100)}%  |  OUT: ${Math.round(node.outW*100)}%`;
+  } else document.getElementById('nd_conn').textContent='';
+}
+function setStyle(s){
+  currentStyle=s;
+  document.querySelectorAll('.style_button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('style_'+s).classList.add('active');
+  document.getElementById('style_label').textContent=
+    {energetic:'Energetic & Colorful',minimal:'Minimal & Modern',cosmic:'Cosmic & Starlane',organic:'Organic & Branching'}[s];
+  rebuild();
+}
+
+(function loop(){
+  requestAnimationFrame(loop);
+  if(!gCanvas||!gCtx||!gPos) return;
+  animT+=0.016;
+  gCtx.clearRect(0,0,gCanvas.width,gCanvas.height);
+  drawBg(gCtx,gCanvas.width,gCanvas.height,animT);
+  renderScene(gCtx,gPos,selId,hovId,gCanvas.width,gCanvas.height,animT);
+})();
+
+window.addEventListener('load',()=>{
+  gCanvas=document.getElementById('network_canvas');
+  gCtx=gCanvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize',resizeCanvas);
+  ['energetic','minimal','cosmic','organic'].forEach(s=>{
+    document.getElementById('style_'+s).onclick=()=>setStyle(s);
+  });
+  document.getElementById('theme_switcher').onclick=rebuild;
+  document.getElementById('admin_button').onclick=()=>alert('Admin tools coming soon.');
+  document.getElementById('admin_link').onclick=()=>alert('Admin tools coming soon.');
+  gCanvas.addEventListener('click',e=>{
+    const rc=gCanvas.getBoundingClientRect();
+    const n=nodeAt(e.clientX-rc.left,e.clientY-rc.top);
+    selId=n?n.id:null; updatePanel(n||null);
+  });
+  gCanvas.addEventListener('mousemove',e=>{
+    const rc=gCanvas.getBoundingClientRect();
+    const n=nodeAt(e.clientX-rc.left,e.clientY-rc.top);
+    hovId=n?n.id:null; gCanvas.style.cursor=hovId?'pointer':'default';
+    const tip=document.getElementById('tip');
+    if(n){
+      tip.style.opacity='1'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-10)+'px';
+      tip.textContent=`${n.label} · IN ${Math.round(n.inW*100)}% / OUT ${Math.round(n.outW*100)}%`;
+    } else tip.style.opacity='0';
+  });
+  gCanvas.addEventListener('mouseleave',()=>{
+    hovId=null; document.getElementById('tip').style.opacity='0';
+  });
+});
+
+</script>
+</body>
+</html>

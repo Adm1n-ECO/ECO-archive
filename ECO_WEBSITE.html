@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EternalCurrent.Online — Your Eternal. Your Current. Only Yours. Forever.</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #080D14;
+  --bg-2:     rgba(255,255,255,0.03);
+  --bg-3:     rgba(255,255,255,0.06);
+  --text:     #ECEEF8;
+  --text-2:   rgba(236,238,248,0.60);
+  --text-3:   rgba(236,238,248,0.32);
+  --eternal:  #00AAFF;
+  --current:  #00CC44;
+  --star:     #FF6688;
+  --passed:   #AA66FF;
+  --border:   rgba(255,255,255,0.08);
+  --border-2: rgba(255,255,255,0.14);
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Outfit', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 48px;
+  background: rgba(8,13,20,0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo { display: flex; flex-direction: column; line-height: 1; cursor: pointer; }
+.nav-logo .et { font-size: 8px; letter-spacing: .38em; color: var(--eternal); font-weight: 500; text-transform: uppercase; font-family: var(--font-body); }
+.nav-logo .cu { font-size: 17px; letter-spacing: .04em; color: var(--current); font-weight: 600; font-family: var(--font-body); }
+.nav-links { display: flex; gap: 36px; align-items: center; }
+.nav-links a {
+  font-family: var(--font-body); font-size: 13px; font-weight: 400;
+  color: var(--text-2); text-decoration: none; letter-spacing: .04em;
+  cursor: pointer; transition: color 0.2s; border: none; background: none; padding: 0;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--text); }
+.nav-links a.active { color: var(--eternal); }
+.nav-cta {
+  background: transparent; border: 1px solid var(--eternal);
+  color: var(--eternal); padding: 8px 20px; border-radius: 6px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; letter-spacing: .04em;
+}
+.nav-cta:hover { background: var(--eternal); color: var(--bg); }
+
+/* ── PAGES ── */
+.page { display: none; min-height: 100vh; padding-top: 72px; }
+.page.active { display: block; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+@keyframes breathe { 0%,100%{opacity:.4;transform:scale(1);} 50%{opacity:.9;transform:scale(1.015);} }
+@keyframes rotate { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+@keyframes arcDraw { from{stroke-dashoffset:300;} to{stroke-dashoffset:0;} }
+@keyframes drift { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+@keyframes pulse-dot { 0%,100%{opacity:.6;r:2;} 50%{opacity:1;r:3.5;} }
+
+.reveal { opacity: 0; animation: fadeUp 0.7s ease forwards; }
+.reveal:nth-child(1) { animation-delay: 0.1s; }
+.reveal:nth-child(2) { animation-delay: 0.25s; }
+.reveal:nth-child(3) { animation-delay: 0.4s; }
+.reveal:nth-child(4) { animation-delay: 0.55s; }
+.reveal:nth-child(5) { animation-delay: 0.7s; }
+
+/* ════════════════════════════════════════
+   HOME PAGE
+════════════════════════════════════════ */
+.hero {
+  min-height: calc(100vh - 72px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 0;
+  padding: 80px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -120px; right: -120px;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,170,255,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: 10%;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,204,68,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-left { padding-right: 64px; }
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--eternal);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 24px; height: 1px;
+  background: var(--eternal);
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(46px, 5vw, 72px);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -.01em;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+h1 em { font-style: italic; color: var(--eternal); }
+h1 .cg { color: var(--current); font-style: normal; }
+
+.tagline {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-2);
+  margin-bottom: 32px;
+  letter-spacing: .06em;
+  font-style: italic;
+}
+.tagline span.e { color: var(--eternal); }
+.tagline span.c { color: var(--current); }
+.tagline span.w { color: var(--text); }
+
+.hero-body {
+  font-size: 17px;
+  color: var(--text-2);
+  line-height: 1.78;
+  max-width: 480px;
+  margin-bottom: 40px;
+  font-weight: 300;
+}
+.hero-body strong { color: var(--text); font-weight: 500; }
+
+.waitlist-wrap { margin-bottom: 48px; }
+.waitlist-label {
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-3); font-family: var(--font-mono); margin-bottom: 10px;
+}
+.waitlist-row { display: flex; gap: 10px; align-items: center; max-width: 440px; }
+.waitlist-input {
+  flex: 1;
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 13px 18px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.25s;
+}
+.waitlist-input::placeholder { color: var(--text-3); }
+.waitlist-input:focus { border-color: var(--eternal); }
+.waitlist-btn {
+  background: var(--eternal);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 13px 24px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.waitlist-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.stat-item {}
+.stat-num {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-num span { color: var(--eternal); }
+.stat-label { font-size: 11px; color: var(--text-3); letter-spacing: .06em; text-transform: uppercase; font-family: var(--font-mono); }
+
+/* Globe visualization */
+.hero-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 520px;
+}
+.globe-container {
+  position: relative;
+  width: 420px; height: 420px;
+  animation: drift 8s ease-in-out infinite;
+}
+.globe-glow {
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,170,255,0.08) 0%, transparent 65%);
+}
+.globe-svg { width: 100%; height: 100%; }
+
+/* ── FEATURES STRIP ── */
+.features-strip {
+  padding: 100px 48px;
+  border-top: 1px solid var(--border);
+}
+.strip-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 64px;
+  text-align: center;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+}
+.feature-card {
+  background: var(--bg);
+  padding: 40px 36px;
+  position: relative;
+  transition: background 0.3s;
+}
+.feature-card:hover { background: var(--bg-2); }
+.feature-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  margin-bottom: 20px;
+  letter-spacing: .06em;
+}
+.feature-icon {
+  width: 44px; height: 44px;
+  margin-bottom: 20px;
+}
+.feature-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  color: var(--text);
+  line-height: 1.2;
+}
+.feature-body {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.72;
+  font-weight: 300;
+}
+.feature-card .accent { color: var(--eternal); }
+.feature-card .accent-g { color: var(--current); }
+
+/* ── VOCABULARY PREVIEW ── */
+.vocab-section {
+  padding: 100px 48px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.section-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+  margin-bottom: 64px;
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--eternal);
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(34px, 3.5vw, 52px);
+  font-weight: 300;
+  line-height: 1.12;
+  color: var(--text);
+}
+.section-body {
+  font-size: 16px;
+  color: var(--text-2);
+  line-height: 1.78;
+  font-weight: 300;
+  padding-top: 36px;
+}
+
+.vocab-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.vocab-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 20px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.vocab-card:hover { border-color: var(--border-2); transform: translateY(-3px); }
+.vocab-term {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.vocab-native { font-size: 18px; color: var(--text-3); margin-bottom: 10px; font-style: italic; }
+.vocab-lang {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--eternal);
+  margin-bottom: 10px;
+  padding: 3px 8px;
+  background: rgba(0,170,255,0.08);
+  border-radius: 4px;
+  display: inline-block;
+}
+.vocab-eng { font-size: 12px; color: var(--text-3); margin-bottom: 6px; }
+.vocab-nuance { font-size: 12px; color: var(--text-2); line-height: 1.6; }
+
+/* ── QUOTE SECTION ── */
+.quote-section {
+  padding: 120px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.quote-section::before {
+  content: '"';
+  position: absolute;
+  top: 30px; left: 48px;
+  font-family: var(--font-display);
+  font-size: 240px;
+  color: rgba(255,255,255,0.03);
+  line-height: 1;
+  pointer-events: none;
+  font-weight: 300;
+}
+.big-quote {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3vw, 42px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.45;
+  max-width: 860px;
+  margin: 0 auto 28px;
+  color: var(--text);
+}
+.big-quote em { color: var(--eternal); font-style: normal; }
+.quote-attr {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+
+/* ── CTA STRIP ── */
+.cta-strip {
+  padding: 80px 48px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 60px;
+}
+.cta-heading {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 44px);
+  font-weight: 300;
+  line-height: 1.2;
+  color: var(--text);
+}
+.cta-heading em { font-style: italic; color: var(--current); }
+.cta-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--eternal);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 14px 30px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary:hover { opacity:.88; transform:translateY(-1px); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  padding: 14px 30px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--text-2); color: var(--text); }
+
+
+/* ════════════════════════════════════════
+   HOW IT WORKS PAGE
+════════════════════════════════════════ */
+.how-hero {
+  padding: 100px 48px 80px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.page-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--current);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.page-eyebrow::before { content:''; display:inline-block; width:24px; height:1px; background:var(--current); }
+.page-title {
+  font-family: var(--font-display);
+  font-size: clamp(44px, 5vw, 72px);
+  font-weight: 300;
+  line-height: 1.08;
+  max-width: 700px;
+  margin-bottom: 24px;
+}
+.page-title em { font-style: italic; color: var(--current); }
+.page-intro {
+  font-size: 18px;
+  color: var(--text-2);
+  max-width: 600px;
+  line-height: 1.78;
+  font-weight: 300;
+}
+
+/* Step system */
+.steps-section { padding: 100px 48px; }
+.step {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+  padding: 60px 0;
+  border-bottom: 1px solid var(--border);
+}
+.step:last-child { border-bottom: none; }
+.step-num {
+  font-family: var(--font-display);
+  font-size: 80px;
+  font-weight: 300;
+  color: rgba(255,255,255,0.06);
+  line-height: 1;
+  text-align: right;
+}
+.step-content {}
+.step-tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--eternal);
+  margin-bottom: 12px;
+}
+.step-title {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.15;
+}
+.step-body {
+  font-size: 15px;
+  color: var(--text-2);
+  line-height: 1.78;
+  font-weight: 300;
+}
+.step-body strong { color: var(--text); font-weight: 500; }
+.step-visual {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* AI question mockup */
+.ai-q-mock {
+  width: 100%;
+}
+.ai-q-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: var(--current);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: .7;
+}
+.ai-q-text {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.6;
+  font-style: italic;
+  margin-bottom: 16px;
+}
+.ai-q-input {
+  background: var(--bg-3);
+  border: 1px solid rgba(0,170,255,0.25);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* Constellation mockup */
+.const-wrap { width: 100%; }
+
+/* Vocab mockup */
+.vocab-mock-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.vm-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-3);
+  border-radius: 8px;
+  border-left: 3px solid transparent;
+}
+.vm-row.e { border-color: var(--eternal); }
+.vm-row.g { border-color: var(--current); }
+.vm-row.p { border-color: var(--passed); }
+.vm-term { font-family: var(--font-display); font-size: 18px; font-weight: 500; color: var(--text); min-width: 80px; }
+.vm-eng { font-size: 12px; color: var(--text-2); flex: 1; }
+.vm-lang { font-family: var(--font-mono); font-size: 9px; color: var(--text-3); letter-spacing: .06em; }
+
+/* Data section */
+.data-section {
+  padding: 80px 48px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+}
+.data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--border); }
+.data-item { background: var(--bg); padding: 40px 32px; }
+.data-icon { margin-bottom: 16px; }
+.data-title { font-family: var(--font-display); font-size: 22px; font-weight: 400; color: var(--text); margin-bottom: 10px; }
+.data-body { font-size: 14px; color: var(--text-2); line-height: 1.7; font-weight: 300; }
+
+/* Roles section */
+.roles-section { padding: 100px 48px; border-top: 1px solid var(--border); }
+.roles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.role-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 24px;
+  transition: border-color 0.2s;
+}
+.role-card:hover { border-color: var(--border-2); }
+.role-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.role-name.c { color: var(--eternal); }
+.role-name.k { color: var(--passed); }
+.role-name.m { color: var(--current); }
+.role-title { font-family: var(--font-display); font-size: 26px; font-weight: 400; color: var(--text); margin-bottom: 12px; line-height: 1.1; }
+.role-body { font-size: 13px; color: var(--text-2); line-height: 1.7; font-weight: 300; }
+
+/* Privacy block */
+.privacy-block {
+  margin: 80px 48px;
+  background: rgba(0,170,255,0.04);
+  border: 1px solid rgba(0,170,255,0.14);
+  border-radius: 16px;
+  padding: 48px 52px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 60px;
+  align-items: center;
+}
+.privacy-label {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.1;
+  color: var(--eternal);
+}
+.privacy-body { font-size: 15px; color: var(--text-2); line-height: 1.78; font-weight: 300; }
+.privacy-body strong { color: var(--text); font-weight: 500; }
+.privacy-pillars {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pillar {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.pillar::before {
+  content: '—';
+  color: var(--eternal);
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+.pillar strong { color: var(--text); }
+
+
+/* ════════════════════════════════════════
+   MANIFESTO PAGE
+════════════════════════════════════════ */
+.manifesto-hero {
+  padding: 120px 48px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.manifesto-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(0,170,255,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.manifesto-title {
+  font-family: var(--font-display);
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.02;
+  max-width: 900px;
+  margin-bottom: 40px;
+  color: var(--text);
+}
+.manifesto-title em { color: var(--eternal); font-style: normal; }
+
+.manifesto-body {
+  max-width: 700px;
+  margin-left: auto;
+}
+
+.manifesto-section {
+  padding: 80px 0;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 64px;
+}
+.m-section-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--text-3);
+  text-transform: uppercase;
+  padding-top: 6px;
+}
+.m-section-content {}
+.m-heading {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 400;
+  color: var(--text);
+  margin-bottom: 24px;
+  line-height: 1.15;
+}
+.m-heading em { font-style: italic; color: var(--eternal); }
+.m-body {
+  font-size: 17px;
+  color: var(--text-2);
+  line-height: 1.82;
+  font-weight: 300;
+}
+.m-body p + p { margin-top: 18px; }
+.m-body strong { color: var(--text); font-weight: 500; }
+.m-body em { font-style: italic; color: var(--text); }
+
+.manifesto-pull {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.5vw, 34px);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text-2);
+  border-left: 3px solid var(--eternal);
+  padding-left: 28px;
+  margin: 32px 0;
+  line-height: 1.45;
+}
+
+.commitment-list {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.commitment {
+  display: flex;
+  gap: 16px;
+  font-size: 16px;
+  color: var(--text-2);
+  line-height: 1.6;
+  font-weight: 300;
+}
+.commitment::before {
+  content: attr(data-n);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--eternal);
+  flex-shrink: 0;
+  padding-top: 3px;
+  min-width: 20px;
+}
+.commitment strong { color: var(--text); font-weight: 500; }
+
+.manifesto-close {
+  padding: 100px 48px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.manifesto-close-title {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 4vw, 60px);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--text);
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+.manifesto-close-title .e { color: var(--eternal); font-style: normal; }
+.manifesto-close-title .c { color: var(--current); font-style: normal; }
+.manifesto-close-sub {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-style: italic;
+  color: var(--text-2);
+  margin-bottom: 48px;
+  letter-spacing: .04em;
+}
+.manifesto-close-cta {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── FOOTER ── */
+footer {
+  padding: 48px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+.footer-left {}
+.footer-wordmark { font-family: var(--font-display); font-size: 15px; font-style: italic; color: var(--text-2); margin-bottom: 8px; }
+.footer-tagline { font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; color: var(--text-3); text-transform: uppercase; }
+.footer-tagline .e { color: var(--eternal); }
+.footer-tagline .c { color: var(--current); }
+.footer-right { font-size: 12px; color: var(--text-3); text-align: right; line-height: 1.8; }
+.footer-right a { color: var(--text-3); text-decoration: none; }
+.footer-right a:hover { color: var(--text-2); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 960px) {
+  nav { padding: 16px 24px; }
+  .nav-links { gap: 20px; }
+  .hero { grid-template-columns: 1fr; padding: 60px 24px; }
+  .hero-right { display: none; }
+  .hero-left { padding-right: 0; }
+  .features-grid { grid-template-columns: 1fr; }
+  .vocab-cards { grid-template-columns: repeat(2,1fr); }
+  .section-header { grid-template-columns: 1fr; gap: 24px; }
+  .step { grid-template-columns: 40px 1fr; }
+  .step-visual { display: none; }
+  .data-grid, .roles-grid { grid-template-columns: 1fr; }
+  .privacy-block { grid-template-columns: 1fr; gap: 24px; }
+  .manifesto-section { grid-template-columns: 1fr; gap: 16px; }
+  .features-strip, .vocab-section, .quote-section, .steps-section, .roles-section, .data-section, .how-hero, .manifesto-hero, .manifesto-close, footer { padding-left: 24px; padding-right: 24px; }
+  .cta-strip { grid-template-columns: 1fr; padding: 60px 24px; }
+  .privacy-block { margin: 40px 24px; }
+  .manifesto-close { padding: 60px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="show('home')">
+    <span class="et">Eternal</span>
+    <span class="cu">Current</span>
+  </div>
+  <div class="nav-links">
+    <a id="nav-home" class="active" onclick="show('home')">Home</a>
+    <a id="nav-how" onclick="show('how')">How It Works</a>
+    <a id="nav-manifesto" onclick="show('manifesto')">Manifesto</a>
+    <button class="nav-cta" onclick="show('home');document.getElementById('waitlist-input').focus()">Join the Waitlist</button>
+  </div>
+</nav>
+
+
+<!-- ════════ HOME ════════ -->
+<div class="page active" id="page-home">
+
+  <section class="hero">
+    <div class="hero-left">
+      <div class="eyebrow reveal">For families who do not fit in a tree</div>
+      <h1 class="reveal">You are not a leaf.<br><em>You are the</em><br><span class="cg">center.</span></h1>
+      <div class="tagline reveal">
+        <span class="e">Your Eternal.</span>&nbsp;
+        <span class="c">Your Current.</span>&nbsp;
+        <span class="w">Only Yours. Forever.</span>
+      </div>
+      <p class="hero-body reveal">
+        EternalCurrent.Online maps family networks the way diaspora families actually experience them —
+        with <strong>the words you actually use</strong>, the cities your people actually came from,
+        and you at the center of every connection.
+      </p>
+      <div class="waitlist-wrap reveal">
+        <div class="waitlist-label">Join the waitlist</div>
+        <div class="waitlist-row">
+          <input type="email" id="waitlist-input" class="waitlist-input" placeholder="What does your family call your mother's father?">
+          <button class="waitlist-btn">Tell us →</button>
+        </div>
+      </div>
+      <div class="hero-stats reveal">
+        <div class="stat-item">
+          <div class="stat-num"><span>48</span></div>
+          <div class="stat-label">Pilot network members</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num"><span>6</span></div>
+          <div class="stat-label">Countries on one globe</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num"><span>∞</span></div>
+          <div class="stat-label">Stories at risk of loss</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="globe-container">
+        <div class="globe-glow"></div>
+        <svg class="globe-svg" viewBox="0 0 420 420" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="globeGrad" cx="40%" cy="35%">
+              <stop offset="0%" stop-color="#0d2040"/>
+              <stop offset="100%" stop-color="#060b14"/>
+            </radialGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Globe body -->
+          <circle cx="210" cy="210" r="180" fill="url(#globeGrad)" stroke="rgba(0,170,255,0.15)" stroke-width="1"/>
+          <!-- Grid lines -->
+          <ellipse cx="210" cy="210" rx="180" ry="56" fill="none" stroke="rgba(0,170,255,0.07)" stroke-width="0.8"/>
+          <ellipse cx="210" cy="210" rx="180" ry="108" fill="none" stroke="rgba(0,170,255,0.06)" stroke-width="0.8"/>
+          <ellipse cx="210" cy="210" rx="180" ry="155" fill="none" stroke="rgba(0,170,255,0.05)" stroke-width="0.8"/>
+          <line x1="210" y1="30" x2="210" y2="390" stroke="rgba(0,170,255,0.06)" stroke-width="0.8"/>
+          <line x1="30" y1="210" x2="390" y2="210" stroke="rgba(0,170,255,0.06)" stroke-width="0.8"/>
+          <!-- Migration arcs -->
+          <path d="M 100 160 Q 140 80 210 140 Q 270 190 330 155" fill="none" stroke="#E09040" stroke-width="2" stroke-dasharray="300" stroke-dashoffset="0" opacity="0.9" filter="url(#glow)"/>
+          <path d="M 88 260 Q 130 170 210 140" fill="none" stroke="#40C8E0" stroke-width="2" opacity="0.85" filter="url(#glow)"/>
+          <path d="M 115 175 Q 155 120 195 148" fill="none" stroke="#AA66FF" stroke-width="1.8" opacity="0.8" filter="url(#glow)"/>
+          <path d="M 100 160 Q 165 230 240 268 Q 280 290 295 310" fill="none" stroke="#E09040" stroke-width="1.5" opacity="0.5" stroke-dasharray="8 4"/>
+          <!-- Birth dots (blue) -->
+          <circle cx="100" cy="160" r="4" fill="#00AAFF" opacity="0.95">
+            <animate attributeName="r" values="4;5.5;4" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="88" cy="260" r="4" fill="#00AAFF" opacity="0.9">
+            <animate attributeName="r" values="4;5.5;4" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="115" cy="175" r="3.5" fill="#00AAFF" opacity="0.85">
+            <animate attributeName="r" values="3.5;5;3.5" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Current home dots (green) -->
+          <circle cx="330" cy="155" r="4.5" fill="#00CC44" opacity="0.95"/>
+          <circle cx="295" cy="310" r="3.5" fill="#00CC44" opacity="0.8"/>
+          <!-- Passed dot (purple) -->
+          <circle cx="152" cy="142" r="3" fill="#AA66FF" opacity="0.8"/>
+          <!-- Center / you dot (star pink) -->
+          <circle cx="210" cy="140" r="8" fill="#FF6688" filter="url(#glow)">
+            <animate attributeName="r" values="8;10;8" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="210" cy="140" r="16" fill="none" stroke="#FF6688" stroke-width="1" opacity="0.3">
+            <animate attributeName="r" values="16;22;16" dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.3;0;0.3" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+          <!-- Atmosphere rim -->
+          <circle cx="210" cy="210" r="180" fill="none" stroke="rgba(0,170,255,0.12)" stroke-width="1.5"/>
+          <circle cx="210" cy="210" r="188" fill="none" stroke="rgba(0,170,255,0.04)" stroke-width="8"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="features-strip">
+    <div class="strip-label">What makes ECO different</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-num">01</div>
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="18" stroke="rgba(0,170,255,0.3)" stroke-width="1"/>
+          <path d="M10 28 Q18 12 22 18 Q26 24 34 10" stroke="#00AAFF" stroke-width="1.5" fill="none"/>
+          <circle cx="10" cy="28" r="2.5" fill="#00AAFF"/>
+          <circle cx="34" cy="10" r="2.5" fill="#00CC44"/>
+          <circle cx="22" cy="18" r="4" fill="#FF6688"/>
+        </svg>
+        <div class="feature-title">The Globe</div>
+        <div class="feature-body">Every person in your network mapped on a living globe. Migration arcs show where your family came from and where they are now. <span class="accent">Amritsar to London to the Bay Area</span> — all on one screen.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">02</div>
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="5" fill="#FF6688"/>
+          <circle cx="10" cy="12" r="3" fill="#00AAFF" opacity="0.9"/>
+          <circle cx="34" cy="12" r="3" fill="#40C8E0" opacity="0.9"/>
+          <circle cx="8" cy="30" r="2.5" fill="#00AAFF" opacity="0.8"/>
+          <circle cx="36" cy="30" r="2.5" fill="#40C8E0" opacity="0.8"/>
+          <circle cx="22" cy="36" r="2.5" fill="#00CC44" opacity="0.8"/>
+          <line x1="22" y1="22" x2="10" y2="12" stroke="rgba(0,170,255,0.35)" stroke-width="1"/>
+          <line x1="22" y1="22" x2="34" y2="12" stroke="rgba(64,200,224,0.35)" stroke-width="1"/>
+          <line x1="22" y1="22" x2="8" y2="30" stroke="rgba(0,170,255,0.35)" stroke-width="1"/>
+          <line x1="22" y1="22" x2="36" y2="30" stroke="rgba(64,200,224,0.35)" stroke-width="1"/>
+          <line x1="22" y1="22" x2="22" y2="36" stroke="rgba(0,204,68,0.35)" stroke-width="1"/>
+        </svg>
+        <div class="feature-title">The Constellation</div>
+        <div class="feature-body">Your family network visualized with you at the center — not a tree with someone at the top. <span class="accent">You are always the center</span> of your own field of energy.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">03</div>
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none">
+          <path d="M8 32 Q14 20 22 22 Q30 24 36 14" stroke="#AA66FF" stroke-width="1.5" fill="none"/>
+          <circle cx="22" cy="34" r="5" fill="#E09040" opacity="0.9"/>
+          <circle cx="22" cy="34" r="9" fill="none" stroke="#E09040" stroke-width="0.8" opacity="0.4"/>
+        </svg>
+        <div class="feature-title">Legacy View</div>
+        <div class="feature-body">See how far your influence has reached across generations — an upward lightning arc from where your family began. <span class="accent">The Eternal made visible.</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">04</div>
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none">
+          <rect x="6" y="10" width="32" height="5" rx="2" fill="rgba(0,170,255,0.2)" stroke="rgba(0,170,255,0.4)" stroke-width="0.5"/>
+          <rect x="6" y="19" width="32" height="5" rx="2" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+          <rect x="6" y="28" width="32" height="5" rx="2" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+          <circle cx="11" cy="12.5" r="2" fill="#FF6688"/>
+          <circle cx="11" cy="21.5" r="2" fill="#00AAFF" opacity="0.8"/>
+          <circle cx="11" cy="30.5" r="2" fill="#40C8E0" opacity="0.8"/>
+        </svg>
+        <div class="feature-title">Network Directory</div>
+        <div class="feature-body">A filterable, sortable view of everyone in your network. Message your whole family without sharing a single email address. <span class="accent-g">Your data never leaves.</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">05</div>
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none">
+          <path d="M8 22 C8 14 14 8 22 8 C30 8 36 14 36 22" stroke="rgba(0,170,255,0.3)" stroke-width="1" fill="none"/>
+          <circle cx="22" cy="22" r="3" fill="#00AAFF"/>
+          <path d="M16 28 L18 24 L20 26 L22 22 L24 24 L26 20 L28 22" stroke="#00CC44" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="feature-title">The AI Conversation</div>
+        <div class="feature-body">An AI that asks open, careful questions — never assuming what you practice or believe. It learns your family's story <span class="accent">at the pace of memory.</span></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-num">06</div>
+        <svg class="feature-icon" viewBox="0 0 44 44" fill="none">
+          <text x="8" y="22" font-size="14" fill="#00AAFF" opacity="0.9" font-family="serif">Bhua</text>
+          <text x="8" y="34" font-size="11" fill="rgba(255,255,255,0.35)" font-family="serif">Aunt</text>
+          <path d="M34 8 L36 14 L42 14 L37 18 L39 24 L34 20 L29 24 L31 18 L26 14 L32 14 Z" fill="rgba(0,204,68,0.15)" stroke="#00CC44" stroke-width="0.8"/>
+        </svg>
+        <div class="feature-title">Cultural Vocabulary</div>
+        <div class="feature-body">The words your family actually uses — Bhayia, Nana, Jij, Mama — held in their own register and nuance. <span class="accent-g">Not translated away.</span> Preserved exactly as they are.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="vocab-section">
+    <div class="section-header">
+      <div>
+        <div class="section-label">The vocabulary library</div>
+        <div class="section-title">The words that disappear between the first generation and the third</div>
+      </div>
+      <div class="section-body">
+        Every culture has words for family relationships that English cannot hold. The distinction between a maternal uncle and a paternal uncle. The difference between addressing your own father and referring to someone else's. The honorific that signals love and hierarchy simultaneously.<br><br>
+        ECO's vocabulary library holds these terms in their living form — with the register, the nuance, and the emotional weight intact.
+      </div>
+    </div>
+    <div class="vocab-cards">
+      <div class="vocab-card">
+        <div class="vocab-term">Bhayia</div>
+        <div class="vocab-native">भैया</div>
+        <div class="vocab-lang">Hindi / Punjabi</div>
+        <div class="vocab-eng">Older brother — but also a term of deep respect</div>
+        <div class="vocab-nuance">Can jump generations. Can be inherited. Carries warmth that 'brother' alone cannot hold.</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-term">Nana</div>
+        <div class="vocab-native">नाना</div>
+        <div class="vocab-lang">Hindi / Punjabi</div>
+        <div class="vocab-eng">Maternal grandfather</div>
+        <div class="vocab-nuance">In English, 'Nana' commonly means grandmother. The same sound. Completely different people. ECO holds both truths simultaneously.</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-term">Otōsan</div>
+        <div class="vocab-native">お父さん</div>
+        <div class="vocab-lang">Japanese</div>
+        <div class="vocab-eng">Father — honorific form</div>
+        <div class="vocab-nuance">The humble form, chichi, is used when speaking about your own father to outsiders. English has one word for both. Japanese has this distinction built in.</div>
+      </div>
+      <div class="vocab-card">
+        <div class="vocab-term">Giri no</div>
+        <div class="vocab-native">義理の</div>
+        <div class="vocab-lang">Japanese</div>
+        <div class="vocab-eng">In-law (prefix)</div>
+        <div class="vocab-nuance">Literally carries the weight of duty and obligation. No English in-law term carries this meaning. It binds through social contract, not only blood.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote-section">
+    <div class="big-quote reveal">
+      "You are not a leaf on a tree. You are the center of a field of energy. Every person here has shaped who you are — whether you know their story <em>or not</em>."
+    </div>
+    <div class="quote-attr">The ECO welcome — shown to every new Conductor on first login</div>
+  </section>
+
+  <section class="cta-strip">
+    <div class="cta-heading">
+      Your family's story is at risk of disappearing.<br>
+      <em>Start preserving it today.</em>
+    </div>
+    <div class="cta-actions">
+      <button class="btn-primary" onclick="show('home');document.getElementById('waitlist-input').focus()">Join the Waitlist</button>
+      <button class="btn-ghost" onclick="show('how')">See How It Works →</button>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-left">
+      <div class="footer-wordmark">EternalCurrent.Online</div>
+      <div class="footer-tagline">
+        <span class="e">Your Eternal.</span>&nbsp;
+        <span class="c">Your Current.</span>&nbsp;
+        Only Yours. Forever.
+      </div>
+    </div>
+    <div class="footer-right">
+      <a onclick="show('home')">Home</a> &nbsp;·&nbsp;
+      <a onclick="show('how')">How It Works</a> &nbsp;·&nbsp;
+      <a onclick="show('manifesto')">Manifesto</a><br>
+      © 2026 EternalCurrent.Online · A CRUNOD project
+    </div>
+  </footer>
+</div>
+
+
+<!-- ════════ HOW IT WORKS ════════ -->
+<div class="page" id="page-how">
+
+  <div class="how-hero">
+    <div class="page-eyebrow">How it works</div>
+    <h1 class="page-title">Built around <em>how families actually work</em> — not how software thinks they should</h1>
+    <p class="page-intro">No forms. No trees. No one at the top. ECO is a conversation between you and your family's story — guided by an AI that asks open questions and never assumes what you believe, practice, or remember.</p>
+  </div>
+
+  <div class="steps-section">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <div class="step-tag">The AI Conversation</div>
+        <div class="step-title">It asks. You tell. It listens.</div>
+        <div class="step-body">
+          There are no forms on ECO. Not a single one. Every piece of information enters through conversation — an AI that asks one question at a time, at the pace of memory, and never pushes harder than you want to go.<br><br>
+          <strong>The AI never assumes.</strong> It will not tell you that you will "tie the chudda at Sahiba's wedding" before knowing whether you were invited. It asks: "Sahiba's wedding is coming up — which activities will you have a chance to participate in?" Your answer teaches it. Then it goes deeper.
+        </div>
+      </div>
+      <div class="step-visual">
+        <div class="ai-q-mock">
+          <div class="ai-q-label">AI Question · Milestone · Upcoming</div>
+          <div class="ai-q-text">"When Sahiba — or maybe one of her parents, or her sister — added her to the network, her upcoming wedding sounds like a fun chance for the whole family. As her mama, which activities will you have a chance to participate in? Is there anything you're especially excited about?"</div>
+          <div class="ai-q-input">Tell me about Sahiba…</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <div class="step-tag">The Globe</div>
+        <div class="step-title">Where everyone came from. Where everyone is.</div>
+        <div class="step-body">
+          Every person in your network appears on a living globe — their birth city connected to their current city by a migration arc colored by cultural origin. Amber for India. Teal for Fiji. Purple for Pakistan.<br><br>
+          When you log in, the globe animates to <strong>your current location</strong>. You are always the center. The arcs tell your family's migration story without a single word of explanation.
+        </div>
+      </div>
+      <div class="step-visual">
+        <svg viewBox="0 0 280 200" width="280" height="200">
+          <circle cx="140" cy="100" r="80" fill="#060b14" stroke="rgba(0,170,255,0.18)" stroke-width="1"/>
+          <ellipse cx="140" cy="100" rx="80" ry="25" fill="none" stroke="rgba(0,170,255,0.08)" stroke-width="0.8"/>
+          <ellipse cx="140" cy="100" rx="80" ry="50" fill="none" stroke="rgba(0,170,255,0.06)" stroke-width="0.8"/>
+          <path d="M75 80 Q105 40 140 62 Q165 78 190 68" fill="none" stroke="#E09040" stroke-width="2" opacity="0.9"/>
+          <path d="M68 128 Q98 78 140 62" fill="none" stroke="#40C8E0" stroke-width="1.8" opacity="0.85"/>
+          <path d="M82 86 Q108 60 132 72" fill="none" stroke="#AA66FF" stroke-width="1.6" opacity="0.8"/>
+          <circle cx="75" cy="80" r="3" fill="#00AAFF"/>
+          <circle cx="68" cy="128" r="3" fill="#00AAFF"/>
+          <circle cx="190" cy="68" r="3.5" fill="#00CC44"/>
+          <circle cx="140" cy="62" r="6" fill="#FF6688"/>
+          <circle cx="140" cy="62" r="11" fill="none" stroke="#FF6688" stroke-width="0.8" opacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <div class="step-tag">The Vocabulary Library</div>
+        <div class="step-title">The words your family uses. Not a dictionary's version.</div>
+        <div class="step-body">
+          ECO holds kinship terms from dozens of languages alongside the register distinctions, regional variations, and emotional weight that translation always loses.<br><br>
+          <strong>Bhayia can jump a generation</strong> — Isaiah calls Vikas Bhayia not because he is his brother, but because he grew up watching Pragati and Amit use the word. That documented fact lives in the platform. The relationship that produced it lives alongside it.
+        </div>
+      </div>
+      <div class="step-visual">
+        <div class="vocab-mock-list">
+          <div class="vm-row e">
+            <div class="vm-term">Bhayia</div>
+            <div class="vm-eng">Older brother — and more than that</div>
+            <div class="vm-lang">Hindi / Punjabi</div>
+          </div>
+          <div class="vm-row p">
+            <div class="vm-term">Jij</div>
+            <div class="vm-eng">Older sister (Fijian-Indian context)</div>
+            <div class="vm-lang">Fijian-Indian</div>
+          </div>
+          <div class="vm-row g">
+            <div class="vm-term">Mama</div>
+            <div class="vm-eng">Maternal uncle (not "Mama = mother")</div>
+            <div class="vm-lang">Hindi / Punjabi</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <div class="step-tag">The Constellation</div>
+        <div class="step-title">Your network. You at the center.</div>
+        <div class="step-body">
+          Every genealogy platform puts someone at the top of a tree. A founding ancestor. A patriarch. A root.<br><br>
+          ECO puts <strong>you at the center</strong> of a constellation — every person in your network radiating outward from where you stand. Your parents above you. Your children below you. Your cousins branching sideways. The visual language of energy, not hierarchy.
+        </div>
+      </div>
+      <div class="step-visual">
+        <svg viewBox="0 0 260 200" width="260" height="200">
+          <line x1="130" y1="100" x2="96" y2="70" stroke="rgba(0,170,255,0.25)" stroke-width="1"/>
+          <line x1="130" y1="100" x2="164" y2="70" stroke="rgba(64,200,224,0.25)" stroke-width="1"/>
+          <line x1="130" y1="100" x2="76" y2="115" stroke="rgba(0,170,255,0.25)" stroke-width="1"/>
+          <line x1="130" y1="100" x2="184" y2="115" stroke="rgba(64,200,224,0.25)" stroke-width="1"/>
+          <line x1="130" y1="100" x2="110" y2="148" stroke="rgba(0,204,68,0.25)" stroke-width="1"/>
+          <line x1="130" y1="100" x2="155" y2="148" stroke="rgba(0,204,68,0.25)" stroke-width="1"/>
+          <line x1="96" y1="70" x2="72" y2="45" stroke="rgba(0,170,255,0.12)" stroke-width="0.7"/>
+          <line x1="96" y1="70" x2="88" y2="40" stroke="rgba(170,102,255,0.18)" stroke-width="0.7"/>
+          <line x1="164" y1="70" x2="188" y2="45" stroke="rgba(64,200,224,0.12)" stroke-width="0.7"/>
+          <circle cx="130" cy="100" r="10" fill="#FF6688"/>
+          <circle cx="96" cy="70" r="5.5" fill="#00AAFF" opacity="0.9"/>
+          <circle cx="164" cy="70" r="5.5" fill="#40C8E0" opacity="0.9"/>
+          <circle cx="76" cy="115" r="4.5" fill="#00AAFF" opacity="0.8"/>
+          <circle cx="184" cy="115" r="4.5" fill="#40C8E0" opacity="0.8"/>
+          <circle cx="110" cy="148" r="4" fill="#00CC44" opacity="0.8"/>
+          <circle cx="155" cy="148" r="4" fill="#00CC44" opacity="0.8"/>
+          <circle cx="72" cy="45" r="3" fill="#AA66FF" opacity="0.7"/>
+          <circle cx="88" cy="40" r="3" fill="#AA66FF" opacity="0.7"/>
+          <circle cx="188" cy="45" r="3" fill="#40C8E0" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <div class="step-tag">The Discovery Banner</div>
+        <div class="step-title">Your family is part of a larger world.</div>
+        <div class="step-body">
+          The Discovery Banner surfaces cultural context you might not have. Not just from your own heritage — from <strong>every culture now in your network</strong>, however it got there.<br><br>
+          Sahiba's fiancé has Mexican roots. The week before the wedding, ECO might surface a note about el lazo — the lasso ceremony that wraps couples in a figure-eight of flowers. Not because ECO assumes he practices it. Because it might be worth knowing.
+        </div>
+      </div>
+      <div class="step-visual">
+        <div style="width:100%">
+          <div style="border-left:2px solid var(--eternal);padding:14px 16px;background:var(--bg-3);border-radius:0 8px 8px 0;">
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--eternal);letter-spacing:.1em;margin-bottom:8px;text-transform:uppercase">Cultural bridge · World traditions</div>
+            <div style="font-size:13px;color:var(--text-2);line-height:1.6;">At Mexican weddings, <strong style="color:var(--eternal)">el lazo</strong> — the lasso ceremony — wraps the couple in a figure-eight of flowers or rosary beads, uniting them as one. A tradition worth knowing.</div>
+            <div style="margin-top:10px;font-size:10px;color:var(--eternal);letter-spacing:.08em;cursor:pointer">+ Learn more</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-section">
+    <div class="section-label" style="margin-bottom:48px">The data model</div>
+    <div class="data-grid">
+      <div class="data-item">
+        <div class="data-title" style="font-family:var(--font-display);color:var(--eternal)">Your Eternal</div>
+        <div class="data-body">Everything that came before you and shaped you. Birth cities. Migration arcs. The people whose names you barely know. Kinship vocabulary from languages your grandchildren may not speak. Oral history records with formal citation. Stories captured before the people who hold them are gone.</div>
+      </div>
+      <div class="data-item">
+        <div class="data-title" style="font-family:var(--font-display);color:var(--current)">Your Current</div>
+        <div class="data-body">Who you are now, where you are, what you are building. Your household. Your relationships. Your role in the milestones of the people you love. The network activity that shows the living is still happening. The questions the AI asks because your story is still being written.</div>
+      </div>
+      <div class="data-item">
+        <div class="data-title" style="font-family:var(--font-display);color:var(--text)">Only Yours. Forever.</div>
+        <div class="data-body">No advertising. No data monetization. No algorithm recommending strangers. No company deciding what your family looks like. If you leave, your data is frozen — preserved for 12 months exactly as you left it. If you ask for complete removal, it is gone. Until then, it is yours.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="roles-section">
+    <div style="margin-bottom:48px">
+      <div class="section-label">The people in your network</div>
+      <div class="section-title" style="font-family:var(--font-display);font-size:clamp(28px,3vw,44px);font-weight:300;max-width:600px;">Three roles. One family. Your rules.</div>
+    </div>
+    <div class="roles-grid">
+      <div class="role-card">
+        <div class="role-name c">Conductor</div>
+        <div class="role-title">Every member is a Conductor</div>
+        <div class="role-body">Full network access. Builds and maintains their own part of the story. Invites others. Responds to AI questions. Contributes to the cultural vocabulary. The standard role for everyone in the network.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-name k">Keeper</div>
+        <div class="role-title">The cultural teacher</div>
+        <div class="role-body">Nominated by the Network Founder. Annotates profiles with cultural context. Authors vocabulary entries. Creates teaching moments that persist long after the Keeper is gone. The role the discipline has always had — now with a platform to carry it.</div>
+      </div>
+      <div class="role-card">
+        <div class="role-name m">Moderator</div>
+        <div class="role-title">The network steward</div>
+        <div class="role-body">Peer-nominated by other Conductors. Handles relationship disputes, content approvals, and VisibleTo decisions. Ensures the network reflects what the community actually decided, not what any single person assumed.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="privacy-block">
+    <div class="privacy-label">Only Yours.<br>Forever.</div>
+    <div class="privacy-body">
+      <p>23andMe's database of 15 million people ended up in a bankruptcy auction in 2025. ECO's tagline is the direct answer to that story.</p>
+      <div class="privacy-pillars">
+        <div class="pillar"><strong>No advertising.</strong> ECO products are ad-free. Advertisers do not pay to reach your family.</div>
+        <div class="pillar"><strong>No data sales.</strong> Your data is never sold, licensed, or shared. Not now. Not if we are acquired. Not ever.</div>
+        <div class="pillar"><strong>No biological data.</strong> ECO holds stories, relationships, and vocabulary. Nothing that can be auctioned to a pharmaceutical company.</div>
+        <div class="pillar"><strong>Freeze, don't delete.</strong> If you stop paying, your network is frozen for 12 months — not deleted. When you return, it is exactly as you left it.</div>
+        <div class="pillar"><strong>Complete removal, always.</strong> Ask for erasure and it is gone within 30 days. No questions. No penalty.</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      <div class="footer-wordmark">EternalCurrent.Online</div>
+      <div class="footer-tagline">
+        <span class="e">Your Eternal.</span>&nbsp;
+        <span class="c">Your Current.</span>&nbsp;
+        Only Yours. Forever.
+      </div>
+    </div>
+    <div class="footer-right">
+      <a onclick="show('home')">Home</a> &nbsp;·&nbsp;
+      <a onclick="show('how')">How It Works</a> &nbsp;·&nbsp;
+      <a onclick="show('manifesto')">Manifesto</a><br>
+      © 2026 EternalCurrent.Online · A CRUNOD project
+    </div>
+  </footer>
+</div>
+
+
+<!-- ════════ MANIFESTO ════════ -->
+<div class="page" id="page-manifesto">
+
+  <div class="manifesto-hero">
+    <div class="page-eyebrow" style="color:var(--passed)">The manifesto</div>
+    <div class="manifesto-title">
+      We built this because<br><em>nothing else</em><br>held our story.
+    </div>
+  </div>
+
+  <div style="padding: 0 48px;">
+
+    <div class="manifesto-section">
+      <div class="m-section-num">I</div>
+      <div class="m-section-content">
+        <div class="m-heading">You are not a leaf on a tree</div>
+        <div class="m-body">
+          <p>Every genealogy platform ever built puts someone at the top. A founding ancestor. A patriarch. A root from which everyone else grows as a leaf.</p>
+          <div class="manifesto-pull">This is not how families work. This is how one culture decided to represent them — and then exported that model to the entire world.</div>
+          <p>A Punjabi family spread across India, Fiji, the United Kingdom, Canada, and the United States is not a tree. It is a field of energy — a network of connections radiating outward from every person at its center simultaneously.</p>
+          <p>ECO puts <strong>you at the center</strong>. Not your great-great-grandfather. Not whoever founded the lineage. You. The person using the platform. The person whose story is still being written.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="manifesto-section">
+      <div class="m-section-num">II</div>
+      <div class="m-section-content">
+        <div class="m-heading">The words that <em>disappear</em></div>
+        <div class="m-body">
+          <p>In North Indian families, the word for a maternal uncle is Mama. The word for a maternal grandfather is Nana. In English, Nana often means grandmother. The same sound. Completely different people.</p>
+          <p>A diaspora child who grows up speaking English may call their grandmother Nana — because that is what English tells them to do — and unknowingly erase the word that their grandparents used for a completely different relationship.</p>
+          <div class="manifesto-pull">This is not failure. It is what happens when a language does not have the right words for your family. It is what ECO was built to resist.</div>
+          <p>The word Bhayia, in Hindi and Punjabi, means older brother. But in one family we know, a son calls his father Bhayia — because he grew up watching his aunt and uncle use the word, and it jumped a generation through observation and love rather than formal teaching.</p>
+          <p><strong>That is a documented fact about a real family. It lives in ECO because ECO was built to hold it.</strong> No other platform in the world makes space for that sentence.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="manifesto-section">
+      <div class="m-section-num">III</div>
+      <div class="m-section-content">
+        <div class="m-heading">We never assume what you practice</div>
+        <div class="m-body">
+          <p>A North Indian name, a family from Amritsar, a network full of Punjabi kinship terms — none of this tells ECO what you believe, practice, observe, or identify with.</p>
+          <p>Roots are not practice. Heritage is not identity. Geography is not religion.</p>
+          <div class="manifesto-pull">ECO's AI will never tell you what your tradition requires of you. It will ask what you are planning to do, and listen to your answer.</div>
+          <p>This is not a hedge. It is not legal caution. It is the philosophy of the platform: you are the authority on your own family. ECO holds what you tell it. It asks about everything else.</p>
+          <p>If the AI asks a question that assumes something wrong, you can correct it. The correction teaches the platform. The platform becomes more accurate for everyone in a network like yours. <strong>The data improves because you participate, not because ECO presumes.</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="manifesto-section">
+      <div class="m-section-num">IV</div>
+      <div class="m-section-content">
+        <div class="m-heading">Your data is not a product</div>
+        <div class="m-body">
+          <p>In March 2025, 23andMe filed for bankruptcy. The genetic data of 15 million people — including their ancestry, their health information, their family connections — was put up for auction.</p>
+          <p>The people who provided that data had agreed to terms of service. The terms of service had contemplated this possibility. None of them expected it to happen.</p>
+          <div class="manifesto-pull">"Only Yours. Forever." is not a marketing phrase. It is a structural commitment built into every architectural decision ECO has made.</div>
+          <p>ECO does not sell data. ECO does not monetize behavioral patterns. ECO does not carry advertising. ECO does not share your family's information with pharmaceutical companies, insurers, governments, or anyone else.</p>
+          <p>The subscription is the revenue. The data is yours. <strong>These two sentences are the entire business model.</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="manifesto-section">
+      <div class="m-section-num">V</div>
+      <div class="m-section-content">
+        <div class="m-heading">Before it is too late</div>
+        <div class="m-body">
+          <p>There is a specific kind of urgency that ECO was built around. It is not the urgency of a product launch or a market window. It is the urgency of biology.</p>
+          <p>The people who hold the most irreplaceable knowledge — the stories of displacement, the reason a family left a city, the name of the street where your grandmother grew up, the word your great-grandfather used for the relationship between a man and his wife's brothers — are not getting younger.</p>
+          <div class="manifesto-pull">When they are gone, the window closes. No amount of technology, no database, no AI can recover what was never recorded.</div>
+          <p>ECO's AI question system is weighted 70–80% toward historical and passed figures. Toward deep history. Toward the people your Conductors never met — grandparents who passed early, relatives separated by Partition, ancestors whose stories exist only in the fading memory of the generation above you.</p>
+          <p>The platform asks about the living because they need to know their family. <strong>It asks about the dead because it is almost too late to ask at all.</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="manifesto-section">
+      <div class="m-section-num">VI</div>
+      <div class="m-section-content">
+        <div class="m-heading">What we commit to</div>
+        <div class="m-body">
+          <div class="commitment-list">
+            <div class="commitment" data-n="01"><span><strong>No forms.</strong> Not a single HTML form tag anywhere on the platform. Every data input is a conversation, a tap, a search, or a file upload. Data entry should feel like memory, not paperwork.</span></div>
+            <div class="commitment" data-n="02"><span><strong>No trees.</strong> The constellation and the globe are the visualization models. Hierarchy belongs to people, not to software defaults.</span></div>
+            <div class="commitment" data-n="03"><span><strong>No assumptions.</strong> The AI never tells you what your tradition requires, who has which role, or what your heritage means to you. It asks. It listens. It learns from your answer.</span></div>
+            <div class="commitment" data-n="04"><span><strong>No advertising.</strong> ECO is a space to think, not a surface to sell. The subscription is the business model. Your attention is not the product.</span></div>
+            <div class="commitment" data-n="05"><span><strong>No deletion without your request.</strong> If you stop paying, your network is frozen — intact, preserved, exactly as you left it — for twelve months. Your family's story does not disappear because a subscription lapsed.</span></div>
+            <div class="commitment" data-n="06"><span><strong>No data sales. Ever.</strong> Not now. Not if we grow. Not if we are acquired. Not if the business faces difficulty. The commitment survives ownership changes because it is built into the architecture, not just the policy.</span></div>
+            <div class="commitment" data-n="07"><span><strong>Complete removal, always.</strong> Ask for erasure. It happens within 30 days. No penalty. No questions. Your data is gone.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="manifesto-close">
+    <div class="manifesto-close-title">
+      <span class="e">Your Eternal.</span><br>
+      <span class="c">Your Current.</span><br>
+      Only Yours. Forever.
+    </div>
+    <div class="manifesto-close-sub">A CRUNOD / LookMeUp.Online project. Built by a Punjabi-Fijian family who needed this.</div>
+    <div class="manifesto-close-cta">
+      <button class="btn-primary" onclick="show('home');document.getElementById('waitlist-input').focus()">Join the Waitlist</button>
+      <button class="btn-ghost" onclick="show('how')">See How It Works</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      <div class="footer-wordmark">EternalCurrent.Online</div>
+      <div class="footer-tagline">
+        <span class="e">Your Eternal.</span>&nbsp;
+        <span class="c">Your Current.</span>&nbsp;
+        Only Yours. Forever.
+      </div>
+    </div>
+    <div class="footer-right">
+      <a onclick="show('home')">Home</a> &nbsp;·&nbsp;
+      <a onclick="show('how')">How It Works</a> &nbsp;·&nbsp;
+      <a onclick="show('manifesto')">Manifesto</a><br>
+      © 2026 EternalCurrent.Online · A CRUNOD project
+    </div>
+  </footer>
+</div>
+
+
+<script>
+function show(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-' + page).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Re-trigger animations
+  document.querySelectorAll('#page-' + page + ' .reveal').forEach((el, i) => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+}
+</script>
+
+</body>
+</html>

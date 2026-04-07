@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FMTO — Bakshi (London)</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; object-src 'none'; frame-ancestors 'none';">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;}
+
+.dev-banner{background:rgba(224,144,64,.08);border-bottom:1px solid rgba(224,144,64,.15);padding:5px 16px;font-size:10px;color:#A06020;display:flex;align-items:center;gap:8px;}
+.dev-banner strong{color:#E09040;}
+
+/* ── Nav ── */
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 20px;gap:10px;position:sticky;top:0;z-index:200;}
+.nav-logo{display:flex;align-items:center;gap:8px;text-decoration:none;}
+.nav-logo-mark{width:20px;height:24px;}
+.nav-wordmark{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;color:#E8F4F0;}
+.nav-sep{width:1px;height:20px;background:rgba(0,229,204,.12);margin:0 4px;}
+.nav-link{font-size:12px;color:#3A5A54;text-decoration:none;padding:4px 8px;border-radius:6px;}
+.nav-link:hover{color:#00E5CC;}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#00E5CC,#00E040);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#070D14;}
+.back-crumb{font-size:12px;color:#3A5A54;text-decoration:none;display:flex;align-items:center;gap:5px;}
+.back-crumb:hover{color:#00E5CC;}
+.back-crumb svg{width:12px;height:12px;stroke:currentColor;}
+
+/* ── Hero ── */
+.hero{position:relative;overflow:hidden;}
+.hero-bg{height:180px;background:linear-gradient(135deg,#0D2040 0%,#0A1828 40%,#081420 100%);position:relative;}
+.hero-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 60%,rgba(0,229,204,.08) 0%,transparent 60%);}
+.hero-body{padding:0 28px 0;display:flex;gap:24px;align-items:flex-end;position:relative;margin-top:-52px;}
+.hh-icon-wrap{width:96px;height:96px;border-radius:22px;border:3px solid #070D14;display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;position:relative;}
+.hh-icon-active{background:linear-gradient(135deg,rgba(0,224,64,.18),rgba(0,229,204,.12));}
+.hh-state-badge{position:absolute;bottom:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:2px solid #070D14;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.state-active-badge{background:#00E040;}
+.hero-meta{padding-bottom:8px;flex:1;}
+.hero-name{font-family:'DM Serif Display',serif;font-size:1.6rem;letter-spacing:-.02em;line-height:1.2;color:#E8F4F0;margin-bottom:4px;}
+.hero-loc{font-size:13px;color:#5A8A80;display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.hero-loc svg{width:12px;height:12px;stroke:currentColor;}
+.hero-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.hero-tag{display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.06em;}
+.ht-family{background:rgba(0,229,204,.10);color:#007A74;border:1px solid rgba(0,229,204,.20);}
+.ht-active{background:rgba(0,224,64,.10);color:#009828;border:1px solid rgba(0,224,64,.22);}
+.ht-mod{background:rgba(0,229,204,.10);color:#007A74;border:1px solid rgba(0,229,204,.18);}
+.hero-actions{padding-bottom:8px;display:flex;gap:8px;align-items:flex-end;flex-shrink:0;}
+.ha-btn{height:36px;padding:0 18px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .13s;font-family:'DM Sans',system-ui,sans-serif;border:none;white-space:nowrap;}
+.ha-primary{background:#00E5CC;color:#070D14;}
+.ha-primary:hover{filter:brightness(1.08);}
+.ha-secondary{background:#0D1820;border:1px solid rgba(0,229,204,.18);color:#7AADA0;}
+.ha-secondary:hover{border-color:rgba(0,229,204,.35);color:#00E5CC;}
+.ha-ghost{background:transparent;border:1px solid rgba(0,229,204,.12);color:#5A8A80;}
+.ha-ghost:hover{border-color:rgba(0,229,204,.25);color:#C8D4D0;}
+
+/* ── Layout ── */
+.content{display:grid;grid-template-columns:1fr 320px;gap:20px;max-width:1000px;margin:24px auto 0;padding:0 28px 80px;}
+@media(max-width:780px){.content{grid-template-columns:1fr;}}
+
+/* ── Sections ── */
+.section-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;margin-bottom:12px;}
+.section-h{font-family:'DM Serif Display',serif;font-size:1.1rem;letter-spacing:-.01em;color:#E8F4F0;margin-bottom:4px;}
+
+/* ── Card ── */
+.card{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.card-header{padding:14px 18px;border-bottom:1px solid rgba(0,229,204,.07);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:12px;font-weight:600;color:#C8D4D0;}
+.card-action{font-size:11px;color:#3A5A54;cursor:pointer;transition:color .12s;}
+.card-action:hover{color:#00E5CC;}
+.card-body{padding:16px 18px;}
+
+/* ── Bio ── */
+.bio-text{font-size:13px;color:#7AADA0;line-height:1.8;}
+
+/* ── Members ── */
+.members-list{display:flex;flex-direction:column;gap:2px;}
+.member-row{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid rgba(0,229,204,.05);transition:background .12s;cursor:pointer;}
+.member-row:hover{background:rgba(0,229,204,.04);}
+.member-row:last-child{border-bottom:none;}
+.m-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#070D14;flex-shrink:0;}
+.m-info{flex:1;}
+.m-name{font-size:13px;font-weight:500;color:#E8F4F0;}
+.m-rel{font-size:11px;color:#5A8A80;margin-top:1px;}
+.m-badges{display:flex;gap:5px;margin-top:4px;}
+.m-badge{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;}
+.mb-owner{background:rgba(0,229,204,.10);color:#007A74;border:1px solid rgba(0,229,204,.18);}
+.mb-mod{background:rgba(0,224,64,.10);color:#009828;border:1px solid rgba(0,224,64,.20);}
+.m-joined{font-size:10px;color:#3A5A54;font-family:'JetBrains Mono',monospace;}
+
+/* ── Life events ── */
+.events-timeline{display:flex;flex-direction:column;gap:0;}
+.event-row{display:flex;gap:14px;padding:12px 18px;border-bottom:1px solid rgba(0,229,204,.05);position:relative;}
+.event-row:last-child{border-bottom:none;}
+.event-row::before{content:'';position:absolute;left:33px;top:32px;bottom:-12px;width:1px;background:rgba(0,229,204,.07);}
+.event-row:last-child::before{display:none;}
+.ev-icon{width:30px;height:30px;border-radius:8px;background:#0A1520;border:1px solid rgba(0,229,204,.10);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;z-index:1;}
+.ev-info{flex:1;}
+.ev-title{font-size:13px;font-weight:500;color:#C8D4D0;}
+.ev-desc{font-size:12px;color:#5A8A80;line-height:1.6;margin-top:2px;}
+.ev-date{font-size:10px;color:#3A5A54;font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.ev-seg{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:rgba(0,229,204,.08);color:#007A74;border:1px solid rgba(0,229,204,.15);margin-top:5px;}
+
+/* ── Photos grid ── */
+.photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:14px 18px;}
+.photo-thumb{aspect-ratio:1;border-radius:8px;background:#0A1520;border:1px solid rgba(0,229,204,.08);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;transition:border-color .12s;}
+.photo-thumb:hover{border-color:rgba(0,229,204,.25);}
+.photo-add{border-style:dashed;color:#3A5A54;font-size:20px;}
+.photo-add:hover{color:#00E5CC;border-color:rgba(0,229,204,.25);}
+
+/* ── Sidebar cards ── */
+.sidebar-card{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:12px;padding:16px;margin-bottom:14px;}
+.sc-title{font-size:11px;font-weight:600;color:#7AADA0;margin-bottom:12px;text-transform:uppercase;letter-spacing:.10em;font-size:9px;}
+
+/* Connection info */
+.conn-type-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid rgba(0,229,204,.06);}
+.conn-type-row:last-child{border-bottom:none;}
+.conn-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.conn-type-label{font-size:12px;color:#C8D4D0;flex:1;}
+.conn-type-val{font-size:11px;color:#5A8A80;}
+
+/* Segments */
+.seg-tag-row{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid rgba(0,229,204,.06);}
+.seg-tag-row:last-child{border-bottom:none;}
+.st-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.st-label{font-size:12px;color:#C8D4D0;flex:1;}
+
+/* Privacy */
+.priv-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,229,204,.05);}
+.priv-item:last-child{border-bottom:none;}
+.priv-label{font-size:12px;color:#7AADA0;}
+.priv-chip{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:999px;}
+.pc-full{background:rgba(0,224,64,.10);color:#009828;border:1px solid rgba(0,224,64,.20);}
+.pc-partial{background:rgba(224,144,64,.10);color:#906030;border:1px solid rgba(224,144,64,.20);}
+.pc-minimal{background:rgba(0,229,204,.10);color:#007A74;border:1px solid rgba(0,229,204,.18);}
+
+/* Privacy edit note */
+.priv-note{font-size:11px;color:#3A5A54;line-height:1.6;margin-top:10px;}
+.priv-edit{font-size:11px;color:#3A5A54;cursor:pointer;transition:color .12s;}
+.priv-edit:hover{color:#00E5CC;}
+
+/* Mutual connections */
+.mutual-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid rgba(0,229,204,.05);cursor:pointer;transition:background .12s;}
+.mutual-row:hover{background:rgba(0,229,204,.03);margin:0 -16px;padding:7px 16px;}
+.mutual-row:last-child{border-bottom:none;}
+.mu-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#070D14;flex-shrink:0;}
+.mu-name{font-size:12px;color:#C8D4D0;flex:1;}
+.mu-type{font-size:10px;color:#3A5A54;}
+
+/* ── Tabs (main content) ── */
+.main-tabs{display:flex;gap:2px;margin-bottom:16px;}
+.mt-btn{padding:7px 16px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:transparent;color:#5A8A80;transition:all .13s;font-family:'DM Sans',system-ui,sans-serif;}
+.mt-btn.active{background:#132030;color:#00E5CC;}
+.mt-pane{display:none;}
+.mt-pane.active{display:block;}
+
+/* ── Globe mini-map ── */
+.map-placeholder{height:120px;background:radial-gradient(ellipse at 50% 50%,#0A2040 0%,#040C18 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#3A5A54;font-size:12px;border:1px solid rgba(0,229,204,.08);position:relative;overflow:hidden;}
+.map-dot{position:absolute;width:10px;height:10px;border-radius:50%;background:#00E040;box-shadow:0 0 8px rgba(0,224,64,.6);}
+.map-dot-conn{position:absolute;width:8px;height:8px;border-radius:50%;background:#00E5CC;box-shadow:0 0 6px rgba(0,229,204,.5);}
+.map-line{position:absolute;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<div class="dev-banner">
+  <strong>Design review</strong> · Mock data · No backend · <a href="../index.html" style="color:#A06020;">← Back to hub</a>
+</div>
+
+<nav class="nav">
+  <a class="nav-logo" href="../index.html">
+    <svg class="nav-logo-mark" viewBox="0 0 44 52" fill="none">
+      <ellipse cx="30" cy="20" rx="8" ry="11" fill="#00E5CC" opacity=".45"/>
+      <ellipse cx="30" cy="12" rx="5" ry="6" fill="#00E5CC" opacity=".35"/>
+      <rect x="28.5" y="29" width="3" height="8" rx="1.5" fill="#00E5CC" opacity=".35"/>
+      <ellipse cx="18" cy="22" rx="11" ry="14" fill="#00E040"/>
+      <ellipse cx="18" cy="11" rx="7" ry="8" fill="#00E040"/>
+      <ellipse cx="10" cy="18" rx="5" ry="7" fill="#00E040" opacity=".7"/>
+      <ellipse cx="26" cy="18" rx="5" ry="7" fill="#00E040" opacity=".7"/>
+      <rect x="16.5" y="34" width="3" height="10" rx="1.5" fill="#00A028"/>
+    </svg>
+    <span class="nav-wordmark">FINDMYTREE</span>
+  </a>
+  <div class="nav-sep"></div>
+  <a class="back-crumb" href="tree.html">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="1.8"><path d="M8 2L4 6l4 4"/></svg>
+    Tree
+  </a>
+  <span style="color:#3A5A54;font-size:12px;">/</span>
+  <span style="font-size:12px;color:#7AADA0;">Bakshi (London)</span>
+  <div class="nav-r">
+    <div class="nav-avatar">VB</div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-bg">
+    <!-- Decorative gradient orbs -->
+    <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;" preserveAspectRatio="none">
+      <defs>
+        <radialGradient id="orb1" cx="25%" cy="60%"><stop offset="0%" stop-color="#00E5CC" stop-opacity=".07"/><stop offset="100%" stop-color="#00E5CC" stop-opacity="0"/></radialGradient>
+        <radialGradient id="orb2" cx="75%" cy="40%"><stop offset="0%" stop-color="#00E040" stop-opacity=".05"/><stop offset="100%" stop-color="#00E040" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse cx="25%" cy="60%" rx="260" ry="160" fill="url(#orb1)"/>
+      <ellipse cx="75%" cy="40%" rx="200" ry="140" fill="url(#orb2)"/>
+    </svg>
+  </div>
+  <div class="hero-body">
+    <div class="hh-icon-wrap hh-icon-active">
+      🌿
+      <div class="hh-state-badge state-active-badge" title="Active">✓</div>
+    </div>
+    <div class="hero-meta">
+      <h1 class="hero-name">Bakshi (London)</h1>
+      <div class="hero-loc">
+        <svg viewBox="0 0 12 14" fill="none" stroke-width="1.6"><path d="M6 1a4 4 0 014 4c0 3-4 8-4 8S2 8 2 5a4 4 0 014-4z"/><circle cx="6" cy="5" r="1.5"/></svg>
+        Hackney, London · United Kingdom
+      </div>
+      <div class="hero-tags">
+        <span class="hero-tag ht-family">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="3" r="2" stroke="#007A74" stroke-width="1.2"/><path d="M1 9s.5-3 4-3 4 3 4 3" stroke="#007A74" stroke-width="1.2"/></svg>
+          Family · Dad's side
+        </span>
+        <span class="hero-tag ht-active">● Active</span>
+        <span class="hero-tag ht-mod">◆ Moderator candidate</span>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <button class="ha-btn ha-primary" onclick="msg()">Message</button>
+      <button class="ha-btn ha-secondary" onclick="invite()">+ Invite to event</button>
+      <button class="ha-btn ha-ghost" onclick="more()">···</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main content -->
+<div class="content">
+
+  <div class="main-col">
+
+    <!-- Tabs -->
+    <div class="main-tabs">
+      <button class="mt-btn active" onclick="switchMTab('about')">About</button>
+      <button class="mt-btn" onclick="switchMTab('events')">Events</button>
+      <button class="mt-btn" onclick="switchMTab('photos')">Photos</button>
+    </div>
+
+    <!-- About -->
+    <div class="mt-pane active" id="mt-about">
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Household</span>
+        </div>
+        <div class="card-body">
+          <p class="bio-text">Rajan's family in East London. Rajan and Vikas are brothers — the two siblings who ended up on opposite ends of the Indian Ocean. Claire is from Cardiff; they met at a conference in 2017 and married in 2020. Isha was born in 2022 and has two nationalities, a British passport, and strong opinions about mango.</p>
+        </div>
+      </div>
+
+      <div class="card" style="overflow:visible;">
+        <div class="card-header">
+          <span class="card-title">Members</span>
+          <span class="card-action">3 people</span>
+        </div>
+        <div class="members-list">
+          <div class="member-row" onclick="viewMember('Rajan')">
+            <div class="m-av" style="background:rgba(0,229,204,.18);color:#00E5CC;border:1px solid rgba(0,229,204,.28);">RB</div>
+            <div class="m-info">
+              <div class="m-name">Rajan Bakshi</div>
+              <div class="m-rel">Brother to Vikas · Product designer</div>
+              <div class="m-badges">
+                <span class="m-badge mb-owner">Owner</span>
+                <span class="m-badge mb-mod">Mod candidate</span>
+              </div>
+            </div>
+            <div class="m-joined">Joined Mar 2025</div>
+          </div>
+          <div class="member-row" onclick="viewMember('Claire')">
+            <div class="m-av" style="background:rgba(224,80,128,.15);color:#E05080;border:1px solid rgba(224,80,128,.25);">CB</div>
+            <div class="m-info">
+              <div class="m-name">Claire Bakshi</div>
+              <div class="m-rel">Sister-in-law to Vikas · Architect</div>
+            </div>
+            <div class="m-joined">Joined Mar 2025</div>
+          </div>
+          <div class="member-row" onclick="viewMember('Isha')">
+            <div class="m-av" style="background:rgba(144,96,224,.15);color:#9060E0;border:1px solid rgba(144,96,224,.25);">IB</div>
+            <div class="m-info">
+              <div class="m-name">Isha Bakshi</div>
+              <div class="m-rel">Niece to Vikas · Born 2022</div>
+            </div>
+            <div class="m-joined">Added Jun 2025</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini globe -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Location</span>
+          <span class="card-action" onclick="globe()">Open globe →</span>
+        </div>
+        <div class="card-body" style="padding-top:0;">
+          <div class="map-placeholder">
+            <svg style="position:absolute;inset:0;width:100%;height:100%;">
+              <line x1="30%" y1="58%" x2="47%" y2="52%" stroke="rgba(0,229,204,.25)" stroke-width="1" stroke-dasharray="3,2"/>
+              <line x1="47%" y1="52%" x2="65%" y2="45%" stroke="rgba(0,229,204,.20)" stroke-width="1" stroke-dasharray="3,2"/>
+            </svg>
+            <div class="map-dot-conn" style="left:27%;top:50%;transform:translate(-50%,-50%);" title="New Delhi"></div>
+            <div class="map-dot" style="left:44%;top:44%;transform:translate(-50%,-50%);" title="London (you)"></div>
+            <div class="map-dot-conn" style="left:62%;top:38%;transform:translate(-50%,-50%);" title="Toronto"></div>
+            <span style="position:absolute;bottom:8px;left:12px;font-size:10px;color:#3A5A54;">Hackney, London  51.5°N  0.05°W</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Events -->
+    <div class="mt-pane" id="mt-events">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Life events</span>
+          <span class="card-action">3 shared with you</span>
+        </div>
+        <div class="events-timeline">
+          <div class="event-row">
+            <div class="ev-icon">🏠</div>
+            <div class="ev-info">
+              <div class="ev-title">New home in Hackney</div>
+              <div class="ev-desc">Moved from Islington after Isha was born. First house with a garden.</div>
+              <div class="ev-date">March 2025</div>
+              <div class="ev-seg">Dad's side</div>
+            </div>
+          </div>
+          <div class="event-row">
+            <div class="ev-icon">💍</div>
+            <div class="ev-info">
+              <div class="ev-title">5th wedding anniversary</div>
+              <div class="ev-desc">Celebrated in Lisbon — a city both Rajan and Claire had never visited.</div>
+              <div class="ev-date">June 2024</div>
+            </div>
+          </div>
+          <div class="event-row">
+            <div class="ev-icon">👶</div>
+            <div class="ev-info">
+              <div class="ev-title">Isha born</div>
+              <div class="ev-desc">First child. Vikas flew in from Delhi. Three nationalities between the four of them at the hospital.</div>
+              <div class="ev-date">September 2022</div>
+              <div class="ev-seg">Dad's side</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photos -->
+    <div class="mt-pane" id="mt-photos">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Photos</span>
+          <span class="card-action">5 shared</span>
+        </div>
+        <div class="photos-grid">
+          <div class="photo-thumb">🌿</div>
+          <div class="photo-thumb">🏠</div>
+          <div class="photo-thumb">👨‍👩‍👧</div>
+          <div class="photo-thumb">✈️</div>
+          <div class="photo-thumb">🎉</div>
+          <div class="photo-thumb photo-add">+</div>
+        </div>
+        <div style="padding:0 18px 14px;font-size:11px;color:#3A5A54;line-height:1.6;">Photos visible to you based on Rajan's privacy settings. Request access to see more.</div>
+      </div>
+    </div>
+
+  </div><!-- /main-col -->
+
+  <!-- Sidebar -->
+  <div class="sidebar-col">
+
+    <!-- Your connection -->
+    <div class="sidebar-card">
+      <div class="sc-title">Your connection</div>
+      <div class="conn-type-row">
+        <div class="conn-dot" style="background:#00E5CC;"></div>
+        <div class="conn-type-label">Connection type</div>
+        <div class="conn-type-val">Family</div>
+      </div>
+      <div class="conn-type-row">
+        <div class="conn-dot" style="background:#5A8A80;"></div>
+        <div class="conn-type-label">Your relationship</div>
+        <div class="conn-type-val">Brothers</div>
+      </div>
+      <div class="conn-type-row">
+        <div class="conn-dot" style="background:#5A8A80;"></div>
+        <div class="conn-type-label">Connected since</div>
+        <div class="conn-type-val">Mar 2025</div>
+      </div>
+      <div class="conn-type-row">
+        <div class="conn-dot" style="background:#5A8A80;"></div>
+        <div class="conn-type-label">Status</div>
+        <div class="conn-type-val" style="color:#009828;">Accepted</div>
+      </div>
+    </div>
+
+    <!-- Segments -->
+    <div class="sidebar-card">
+      <div class="sc-title">Segments</div>
+      <div class="seg-tag-row">
+        <div class="st-dot" style="background:#00E5CC;"></div>
+        <div class="st-label">Dad's side</div>
+      </div>
+      <div class="seg-tag-row">
+        <div class="st-dot" style="background:#00E040;"></div>
+        <div class="st-label">London friends</div>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:#3A5A54;cursor:pointer;" onclick="editSegs()">+ Add to segment →</div>
+    </div>
+
+    <!-- Privacy -->
+    <div class="sidebar-card">
+      <div class="sc-title">Privacy you share with them</div>
+      <div class="priv-item">
+        <span class="priv-label">Your profile</span>
+        <span class="priv-chip pc-full">Full</span>
+      </div>
+      <div class="priv-item">
+        <span class="priv-label">Your location</span>
+        <span class="priv-chip pc-full">Full</span>
+      </div>
+      <div class="priv-item">
+        <span class="priv-label">Your events</span>
+        <span class="priv-chip pc-partial">Partial</span>
+      </div>
+      <div class="priv-item">
+        <span class="priv-label">Your photos</span>
+        <span class="priv-chip pc-minimal">Minimal</span>
+      </div>
+      <div class="priv-note">These are the settings you control. <span class="priv-edit" onclick="editPrivacy()">Edit in settings →</span></div>
+    </div>
+
+    <!-- Mutual connections -->
+    <div class="sidebar-card">
+      <div class="sc-title">Mutual connections</div>
+      <div class="mutual-row" onclick="viewNode('n1')">
+        <div class="mu-av" style="background:rgba(0,229,204,.18);color:#00E5CC;">RB</div>
+        <div class="mu-name">Bakshi (Mumbai)</div>
+        <div class="mu-type">Family</div>
+      </div>
+      <div class="mutual-row" onclick="viewNode('n7')">
+        <div class="mu-av" style="background:rgba(144,96,224,.15);color:#9060E0;">SC</div>
+        <div class="mu-name">Chopra (Chandigarh)</div>
+        <div class="mu-type">Family</div>
+      </div>
+      <div class="mutual-row" onclick="viewNode('n12')">
+        <div class="mu-av" style="background:rgba(0,224,64,.15);color:#00E040;">JM</div>
+        <div class="mu-name">Miller (London)</div>
+        <div class="mu-type">Friends</div>
+      </div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+</div><!-- /content -->
+
+<script>
+function switchMTab(id) {
+  document.querySelectorAll('.mt-btn').forEach(function(b,i){
+    b.classList.toggle('active', ['about','events','photos'][i] === id);
+  });
+  document.querySelectorAll('.mt-pane').forEach(function(p){
+    p.classList.toggle('active', p.id === 'mt-'+id);
+  });
+}
+function msg()     { alert('Messaging — Phase 2 feature.'); }
+function invite()  { alert('Invite to event — Phase 3 feature (life events broadcast).'); }
+function more()    { alert('Options: report content, adjust privacy, remove connection.'); }
+function globe()   { alert('Globe view — app/globe.html — Phase 2.'); }
+function editPrivacy() { alert('Privacy settings — app/settings.html — Phase 1.'); }
+function editSegs()    { alert('Segment manager — app/segments.html — Phase 2.'); }
+function viewMember(n) { alert('Member profile for ' + n + ' — Phase 2 feature.'); }
+function viewNode(id)  { window.location.href = 'tree.html'; }
+</script>
+
+</body>
+</html>

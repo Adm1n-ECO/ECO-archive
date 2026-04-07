@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EternalCurrent · Globe</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #080D14;
+    overflow: hidden;
+    font-family: Arial Black, Arial, sans-serif;
+    font-weight: 900;
+  }
+  #canvas-container { width: 100vw; height: 100vh; }
+  canvas { display: block; }
+
+  /* ── HUD ── */
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px;
+    background: linear-gradient(180deg, rgba(8,13,20,0.95) 0%, rgba(8,13,20,0) 100%);
+    pointer-events: none;
+  }
+  #wordmark {
+    display: flex; flex-direction: column; line-height: 1;
+  }
+  #wordmark .eternal {
+    font-size: 9px; letter-spacing: 0.32em; color: #00AAFF;
+    text-transform: uppercase;
+  }
+  #wordmark .current {
+    font-size: 21px; letter-spacing: 0.08em; color: #00CC44;
+    text-transform: uppercase;
+  }
+  #status-pill {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 5px 13px; border-radius: 20px;
+    background: rgba(0,170,255,0.12); border: 1px solid rgba(0,170,255,0.35);
+    color: #00AAFF; pointer-events: none;
+  }
+  #status-pill.snapshot { color: #E09040; border-color: rgba(224,144,64,0.35); background: rgba(224,144,64,0.10); }
+
+  /* ── LEGEND ── */
+  #legend {
+    position: fixed; bottom: 28px; left: 28px;
+    display: flex; flex-direction: column; gap: 8px;
+    pointer-events: none;
+  }
+  .legend-row { display: flex; align-items: center; gap: 9px; }
+  .legend-dot {
+    width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    box-shadow: 0 0 6px currentColor;
+  }
+  .legend-line {
+    width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0;
+  }
+  .legend-label { font-size: 10px; letter-spacing: 0.10em; color: rgba(255,255,255,0.55); text-transform: uppercase; }
+
+  /* ── ARC COUNT ── */
+  #arc-counter {
+    position: fixed; bottom: 28px; right: 28px;
+    text-align: right; pointer-events: none;
+  }
+  #arc-counter .num { font-size: 36px; color: #00CC44; line-height: 1; }
+  #arc-counter .label { font-size: 9px; letter-spacing: 0.18em; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+
+  /* ── TOOLTIP ── */
+  #tooltip {
+    position: fixed; pointer-events: none;
+    background: rgba(8,13,20,0.92); border: 1px solid rgba(0,170,255,0.30);
+    border-radius: 8px; padding: 10px 14px;
+    font-family: Arial, sans-serif; font-weight: 400;
+    opacity: 0; transition: opacity 0.15s;
+    max-width: 200px;
+  }
+  #tooltip.visible { opacity: 1; }
+  #tooltip .tip-name { font-weight: 900; font-size: 13px; color: #fff; margin-bottom: 3px; }
+  #tooltip .tip-detail { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="wordmark">
+    <span class="eternal">Eternal</span>
+    <span class="current">Current</span>
+  </div>
+  <div id="status-pill">Loading…</div>
+</div>
+
+<!-- LEGEND -->
+<div id="legend">
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#00AAFF; color:#00AAFF;"></div>
+    <span class="legend-label">Birthplace</span>
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#00CC44; color:#00CC44;"></div>
+    <span class="legend-label">Current home</span>
+  </div>
+  <div class="legend-row">
+    <div class="legend-dot" style="background:#AA66FF; color:#AA66FF;"></div>
+    <span class="legend-label">Passed</span>
+  </div>
+  <div style="height:4px;"></div>
+  <div class="legend-row">
+    <div class="legend-line" style="background:#E09040;"></div>
+    <span class="legend-label">India origin</span>
+  </div>
+  <div class="legend-row">
+    <div class="legend-line" style="background:#40C8E0;"></div>
+    <span class="legend-label">Fiji origin</span>
+  </div>
+  <div class="legend-row">
+    <div class="legend-line" style="background:#AA66FF;"></div>
+    <span class="legend-label">Pakistan origin</span>
+  </div>
+  <div class="legend-row">
+    <div class="legend-line" style="background:#C0C8D0;"></div>
+    <span class="legend-label">Other origin</span>
+  </div>
+</div>
+
+<!-- ARC COUNTER -->
+<div id="arc-counter">
+  <div class="num" id="arc-num">0</div>
+  <div class="label">Migration arcs</div>
+</div>
+
+<!-- TOOLTIP -->
+<div id="tooltip">
+  <div class="tip-name" id="tip-name"></div>
+  <div class="tip-detail" id="tip-detail"></div>
+</div>
+
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script>
+// ══════════════════════════════════════════════════════
+//  SNAPSHOT DATA — Lightning network (fallback)
+// ══════════════════════════════════════════════════════
+const SNAPSHOT = [
+  { id:'STAR',  name:'Vikas',           birthCity:'Amritsar, India',   birthLat:31.63, birthLng:74.87,  currentCity:'San Francisco, USA', currentLat:37.77, currentLng:-122.41, origin:'India',  status:'Living', isStar:true },
+  { id:'R001',  name:'Reema',           birthCity:'Lautoka, Fiji',     birthLat:-17.62,birthLng:177.45, currentCity:'San Francisco, USA', currentLat:37.74, currentLng:-122.38, origin:'Fiji',   status:'Living' },
+  { id:'M001',  name:'Madan',           birthCity:'Amritsar, India',   birthLat:31.63, birthLng:74.87,  currentCity:'London, UK',         currentLat:51.51, currentLng:-0.13,   origin:'India',  status:'Living' },
+  { id:'N001',  name:'Nirupma (Neeru)', birthCity:'Amritsar, India',   birthLat:31.63, birthLng:74.87,  currentCity:'London, UK',         currentLat:51.51, currentLng:-0.12,   origin:'India',  status:'Living' },
+  { id:'P001',  name:'Pragati',         birthCity:'Amritsar, India',   birthLat:31.63, birthLng:74.87,  currentCity:'London, UK',         currentLat:51.52, currentLng:-0.11,   origin:'India',  status:'Living' },
+  { id:'AM001', name:'Amit',            birthCity:'Amritsar, India',   birthLat:31.63, birthLng:74.87,  currentCity:'San Francisco, USA', currentLat:37.76, currentLng:-122.43, origin:'India',  status:'Passed' },
+  { id:'NA001', name:'Narendra',        birthCity:'Lautoka, Fiji',     birthLat:-17.62,birthLng:177.45, currentCity:'San Francisco, USA', currentLat:37.79, currentLng:-122.42, origin:'Fiji',   status:'Living' },
+  { id:'JA001', name:'Jaiwati',         birthCity:'Lautoka, Fiji',     birthLat:-17.62,birthLng:177.45, currentCity:'San Francisco, USA', currentLat:37.79, currentLng:-122.40, origin:'Fiji',   status:'Living' },
+  { id:'KA001', name:'Karishma',        birthCity:'Lautoka, Fiji',     birthLat:-17.62,birthLng:177.45, currentCity:'San Jose, USA',      currentLat:37.34, currentLng:-121.89, origin:'Fiji',   status:'Living' },
+  { id:'SE001', name:'Seema',           birthCity:'Lautoka, Fiji',     birthLat:-17.62,birthLng:177.45, currentCity:'Auckland, NZ',       currentLat:-36.85,currentLng:174.76,  origin:'Fiji',   status:'Living' },
+  { id:'KD001', name:'Krishan Datta',   birthCity:'Rawalpindi, Pakistan',birthLat:33.60,birthLng:73.05, currentCity:'Amritsar, India',    currentLat:31.63, currentLng:74.87,   origin:'Pakistan',status:'Passed'},
+  { id:'LD001', name:'Leela Datta',     birthCity:'Lahore, Pakistan',  birthLat:31.55, birthLng:74.34,  currentCity:'Amritsar, India',    currentLat:31.63, currentLng:74.87,   origin:'Pakistan',status:'Passed'},
+  { id:'RS001', name:'Ramesh Sewak',    birthCity:'Lautoka, Fiji',     birthLat:-17.62,birthLng:177.45, currentCity:'Melbourne, Australia',currentLat:-37.81,currentLng:144.96, origin:'Fiji',   status:'Living' },
+  { id:'IS001', name:'Isaiah',          birthCity:'San Francisco, USA',birthLat:37.77, birthLng:-122.41,currentCity:'San Francisco, USA', currentLat:37.77, currentLng:-122.41, origin:'Other',  status:'Living' },
+  { id:'NV001', name:'Niti Vaid',       birthCity:'New Delhi, India',  birthLat:28.61, birthLng:77.21,  currentCity:'Toronto, Canada',    currentLat:43.65, currentLng:-79.38,  origin:'India',  status:'Living' },
+  { id:'AN001', name:'Anu',             birthCity:'Amritsar, India',   birthLat:31.63, birthLng:74.87,  currentCity:'New Delhi, India',   currentLat:28.61, currentLng:77.21,   origin:'India',  status:'Living' },
+  { id:'BA001', name:'Babloo',          birthCity:'Amritsar, India',   birthLat:31.63, birthLng:74.87,  currentCity:'Chandigarh, India',  currentLat:30.73, currentLng:76.78,   origin:'India',  status:'Living' },
+];
+
+// ══════════════════════════════════════════════════════
+//  COLOUR MAP
+// ══════════════════════════════════════════════════════
+const ARC_COLORS = {
+  'India':    0xE09040,
+  'Fiji':     0x40C8E0,
+  'Pakistan': 0xAA66FF,
+  'Other':    0xC0C8D0,
+};
+const DOT_COLORS = {
+  birth:   '#00AAFF',
+  current: '#00CC44',
+  passed:  '#AA66FF',
+  star:    '#FF6688',
+};
+
+// ══════════════════════════════════════════════════════
+//  SCENE SETUP
+// ══════════════════════════════════════════════════════
+const container = document.getElementById('canvas-container');
+const W = window.innerWidth, H = window.innerHeight;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setSize(W, H);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.95;
+renderer.outputEncoding = THREE.sRGBEncoding;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, W / H, 0.01, 1000);
+camera.position.set(0, 0, 2.8);
+
+// ── Lighting ──
+const sunLight = new THREE.DirectionalLight(0xfff5e8, 1.6);
+sunLight.position.set(5, 3, 5);
+scene.add(sunLight);
+const ambLight = new THREE.AmbientLight(0x1a2840, 0.8);
+scene.add(ambLight);
+
+// ══════════════════════════════════════════════════════
+//  STAR FIELD
+// ══════════════════════════════════════════════════════
+(function buildStars() {
+  const count = 8000;
+  const positions = new Float32Array(count * 3);
+  const sizes = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    const r = 80 + Math.random() * 20;
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.acos(2 * Math.random() - 1);
+    positions[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+    positions[i*3+1] = r * Math.cos(phi);
+    positions[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    sizes[i] = 0.5 + Math.random() * 1.5;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+  const mat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.08, sizeAttenuation: true, transparent: true, opacity: 0.7 });
+  scene.add(new THREE.Points(geo, mat));
+})();
+
+// ══════════════════════════════════════════════════════
+//  GLOBE SHADERS
+// ══════════════════════════════════════════════════════
+const globeVertexShader = `
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+  void main() {
+    // UV fix — prevents upside-down rendering
+    vUv = vec2(uv.x, 1.0 - uv.y);
+    vNormal = normalize(normalMatrix * normal);
+    vPosition = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const globeFragmentShader = `
+  uniform sampler2D uDayMap;
+  uniform sampler2D uNightMap;
+  uniform sampler2D uCloudsMap;
+  uniform sampler2D uSpecMap;
+  uniform vec3 uSunDirection;
+  uniform bool uTexturesLoaded;
+
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vPosition;
+
+  void main() {
+    vec3 sunDir = normalize(uSunDirection);
+    float cosAngle = dot(vNormal, sunDir);
+    float dayNight = smoothstep(-0.15, 0.20, cosAngle);
+
+    if (uTexturesLoaded) {
+      vec3 dayColor   = texture2D(uDayMap,    vUv).rgb;
+      vec3 nightColor = texture2D(uNightMap,  vUv).rgb;
+      float specMask  = texture2D(uSpecMap,   vUv).r;
+      float cloudAlpha= texture2D(uCloudsMap, vUv).r;
+
+      // specular highlight on ocean
+      vec3 viewDir  = normalize(cameraPosition - vPosition);
+      vec3 halfVec  = normalize(sunDir + viewDir);
+      float spec    = pow(max(dot(vNormal, halfVec), 0.0), 32.0) * specMask * dayNight * 0.4;
+
+      vec3 day   = dayColor + cloudAlpha * vec3(0.6, 0.65, 0.7) * dayNight;
+      vec3 night = nightColor * 2.2;
+      vec3 col   = mix(night, day, dayNight) + spec;
+
+      gl_FragColor = vec4(col, 1.0);
+    } else {
+      // Fallback: procedural ocean/land look
+      vec3 oceanColor = vec3(0.05, 0.12, 0.22);
+      vec3 landColor  = vec3(0.13, 0.18, 0.10);
+      float landMask  = step(0.5, fract(vUv.x * 3.0 + vUv.y * 2.5));
+      vec3 surface = mix(oceanColor, landColor, landMask * 0.4);
+      float night  = 0.3 + 0.7 * dayNight;
+      gl_FragColor = vec4(surface * night, 1.0);
+    }
+  }
+`;
+
+// ── Atmosphere shaders ──
+const atmVertShader = `
+  varying vec3 vNormal;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+const atmFragShader = `
+  varying vec3 vNormal;
+  uniform vec3 uSunDirection;
+  void main() {
+    float rim = 1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0)));
+    rim = pow(rim, 3.5);
+    vec3 atmColor = vec3(0.2, 0.55, 1.0);
+    gl_FragColor = vec4(atmColor, rim * 0.6);
+  }
+`;
+
+// ── Texture loader ──
+const loader = new THREE.TextureLoader();
+let texturesLoaded = false;
+const texturePaths = {
+  day:    'textures/earth-day.jpg',
+  night:  'textures/earth-night.jpg',
+  clouds: 'textures/earth-clouds.png',
+  spec:   'textures/earth-spec.png',
+};
+
+const globeUniforms = {
+  uDayMap:        { value: new THREE.Texture() },
+  uNightMap:      { value: new THREE.Texture() },
+  uCloudsMap:     { value: new THREE.Texture() },
+  uSpecMap:       { value: new THREE.Texture() },
+  uSunDirection:  { value: sunLight.position.clone().normalize() },
+  uTexturesLoaded:{ value: false },
+};
+
+// Load textures — silently fall back if they fail (CDN / local server)
+let loadCount = 0;
+const TOTAL_TEX = 4;
+function onTexLoad(uniform, tex) {
+  tex.encoding = THREE.sRGBEncoding;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  uniform.value = tex;
+  loadCount++;
+  if (loadCount === TOTAL_TEX) {
+    globeUniforms.uTexturesLoaded.value = true;
+    texturesLoaded = true;
+  }
+}
+loader.load(texturePaths.day,    t => onTexLoad(globeUniforms.uDayMap,    t), undefined, () => loadCount++);
+loader.load(texturePaths.night,  t => onTexLoad(globeUniforms.uNightMap,  t), undefined, () => loadCount++);
+loader.load(texturePaths.clouds, t => onTexLoad(globeUniforms.uCloudsMap, t), undefined, () => loadCount++);
+loader.load(texturePaths.spec,   t => onTexLoad(globeUniforms.uSpecMap,   t), undefined, () => loadCount++);
+
+// ── Globe mesh ──
+const globeGeo = new THREE.SphereGeometry(1, 64, 64);
+const globeMat = new THREE.ShaderMaterial({
+  uniforms:       globeUniforms,
+  vertexShader:   globeVertexShader,
+  fragmentShader: globeFragmentShader,
+});
+const globe = new THREE.Mesh(globeGeo, globeMat);
+scene.add(globe);
+
+// ── Atmosphere ──
+const atmOuter = new THREE.Mesh(
+  new THREE.SphereGeometry(1.025, 32, 32),
+  new THREE.ShaderMaterial({
+    uniforms: { uSunDirection: { value: sunLight.position.clone().normalize() } },
+    vertexShader: atmVertShader,
+    fragmentShader: atmFragShader,
+    transparent: true,
+    side: THREE.FrontSide,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  })
+);
+scene.add(atmOuter);
+
+// ══════════════════════════════════════════════════════
+//  UTILITY: lat/lng → Vector3 on sphere surface
+// ══════════════════════════════════════════════════════
+function latLngToVec3(lat, lng, R) {
+  const phi   = (90 - lat)  * Math.PI / 180;
+  const theta = (lng + 180) * Math.PI / 180;
+  return new THREE.Vector3(
+    -R * Math.sin(phi) * Math.cos(theta),
+     R * Math.cos(phi),
+     R * Math.sin(phi) * Math.sin(theta)
+  );
+}
+
+// ══════════════════════════════════════════════════════
+//  ANIMATED ARC BUILDER
+//  Uses TubeGeometry + custom ShaderMaterial with
+//  per-vertex aAlongCurve attribute for reveal animation
+// ══════════════════════════════════════════════════════
+const ARC_VERTEX_SHADER = `
+  attribute float aAlongCurve;
+  varying float vAlongCurve;
+  void main() {
+    vAlongCurve = aAlongCurve;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+const ARC_FRAGMENT_SHADER = `
+  uniform float uProgress;
+  uniform vec3  uColor;
+  uniform float uBaseAlpha;
+  varying float vAlongCurve;
+  void main() {
+    // Discard anything beyond the reveal front
+    if (vAlongCurve > uProgress + 0.001) discard;
+    // Glow trail: bright at the leading edge, dimmer behind
+    float trailLen  = 0.30;
+    float trailPos  = uProgress - vAlongCurve;
+    float trailFade = 1.0 - clamp(trailPos / trailLen, 0.0, 1.0);
+    trailFade = trailFade * trailFade; // quadratic
+    float glow = 0.35 + trailFade * 0.65;
+    gl_FragColor = vec4(uColor * glow, uBaseAlpha * (0.5 + trailFade * 0.5));
+  }
+`;
+
+function buildArcGeometry(curve, tubularSegs, radius, radialSegs) {
+  const geo = new THREE.TubeGeometry(curve, tubularSegs, radius, radialSegs, false);
+  // Add along-curve attribute (0 = start, 1 = end)
+  const count = geo.attributes.position.count;
+  const vertsPerRing = radialSegs + 1;
+  const along = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    along[i] = Math.floor(i / vertsPerRing) / tubularSegs;
+  }
+  geo.setAttribute('aAlongCurve', new THREE.BufferAttribute(along, 1));
+  return geo;
+}
+
+const arcGroup = new THREE.Group();
+scene.add(arcGroup);
+
+const arcObjects = []; // { mesh, leadDot, curve, material, delay, duration, progress }
+let arcCountVisible = 0;
+
+function makeArc(person) {
+  // Skip if same location (< 100km apart)
+  const dx = person.birthLat - person.currentLat;
+  const dy = person.birthLng - person.currentLng;
+  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return null;
+
+  const R = 1.0;
+  const start = latLngToVec3(person.birthLat,    person.birthLng,    R);
+  const end   = latLngToVec3(person.currentLat,  person.currentLng,  R);
+
+  // Midpoint lifted off the surface — height proportional to arc distance
+  const mid   = start.clone().add(end).normalize();
+  const dist  = start.distanceTo(end);
+  const lift  = 0.25 + dist * 0.28; // more lift for long-haul arcs
+  mid.multiplyScalar(R + lift);
+
+  // QuadraticBezierCurve3: smooth single-arc shape
+  const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+
+  const colorHex = ARC_COLORS[person.origin] || ARC_COLORS['Other'];
+  const color    = new THREE.Color(colorHex);
+
+  // Tube geometry with along-curve attribute
+  const TUBE_SEGS   = 80;
+  const RADIAL_SEGS = 8;
+  const arcRadius   = 0.006; // thick enough to see clearly
+
+  const geo = buildArcGeometry(curve, TUBE_SEGS, arcRadius, RADIAL_SEGS);
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uProgress:  { value: 0.0 },
+      uColor:     { value: color },
+      uBaseAlpha: { value: 0.92 },
+    },
+    vertexShader:   ARC_VERTEX_SHADER,
+    fragmentShader: ARC_FRAGMENT_SHADER,
+    transparent:    true,
+    depthWrite:     false,
+    side:           THREE.DoubleSide,
+    blending:       THREE.AdditiveBlending,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  arcGroup.add(mesh);
+
+  // Leading-edge glow dot (travels along the arc)
+  const dotGeo = new THREE.SphereGeometry(0.016, 10, 10);
+  const dotMat = new THREE.MeshBasicMaterial({
+    color: color,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const dot = new THREE.Mesh(dotGeo, dotMat);
+  arcGroup.add(dot);
+
+  // Halo ring around leading dot
+  const haloGeo = new THREE.SphereGeometry(0.030, 10, 10);
+  const haloMat = new THREE.MeshBasicMaterial({
+    color: color,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    wireframe: false,
+  });
+  const halo = new THREE.Mesh(haloGeo, haloMat);
+  arcGroup.add(halo);
+
+  return { mesh, dot, halo, curve, material: mat, dotMat, haloMat, progress: 0, person };
+}
+
+// ══════════════════════════════════════════════════════
+//  LOCATION DOTS
+// ══════════════════════════════════════════════════════
+const dotGroup = new THREE.Group();
+scene.add(dotGroup);
+
+// Raycasting for hover
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2(-9999, -9999);
+const dotMeshes = [];
+
+function addLocationDot(lat, lng, colorHex, labelData) {
+  const pos = latLngToVec3(lat, lng, 1.007);
+  const geo  = new THREE.SphereGeometry(0.011, 10, 10);
+  const mat  = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(colorHex),
+    transparent: true,
+    opacity: 0.9,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(pos);
+  mesh.userData = labelData;
+  dotGroup.add(mesh);
+  dotMeshes.push(mesh);
+
+  // Outer glow ring
+  const ringGeo = new THREE.SphereGeometry(0.022, 10, 10);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(colorHex),
+    transparent: true,
+    opacity: 0.25,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.position.copy(pos);
+  dotGroup.add(ring);
+}
+
+// ══════════════════════════════════════════════════════
+//  BUILD SCENE FROM DATA
+// ══════════════════════════════════════════════════════
+function buildScene(people) {
+  // Clear old arcs / dots
+  arcObjects.length = 0;
+  while (arcGroup.children.length) arcGroup.remove(arcGroup.children[0]);
+  while (dotGroup.children.length) dotGroup.remove(dotGroup.children[0]);
+  dotMeshes.length = 0;
+  arcCountVisible = 0;
+
+  const ANIM_DURATION = 2800; // ms for arc to travel full distance
+  const STAGGER       = 600;  // ms between each arc start
+
+  let arcIndex = 0;
+
+  people.forEach(p => {
+    // ── Birth dot ──
+    const birthColor = p.status === 'Passed' ? DOT_COLORS.passed : DOT_COLORS.birth;
+    addLocationDot(p.birthLat, p.birthLng, birthColor, {
+      name:   p.name,
+      detail: `Born: ${p.birthCity}`,
+    });
+
+    // ── Current dot (if different location) ──
+    const dx = Math.abs(p.birthLat - p.currentLat);
+    const dy = Math.abs(p.birthLng - p.currentLng);
+    if (dx > 0.5 || dy > 0.5) {
+      const curColor = p.isStar ? DOT_COLORS.star :
+                       p.status === 'Passed' ? DOT_COLORS.passed : DOT_COLORS.current;
+      addLocationDot(p.currentLat, p.currentLng, curColor, {
+        name:   p.name,
+        detail: `Lives: ${p.currentCity}`,
+      });
+
+      // ── Migration arc ──
+      const arc = makeArc(p);
+      if (arc) {
+        arc.delay    = arcIndex * STAGGER;
+        arc.duration = ANIM_DURATION;
+        arc.startTime = null;
+        arc.done = false;
+        arcObjects.push(arc);
+        arcIndex++;
+      }
+    }
+  });
+
+  document.getElementById('arc-num').textContent = arcIndex;
+}
+
+// ══════════════════════════════════════════════════════
+//  CAMERA CONTROLS (drag to rotate)
+// ══════════════════════════════════════════════════════
+let isDragging = false;
+let prevMouse = { x: 0, y: 0 };
+let rotationVel = { x: 0, y: 0 };
+let targetQuat = new THREE.Quaternion();
+let autoRotate = true;
+
+renderer.domElement.addEventListener('mousedown', e => {
+  isDragging = true;
+  autoRotate = false;
+  prevMouse = { x: e.clientX, y: e.clientY };
+  rotationVel = { x: 0, y: 0 };
+});
+renderer.domElement.addEventListener('mousemove', e => {
+  // Update mouse for raycasting
+  mouse.x =  (e.clientX / W) * 2 - 1;
+  mouse.y = -(e.clientY / H) * 2 + 1;
+
+  if (!isDragging) return;
+  const dx = e.clientX - prevMouse.x;
+  const dy = e.clientY - prevMouse.y;
+  rotationVel.x = dy * 0.003;
+  rotationVel.y = dx * 0.003;
+  prevMouse = { x: e.clientX, y: e.clientY };
+  globe.rotation.x += rotationVel.x;
+  globe.rotation.y += rotationVel.y;
+  arcGroup.rotation.copy(globe.rotation);
+  dotGroup.rotation.copy(globe.rotation);
+  atmOuter.rotation.copy(globe.rotation);
+});
+renderer.domElement.addEventListener('mouseup', () => { isDragging = false; });
+renderer.domElement.addEventListener('mouseleave', () => { isDragging = false; });
+
+// Touch support
+renderer.domElement.addEventListener('touchstart', e => {
+  isDragging = true; autoRotate = false;
+  prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+});
+renderer.domElement.addEventListener('touchmove', e => {
+  if (!isDragging) return;
+  const dx = e.touches[0].clientX - prevMouse.x;
+  const dy = e.touches[0].clientY - prevMouse.y;
+  prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  globe.rotation.x += dy * 0.003;
+  globe.rotation.y += dx * 0.003;
+  arcGroup.rotation.copy(globe.rotation);
+  dotGroup.rotation.copy(globe.rotation);
+  atmOuter.rotation.copy(globe.rotation);
+});
+renderer.domElement.addEventListener('touchend', () => { isDragging = false; });
+
+// ══════════════════════════════════════════════════════
+//  TOOLTIP
+// ══════════════════════════════════════════════════════
+const tooltip    = document.getElementById('tooltip');
+const tipName    = document.getElementById('tip-name');
+const tipDetail  = document.getElementById('tip-detail');
+
+function showTooltip(name, detail, x, y) {
+  tipName.textContent   = name;
+  tipDetail.textContent = detail;
+  tooltip.style.left = (x + 14) + 'px';
+  tooltip.style.top  = (y - 10) + 'px';
+  tooltip.classList.add('visible');
+}
+function hideTooltip() { tooltip.classList.remove('visible'); }
+
+// ══════════════════════════════════════════════════════
+//  ORIENT TO BAY AREA (Vikas / STAR)
+// ══════════════════════════════════════════════════════
+function orientToLocation(lat, lng) {
+  // Rotate globe so that lat/lng faces the camera
+  const phi   = (90 - lat)  * Math.PI / 180;
+  const theta = -(lng + 180) * Math.PI / 180;
+  globe.rotation.set(phi - Math.PI / 2, theta, 0);
+  arcGroup.rotation.copy(globe.rotation);
+  dotGroup.rotation.copy(globe.rotation);
+  atmOuter.rotation.copy(globe.rotation);
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER LOOP
+// ══════════════════════════════════════════════════════
+let lastTime = performance.now();
+
+function animate(now) {
+  requestAnimationFrame(animate);
+  const dt = now - lastTime;
+  lastTime = now;
+
+  // Auto-rotate (slow)
+  if (autoRotate && !isDragging) {
+    globe.rotation.y    += 0.0008;
+    arcGroup.rotation.y  = globe.rotation.y;
+    dotGroup.rotation.y  = globe.rotation.y;
+    atmOuter.rotation.y  = globe.rotation.y;
+  }
+  // Momentum
+  if (!isDragging && (Math.abs(rotationVel.x) > 0.0001 || Math.abs(rotationVel.y) > 0.0001)) {
+    globe.rotation.x += rotationVel.x;
+    globe.rotation.y += rotationVel.y;
+    arcGroup.rotation.copy(globe.rotation);
+    dotGroup.rotation.copy(globe.rotation);
+    atmOuter.rotation.copy(globe.rotation);
+    rotationVel.x *= 0.92;
+    rotationVel.y *= 0.92;
+  }
+
+  // ── Animate arcs ──
+  let doneCount = 0;
+  arcObjects.forEach(arc => {
+    if (arc.done) { doneCount++; return; }
+    if (arc.startTime === null) {
+      arc.startTime = now + arc.delay;
+      return;
+    }
+    if (now < arc.startTime) return;
+
+    const elapsed = now - arc.startTime;
+    const t = Math.min(elapsed / arc.duration, 1.0);
+    // ease in-out cubic
+    const progress = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+
+    arc.material.uniforms.uProgress.value = progress;
+
+    // Leading dot follows the tip
+    const tipPos = arc.curve.getPoint(Math.min(progress, 0.999));
+    arc.dot.position.copy(tipPos);
+    arc.halo.position.copy(tipPos);
+
+    // Dot appears as arc builds, fades when arc completes
+    const dotAlpha = progress < 0.95 ? Math.min(progress * 4, 1.0) : (1 - (progress - 0.95) / 0.05);
+    arc.dotMat.opacity  = dotAlpha * 1.0;
+    arc.haloMat.opacity = dotAlpha * 0.4;
+
+    if (t >= 1.0) {
+      arc.done = true;
+      // After complete, arc glows steadily (no dot)
+      arc.material.uniforms.uBaseAlpha.value = 0.70;
+    }
+  });
+
+  // ── Hover raycasting on dots ──
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(dotMeshes);
+  if (hits.length > 0) {
+    const d = hits[0].object.userData;
+    if (d && d.name) {
+      const sp = hits[0].object.position.clone().project(camera);
+      const sx = (sp.x * 0.5 + 0.5) * W;
+      const sy = (-sp.y * 0.5 + 0.5) * H;
+      showTooltip(d.name, d.detail, sx, sy);
+    }
+  } else {
+    hideTooltip();
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ══════════════════════════════════════════════════════
+//  DATA LOADING
+// ══════════════════════════════════════════════════════
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwMwGJkx9Bw835uNe9r33Fwngxd9gQqmLxi2bP0e9o6fi6ljRSpwAYqkxNUML6obB4fSA/exec';
+const statusPill = document.getElementById('status-pill');
+
+async function loadData() {
+  // Try live Apps Script endpoint
+  try {
+    const resp = await fetch(APPS_SCRIPT_URL, { signal: AbortSignal.timeout(5000) });
+    const data = await resp.json();
+    if (data && Array.isArray(data.people) && data.people.length > 0) {
+      statusPill.textContent = 'Live · Google Sheets';
+      statusPill.classList.remove('snapshot');
+      buildScene(data.people);
+      return;
+    }
+  } catch (e) {
+    // silent fallback
+  }
+
+  // Snapshot mode
+  statusPill.textContent = 'Snapshot mode';
+  statusPill.classList.add('snapshot');
+  buildScene(SNAPSHOT);
+}
+
+// ══════════════════════════════════════════════════════
+//  RESIZE
+// ══════════════════════════════════════════════════════
+window.addEventListener('resize', () => {
+  const W2 = window.innerWidth, H2 = window.innerHeight;
+  camera.aspect = W2 / H2;
+  camera.updateProjectionMatrix();
+  renderer.setSize(W2, H2);
+});
+
+// ══════════════════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════════════════
+orientToLocation(37.77, -122.41); // Start over Bay Area (Vikas / STAR)
+loadData();
+animate(performance.now());
+</script>
+</body>
+</html>

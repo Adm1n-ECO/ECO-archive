@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO — Feature Matrix</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'none';">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#F7F6F3;color:#1C1F1E;-webkit-font-smoothing:antialiased;font-size:14px;}
+.topbar{position:sticky;top:0;z-index:200;background:#141918;border-bottom:1px solid rgba(255,255,255,0.08);padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-logo{font-size:13px;font-weight:600;color:#E8F0EE;display:flex;align-items:center;gap:8px;}
+.topbar-logo span{color:#5DCAA5;}
+.topbar-back{font-size:12px;color:#7A9490;text-decoration:none;transition:color 140ms;}
+.topbar-back:hover{color:#5DCAA5;}
+.toolbar{background:#fff;border-bottom:1px solid rgba(28,31,30,0.10);padding:10px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;position:sticky;top:50px;z-index:100;}
+.search-wrap{position:relative;min-width:160px;max-width:260px;flex:1;}
+.search-wrap input{width:100%;padding:6px 10px 6px 28px;font-family:'DM Sans',sans-serif;font-size:12px;border:1px solid rgba(28,31,30,0.15);border-radius:7px;background:#F7F6F3;color:#1C1F1E;outline:none;transition:border-color 140ms;}
+.search-wrap input:focus{border-color:#0E7C6B;}
+.search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:#8FA39D;pointer-events:none;}
+.dvdr{width:1px;height:22px;background:rgba(28,31,30,0.12);}
+.fl{display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+.flabel{font-size:10px;font-weight:600;color:#8FA39D;text-transform:uppercase;letter-spacing:.06em;}
+.fb{padding:3px 9px;font-size:11px;font-weight:500;border:1px solid rgba(28,31,30,0.15);border-radius:999px;background:#fff;color:#5A6360;cursor:pointer;transition:all 140ms;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.fb:hover{border-color:rgba(28,31,30,0.3);color:#1C1F1E;}
+.fb.on{background:#0E7C6B;border-color:#0E7C6B;color:#fff;}
+.fb.on-h{background:#1A6FA8;border-color:#1A6FA8;color:#fff;}
+.fb.on-m{background:#7B5EA7;border-color:#7B5EA7;color:#fff;}
+.fb.on-l{background:#5A6360;border-color:#5A6360;color:#fff;}
+.statsbar{background:#fff;border-bottom:1px solid rgba(28,31,30,0.10);padding:7px 20px;display:flex;gap:20px;flex-wrap:wrap;align-items:center;}
+.stat{display:flex;align-items:baseline;gap:4px;}
+.sn{font-size:16px;font-weight:600;color:#1C1F1E;}
+.sn.g{color:#1A7A4A;}
+.sn.b{color:#0E7C6B;}
+.sl{font-size:11px;color:#8FA39D;}
+.prog{flex:1;min-width:100px;max-width:180px;}
+.prog-bar{height:4px;background:#F0EEE9;border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;background:#0E7C6B;border-radius:999px;transition:width 400ms;}
+.prog-pct{font-size:10px;color:#0E7C6B;font-weight:600;margin-top:2px;}
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{background:#EBEBDF;border-bottom:2px solid rgba(28,31,30,0.12);padding:8px 10px;text-align:left;font-size:10px;font-weight:600;color:#5A6360;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;cursor:pointer;user-select:none;position:sticky;top:105px;z-index:50;transition:background 140ms;}
+th:hover{background:#E0DDD3;color:#1C1F1E;}
+th.srt .sa{opacity:1;color:#0E7C6B;}
+.sa{margin-left:3px;opacity:.35;font-size:9px;}
+td{padding:9px 10px;border-bottom:1px solid rgba(28,31,30,0.07);vertical-align:top;color:#1C1F1E;}
+tr:hover td{background:rgba(14,124,107,0.025);}
+tr.done-row td{opacity:.42;}
+tr.done-row .ft{text-decoration:line-through;}
+.col-id{width:36px;text-align:center;}
+.col-ph{width:80px;}
+.col-ti{min-width:160px;max-width:200px;}
+.col-ar{width:100px;}
+.col-fe{min-width:200px;}
+.col-vl{width:130px;}
+.col-tm{width:90px;}
+.col-cp{min-width:180px;}
+.col-dn{width:44px;text-align:center;}
+.ft{font-weight:500;color:#1C1F1E;line-height:1.4;}
+.ph{display:inline-block;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:600;}
+.ph0{background:#F0EEE9;color:#444441;}
+.ph1{background:#E6F5F2;color:#085C4F;}
+.ph2{background:#E6F1F8;color:#0F4F7A;}
+.ph3{background:#EEEDFE;color:#3C3489;}
+.ar{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600;white-space:nowrap;}
+.ar-ui{background:#e6f5f2;color:#085C4F;}
+.ar-database{background:#e6f1f8;color:#0F4F7A;}
+.ar-auth{background:#eeedfe;color:#3C3489;}
+.ar-payments{background:#fdf3e6;color:#A06020;}
+.ar-email{background:#fbeaf0;color:#7A2048;}
+.ar-infra{background:#f0eee9;color:#444441;}
+.ar-seo{background:#e6f1f8;color:#185FA5;}
+.ar-ai{background:#f5eefe;color:#534AB7;}
+.ar-network{background:#fbeae6;color:#712B13;}
+.vl{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:7px;font-size:11px;font-weight:500;white-space:nowrap;}
+.vl-h{background:#e6f5f2;color:#085C4F;}
+.vl-m{background:#e6f1f8;color:#0F4F7A;}
+.vl-l{background:#f0eee9;color:#5A6360;}
+.vd{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.vl-h .vd{background:#0E7C6B;}
+.vl-m .vd{background:#1A6FA8;}
+.vl-l .vd{background:#8FA39D;}
+.tm{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:500;background:#F0EEE9;color:#5A6360;white-space:nowrap;}
+.tm-s{background:#e6f5f2;color:#0E7C6B;}
+.tm-m{background:#fdf3e6;color:#A06020;}
+.tm-l{background:#fbeae6;color:#993C1D;}
+.tm-xl{background:#fbeaf0;color:#7A2048;}
+.cl{display:flex;flex-wrap:wrap;gap:3px;}
+.cp{padding:1px 6px;border-radius:4px;font-size:10px;font-weight:500;background:#F7F6F3;border:1px solid rgba(28,31,30,0.12);color:#5A6360;white-space:nowrap;}
+.cp-sb{background:#e6f5f2;border-color:#0E7C6B;color:#085C4F;}
+.cp-st{background:#fdf3e6;border-color:#C4783A;color:#7A3A10;}
+.cp-rs{background:#fbeaf0;border-color:#D4537E;color:#7A2048;}
+.cp-ai{background:#eeedfe;border-color:#7F77DD;color:#26215C;}
+.cp-js{background:#fafae6;border-color:#9A9A20;color:#4A4A10;}
+.cp-mb{background:#e6f1f8;border-color:#1A6FA8;color:#0F4F7A;}
+.cp-gh{background:#f0eee9;border-color:#444441;color:#2C2C2A;}
+.dc{width:18px;height:18px;border-radius:4px;border:1.5px solid rgba(28,31,30,0.2);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:0 auto;transition:all 140ms;}
+.dc.on{background:#1A7A4A;border-color:#1A7A4A;}
+.dc.on::after{content:'✓';font-size:11px;color:#fff;font-weight:700;}
+.empty{padding:48px;text-align:center;color:#8FA39D;font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">🌳 EternalCurrent<span>.Online</span> &nbsp;·&nbsp; Feature Matrix</div>
+  <a href="index.html" class="topbar-back">← Back to index</a>
+</div>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search" placeholder="Search features…" autocomplete="off">
+  </div>
+  <div class="dvdr"></div>
+  <div class="fl">
+    <span class="flabel">Area</span>
+    <button class="fb on" data-area="all">All</button>
+    <button class="fb" data-area="ui">UI</button>
+    <button class="fb" data-area="database">Database</button>
+    <button class="fb" data-area="auth">Auth</button>
+    <button class="fb" data-area="payments">Payments</button>
+    <button class="fb" data-area="email">Email</button>
+    <button class="fb" data-area="infra">Infra</button>
+    <button class="fb" data-area="network">Network</button>
+    <button class="fb" data-area="seo">SEO</button>
+    <button class="fb" data-area="ai">AI</button>
+  </div>
+  <div class="dvdr"></div>
+  <div class="fl">
+    <span class="flabel">Value</span>
+    <button class="fb on" data-val="all">All</button>
+    <button class="fb" data-val="H">🟢 High</button>
+    <button class="fb" data-val="M">🔵 Medium</button>
+    <button class="fb" data-val="L">⚪ Low</button>
+  </div>
+  <div class="dvdr"></div>
+  <div class="fl">
+    <span class="flabel">Phase</span>
+    <button class="fb on" data-phase="all">All</button>
+    <button class="fb" data-phase="0">0 — Infra</button>
+    <button class="fb" data-phase="1">1 — MVP</button>
+    <button class="fb" data-phase="2">2 — Growth</button>
+    <button class="fb" data-phase="3">3 — Scale</button>
+  </div>
+  <div class="dvdr"></div>
+  <button class="fb" id="tog-done">Hide done</button>
+</div>
+
+<div class="statsbar">
+  <div class="stat"><span class="sn" id="s-tot">0</span><span class="sl">total features</span></div>
+  <div class="stat"><span class="sn g" id="s-dn">0</span><span class="sl">done</span></div>
+  <div class="stat"><span class="sn" id="s-rm">0</span><span class="sl">remaining</span></div>
+  <div class="stat"><span class="sn b" id="s-hi">0</span><span class="sl">high priority</span></div>
+  <div class="prog">
+    <div class="prog-bar"><div class="prog-fill" id="s-bar" style="width:0%"></div></div>
+    <div class="prog-pct" id="s-pct">0% complete</div>
+  </div>
+</div>
+
+<div class="tw">
+<table>
+  <thead><tr>
+    <th class="col-id"  data-col="id">    # <span class="sa">↕</span></th>
+    <th class="col-ph"  data-col="phase"> Phase <span class="sa">↕</span></th>
+    <th class="col-ti"  data-col="title"> Feature title <span class="sa">↕</span></th>
+    <th class="col-ar"  data-col="area">  Benefit area <span class="sa">↕</span></th>
+    <th class="col-fe">                   Feature description</th>
+    <th class="col-vl"  data-col="val">   Value / urgency <span class="sa">↕</span></th>
+    <th class="col-tm"  data-col="time">  Build time <span class="sa">↕</span></th>
+    <th class="col-cp">                   Components required</th>
+    <th class="col-dn"  data-col="done">  ✓</th>
+  </tr></thead>
+  <tbody id="tbody"></tbody>
+</table>
+<div class="empty" id="empty" style="display:none">No features match your filters.</div>
+</div>
+
+<script>
+var F=[
+  {id:1, phase:0,title:'CSS theme system',area:'ui',feat:'All colors, typography, spacing as CSS variables in theme.css. Light + dark mode. Never hardcode hex in any component.',val:'H',time:'S',comp:['js'],done:1},
+  {id:2, phase:0,title:'site-components.js',area:'ui',feat:'Injects nav and footer into every page via data-nav attribute. Hamburger, active links, auth state, dev banner on staging.',val:'H',time:'M',comp:['js'],done:1},
+  {id:3, phase:0,title:'Admin feature matrix',area:'infra',feat:'This page. Full roadmap tracker. Sortable, filterable, searchable. Done state in localStorage. Linked from index.html dev tools bar.',val:'H',time:'M',comp:['js'],done:1},
+  {id:4, phase:0,title:'GitHub repo setup',area:'infra',feat:'Private repo. PAT. Pre-commit syntax hook. GitHub Actions secrets. Deploy: push main → lftp mirror → live ~60s.',val:'H',time:'M',comp:['gh'],done:0},
+  {id:5, phase:0,title:'SQL 001 — initial schema',area:'database',feat:'Core tables: users, households, household_members, connections, segments, connection_segments, invitations, life_events, admin_superusers. Full RLS + indexes.',val:'H',time:'M',comp:['sb'],done:1},
+  {id:6, phase:0,title:'Supabase project setup',area:'infra',feat:'New ECO project (not F4F). Anon + service role keys. Enable pg_trgm. Run SQL 001. Confirm RLS on all tables.',val:'H',time:'S',comp:['sb'],done:0},
+  {id:7, phase:0,title:'GitHub Actions deploy',area:'infra',feat:'deploy.yml: push main → lftp → crunod.com/sites/ECO live ~60s. SFTP creds as secrets. Supabase CLI for edge functions.',val:'H',time:'M',comp:['gh','sb'],done:0},
+  {id:8, phase:0,title:'Admin hub (admin.html)',area:'infra',feat:'Central admin page. Links to feature matrix, blueprint, dev ops, user manager. Requires superuser login.',val:'H',time:'S',comp:['js','sb'],done:0},
+  {id:9, phase:0,title:'index.html homepage',area:'ui',feat:'Hero, differentiators, segment demo, globe teaser, pricing, CTA, footer. Discussion annotations for Vikas and Isaiah. Dev tools bar at bottom.',val:'H',time:'L',comp:['js'],done:1},
+  {id:10,phase:1,title:'signup.html',area:'auth',feat:'Email, name, household name. Creates Supabase user + users row + household in one flow. Sends welcome email via edge function.',val:'H',time:'L',comp:['sb','rs','js'],done:0},
+  {id:11,phase:1,title:'signin.html',area:'auth',feat:'Magic link primary, email/password fallback. exchangeCodeForSession on return. Routes to dashboard. Handles expired links.',val:'H',time:'M',comp:['sb','js'],done:0},
+  {id:12,phase:1,title:'js/auth.js helper',area:'auth',feat:'getSupabase() singleton. getSession(), requireAuth(), signOut(). ECO_TEST_MODE flag. Subscription tier gate. Route protection.',val:'H',time:'M',comp:['sb','js'],done:0},
+  {id:13,phase:1,title:'join.html — accept invite',area:'auth',feat:'Token-based join. Reads token from URL. Handles new user signup and existing user login. Merges connection. Graceful expired-token error.',val:'H',time:'M',comp:['sb','js'],done:0},
+  {id:14,phase:1,title:'app/dashboard.html',area:'ui',feat:'First page post-login. Shows household summary, recent connections, pending invites, quick-invite CTA. Stats: X connections, Y countries.',val:'H',time:'L',comp:['sb','js'],done:0},
+  {id:15,phase:1,title:'app/tree.html — tree view',area:'ui',feat:'Core feature. Force-directed graph. Nodes = households. Edges = connections. Segment toggles. Click node = household panel. Zoom, pan, fit.',val:'H',time:'XL',comp:['sb','js'],done:0},
+  {id:16,phase:1,title:'D3.js tree rendering',area:'ui',feat:'D3 force-directed layout powering tree.html. Node click opens detail panel. Edge color by connection type. Segment filter wired to pills. Smooth transitions.',val:'H',time:'XL',comp:['js'],done:0},
+  {id:17,phase:1,title:'app/household.html',area:'ui',feat:'Household profile: name, photo, members, city/country, bio. Owner can edit. Shows connections. Privacy-tier aware display.',val:'H',time:'L',comp:['sb','js'],done:0},
+  {id:18,phase:1,title:'app/connections.html',area:'network',feat:'Tabs: pending invites (in + out), accepted connections. Send new invite by email. Connection type + privacy level. Accept/decline/remove.',val:'H',time:'L',comp:['sb','js'],done:0},
+  {id:19,phase:1,title:'app/settings.html',area:'ui',feat:'Profile: display name, avatar, bio. Subscription status + billing link. Privacy defaults. Notification prefs. Danger zone: delete account.',val:'H',time:'L',comp:['sb','st','js'],done:0},
+  {id:20,phase:1,title:'pricing.html',area:'ui',feat:'Free vs Personal ($3.99/mo) vs Family (TBD). Feature comparison. Stripe Checkout CTA. FAQ accordion.',val:'H',time:'M',comp:['st','js'],done:0},
+  {id:21,phase:1,title:'privacy.html + terms.html',area:'ui',feat:'Privacy policy (GDPR-aware: data use, deletion, third parties). Terms of service (subscription, acceptable use). Plain English.',val:'H',time:'S',comp:['js'],done:0},
+  {id:22,phase:1,title:'Stripe product setup',area:'payments',feat:'New ECO Stripe account. Personal plan $3.99/mo. Test mode keys. Customer portal for billing. Flip to live keys at go-live.',val:'H',time:'S',comp:['st'],done:0},
+  {id:23,phase:1,title:'Stripe Checkout flow',area:'payments',feat:'Checkout session from pricing.html. success_url and cancel_url. Confirm subscription before granting app access.',val:'H',time:'M',comp:['st','sb'],done:0},
+  {id:24,phase:1,title:'stripe-webhook edge fn',area:'payments',feat:'Handles checkout.session.completed, subscription.updated, subscription.deleted. Updates users.subscription_tier, status, stripe_customer_id.',val:'H',time:'M',comp:['st','sb'],done:0},
+  {id:25,phase:1,title:'Resend account + DNS',area:'email',feat:'ECO Resend account. Verify findmytree.online domain (SPF, DKIM, DMARC). From: hello@findmytree.online.',val:'H',time:'S',comp:['rs'],done:0},
+  {id:26,phase:1,title:'welcome-email edge fn',area:'email',feat:'Triggered on signup. Branded HTML: welcome message, 3 quick-start steps, dashboard link. Personalized with first name.',val:'H',time:'M',comp:['rs','sb'],done:0},
+  {id:27,phase:1,title:'invitation-email edge fn',area:'email',feat:'Sends invite with inviter name, personal message, join URL with token. Branded HTML. Expiry notice.',val:'H',time:'M',comp:['rs','sb'],done:0},
+  {id:28,phase:1,title:'Subscription gating',area:'auth',feat:'All app/* pages check session + subscription_tier. Free users see view-only or redirected to pricing. Clear upgrade prompt.',val:'H',time:'M',comp:['sb','js'],done:0},
+  {id:29,phase:1,title:'404.html + 500.html',area:'ui',feat:'Friendly error pages. 404: branch-not-found with link home. 500: apology + support link. Brand-consistent.',val:'M',time:'S',comp:['js'],done:0},
+  {id:30,phase:2,title:'app/globe.html — shell + controls',area:'ui',feat:'Globe page shell. Canvas element. Home button (animates to user lat/lng). North-up reset. Zoom in/out. Tier filter bar. Mode switcher. Time badge showing local time + timezone. See GLOBE-001 + GLOBE-002 specs.',val:'H',time:'L',comp:['js','sb'],done:0},
+  {id:51,phase:2,title:'Globe — 3D canvas engine',area:'ui',feat:'Pure HTML5 Canvas globe. lat/lng to 3D spherical coords to rotation matrix to 2D projection. Free rotation any axis. Momentum physics: flick = spin + decelerate. Touch drag. Zoom via scroll and pinch. No external libraries.',val:'H',time:'L',comp:['js'],done:1},
+  {id:52,phase:2,title:'Globe — day/night surface render',area:'ui',feat:'Pixel-level surface via ImageData. Day: deep ocean blue-teal. River Depth: near black. Soft terminator gradient (twilight band). 2x2 pixel blocks for performance. 30fps render loop.',val:'H',time:'L',comp:['js'],done:1},
+  {id:53,phase:2,title:'Globe — real-time solar position',area:'ui',feat:'Sun lat/lng from current UTC using astronomical formulas: Julian Date, solar declination, Greenwich Mean Sidereal Time. Accurate to ~1 degree. Pure JS math, no API needed. Updates each frame.',val:'H',time:'S',comp:['js'],done:1},
+  {id:54,phase:2,title:'Globe — city lights (37 metros)',area:'ui',feat:'Major metros glow amber/white on night side only. Radial gradient glow per city sized by brightness weight. Fades naturally as terminator passes. NYC, London, Tokyo, Delhi, Mumbai, Dubai, Sydney + 30 more.',val:'H',time:'M',comp:['js'],done:1},
+  {id:55,phase:2,title:'Globe — migration arc routes',area:'ui',feat:'Family migration paths as elevated great-circle arcs (airline route style). Color by generation: root=gold, gen1=amber, gen2=blue, gen3=lavender, friends=sage. Glow at arc midpoint. Animate mode draws arcs chronologically.',val:'H',time:'L',comp:['js','sb'],done:1},
+  {id:56,phase:2,title:'Globe — tier filter + mode switcher',area:'ui',feat:'Tier filter: Full tree / Me / My tier / +1 up / +2 up / +3 up. Mode: Paths / Current / Animate. Controls who and what appears. State in URL params for sharing.',val:'H',time:'M',comp:['js','sb'],done:1},
+  {id:57,phase:2,title:'Globe — location history UI',area:'ui',feat:'Tab in household profile: Life journey. Add/edit/reorder past locations. Fields: city, country, year, month (optional), notes, is_birth_place. Geocoding auto-runs on save. Drag to reorder.',val:'H',time:'L',comp:['js','sb'],done:0},
+  {id:58,phase:2,title:'Globe — location_history SQL + RLS',area:'database',feat:'SQL 002: location_history table with user_id, household_id, city, country, lat, lng, moved_year, moved_month, is_birth_place, is_current, notes, sort_order. Full RLS. get_migration_paths() security definer RPC.',val:'H',time:'M',comp:['sb'],done:0},
+  {id:59,phase:2,title:'Globe — geocoding edge function',area:'infra',feat:'Edge function: city + country to lat/lng via Nominatim (free). Called on location_history save. Stores result on lat/lng columns. Graceful fallback if city not found.',val:'H',time:'M',comp:['sb','js'],done:0},
+  {id:60,phase:2,title:'Globe — atmosphere + shimmer',area:'ui',feat:'Thin blue atmospheric rim outside globe edge. Subtle specular shimmer on day side. Pulsing glow ring on root origin node. All Canvas, no extra libraries.',val:'M',time:'S',comp:['js'],done:1},
+  {id:61,phase:2,title:'Globe — screenshot / share button',area:'ui',feat:'Captures canvas as PNG (1200x800). Adds family name watermark. Triggers native share sheet on mobile, downloads on desktop. The viral sharing moment.',val:'H',time:'M',comp:['js'],done:0},
+  {id:62,phase:2,title:'Globe — time badge + timezone',area:'ui',feat:'Overlay top-left: current local time (HH:MM) + timezone from Intl.DateTimeFormat(). Reinforces the alive/real-time feeling. Updates each minute.',val:'M',time:'S',comp:['js'],done:1},
+  {id:63,phase:3,title:'Globe — city lights 150+ cities',area:'ui',feat:'Expand from 37 to 150+ cities using NASA VIIRS night light data. Brightness weights from satellite luminosity. Adds suburban sprawl glow to major metro regions.',val:'L',time:'M',comp:['js'],done:0},
+  {id:64,phase:3,title:'Globe — continent outlines (day)',area:'ui',feat:'Very faint low-contrast coastline outlines on day side only. Geographic orientation without political map feel. Simplified GeoJSON drawn as Canvas paths.',val:'M',time:'L',comp:['js'],done:0},
+  {id:65,phase:3,title:'Globe — aurora simulation',area:'ui',feat:'Faint green/teal shimmer near poles on the night side. Sine-wave animation. Purely decorative but beautiful. Phase 3 polish.',val:'L',time:'M',comp:['js'],done:0},
+  {id:31,phase:2,title:'Geocoding on household save',area:'database',feat:'city + country → lat/lng via Nominatim (OpenStreetMap, free). Store on households.lat + households.lng for globe.',val:'H',time:'M',comp:['sb','js'],done:0},
+  {id:32,phase:2,title:'app/segments.html',area:'network',feat:'Create, name, color-code, reorder segments. Assign connections to segments. Preview segment view. Delete segment (connections stay).',val:'H',time:'L',comp:['sb','js'],done:0},
+  {id:33,phase:2,title:'Consent merge flow',area:'network',feat:'When User A invites User B who has a tree: detect overlap, show merge proposal, require both parties to approve each link. No auto-overwrites.',val:'H',time:'XL',comp:['sb','js'],done:0},
+  {id:34,phase:2,title:'features.html',area:'ui',feat:'Deep-dive feature page. Live segment demo. Globe preview. Privacy tier explainer. Merge flow walkthrough. Competitor comparison.',val:'M',time:'L',comp:['js'],done:0},
+  {id:35,phase:2,title:'about.html',area:'ui',feat:'Founders story. The globe-trotting inspiration. Mission. Isaiah photo. Contact email.',val:'M',time:'M',comp:['js'],done:0},
+  {id:36,phase:2,title:'support.html + FAQ',area:'ui',feat:'FAQ accordion (billing, privacy, inviting, merging). Contact form. Links to key how-to topics.',val:'M',time:'M',comp:['js'],done:0},
+  {id:37,phase:2,title:'SEO — all public pages',area:'seo',feat:'Unique title + meta description + canonical on every public page. JSON-LD org schema on index. sitemap.xml. robots.txt.',val:'M',time:'M',comp:['js'],done:0},
+  {id:38,phase:2,title:'Family plan — Stripe',area:'payments',feat:'Multi-household billing. New Stripe product (price TBD). Shared admin view for family account owner.',val:'M',time:'M',comp:['st','sb'],done:0},
+  {id:39,phase:2,title:'llms.txt crawler file',area:'seo',feat:'AI crawler identity for ChatGPT, Gemini, Perplexity, Claude. Describes ECO mission and positioning.',val:'L',time:'S',comp:['js'],done:0},
+  {id:40,phase:2,title:'Admin user manager',area:'infra',feat:'List all users, subscription status, signup date. Toggle subscription for support cases. Soft-delete. Filter by tier.',val:'M',time:'L',comp:['sb','js'],done:0},
+  {id:41,phase:3,title:'app/events.html',area:'ui',feat:'Life events feed. Create event (birth/wedding/move/graduation/custom). Choose segments to notify. Network timeline view.',val:'M',time:'L',comp:['sb','rs','js'],done:0},
+  {id:42,phase:3,title:'Life event broadcast email',area:'email',feat:'On broadcast: sends notification to accepted connections in chosen segments. Personalized with event details and household name.',val:'M',time:'M',comp:['rs','sb'],done:0},
+  {id:43,phase:3,title:'Blog section',area:'ui',feat:'blog/index.html (listing) + blog/[slug].html (article). Categories: family stories, diaspora, product updates, how-to. SEO-optimized.',val:'M',time:'L',comp:['js'],done:0},
+  {id:44,phase:3,title:'AI tree suggestions',area:'ai',feat:'Claude API: analyze tree, suggest missing connections, recommend relationship labels, flag geographic matches. Edge function.',val:'M',time:'XL',comp:['ai','sb'],done:0},
+  {id:45,phase:3,title:'AI help chat widget',area:'ai',feat:'In-app assistant for tree-building questions. Claude Haiku powered. Context-aware (knows current page). Edge function.',val:'L',time:'L',comp:['ai','sb','js'],done:0},
+  {id:46,phase:3,title:'Printed family book',area:'payments',feat:'Premium add-on ($40-80 one-time). AI-generated family narrative + household profiles as printable PDF. Stripe one-time payment.',val:'L',time:'XL',comp:['ai','st','sb'],done:0},
+  {id:47,phase:3,title:'Diaspora community groups',area:'network',feat:'Organization accounts for large community networks. Bulk invite, group tree, community admin role.',val:'L',time:'XL',comp:['sb','st','js'],done:0},
+  {id:48,phase:3,title:'Admin analytics dashboard',area:'infra',feat:'Signups over time, DAU/MAU, conversion rate, MRR, churn. Charts. CSV export.',val:'M',time:'L',comp:['sb','js'],done:0},
+  {id:66,phase:0,title:'Theme system — CSS variables',area:'ui',feat:'4 dark themes (Deep Water 100%, River Depth 75%, Midstream 50%, River Light 25%). Max 8 colors per theme. CRUNOD parent brand: electric cyan + neon green primaries. All high-contrast vs background. Full dark — no light mode.',val:'H',time:'M',comp:['js'],done:1},
+  {id:67,phase:0,title:'Theme selector — floating widget',area:'ui',feat:'Floating bottom-right panel. 4 theme options with live preview swatches. Persists selection in localStorage. Closes on outside click. Keyboard accessible. Z-index 900 (theme) / 800 (admin btn below it).',val:'H',time:'M',comp:['js'],done:1},
+  {id:68,phase:0,title:'Admin float button (theme-anchored)',area:'ui',feat:'Amber ⚙ button floats below theme selector. Hidden by default. Shown only when admin session active via ECOTheme.setAdminVisible(true) called from auth.js. Links to admin.html.',val:'H',time:'S',comp:['js','sb'],done:1},
+  {id:49,phase:3,title:'PostHog + Sentry',area:'infra',feat:'PostHog for analytics (funnels, feature flags). Sentry for JS errors. Both via site-components.js. Disabled until go-live.',val:'L',time:'S',comp:['js'],done:0},
+  {id:50,phase:3,title:'Mobile app (future scope)',area:'ui',feat:'Native iOS/Android. Push notifications for events + connection requests. Offline tree view. Not in web launch scope — planning doc only.',val:'L',time:'XL',comp:[],done:0},
+];
+
+var CLABEL={sb:'Supabase',st:'Stripe',rs:'Resend',ai:'Anthropic AI',js:'HTML/CSS/JS',mb:'Mapbox',gh:'GitHub'};
+var CCLS={sb:'cp-sb',st:'cp-st',rs:'cp-rs',ai:'cp-ai',js:'cp-js',mb:'cp-mb',gh:'cp-gh'};
+var ALABEL={ui:'UI / HTML',database:'Database',auth:'Auth',payments:'Payments',email:'Email',infra:'Infrastructure',network:'Network',seo:'SEO',ai:'AI'};
+var VLABEL={H:'High / Immediate',M:'Medium / Not urgent',L:'Low / Nice to have'};
+var TLABEL={S:'< 1 hour',M:'1–3 hours',L:'3–8 hours',XL:'8+ hours'};
+var TCLS={S:'tm-s',M:'tm-m',L:'tm-l',XL:'tm-xl'};
+var PLABEL={'0':'Phase 0 — Infra','1':'Phase 1 — MVP','2':'Phase 2 — Growth','3':'Phase 3 — Scale'};
+
+var st={q:'',area:'all',val:'all',phase:'all',hideDone:false,sortCol:'id',sortDir:1,done:{}};
+try{st.done=JSON.parse(localStorage.getItem('fmto_fm_done')||'{}');}catch(e){}
+function save(){try{localStorage.setItem('fmto_fm_done',JSON.stringify(st.done));}catch(e){}}
+
+function render(){
+  var q=st.q.toLowerCase();
+  var rows=F.filter(function(f){
+    if(st.hideDone&&st.done[f.id]) return false;
+    if(st.area!=='all'&&f.area!==st.area) return false;
+    if(st.val!=='all'&&f.val!==st.val) return false;
+    if(st.phase!=='all'&&String(f.phase)!==String(st.phase)) return false;
+    if(q){var h=(f.title+' '+f.feat+' '+f.area).toLowerCase();if(h.indexOf(q)===-1)return false;}
+    return true;
+  });
+  rows.sort(function(a,b){
+    var av,bv;
+    if(st.sortCol==='id'){av=a.id;bv=b.id;}
+    else if(st.sortCol==='phase'){av=a.phase;bv=b.phase;}
+    else if(st.sortCol==='title'){av=a.title.toLowerCase();bv=b.title.toLowerCase();}
+    else if(st.sortCol==='area'){av=a.area;bv=b.area;}
+    else if(st.sortCol==='val'){av={H:0,M:1,L:2}[a.val];bv={H:0,M:1,L:2}[b.val];}
+    else if(st.sortCol==='time'){av={S:0,M:1,L:2,XL:3}[a.time];bv={S:0,M:1,L:2,XL:3}[b.time];}
+    else if(st.sortCol==='done'){av=st.done[a.id]?1:0;bv=st.done[b.id]?1:0;}
+    else{av=a.id;bv=b.id;}
+    if(av<bv)return -st.sortDir;if(av>bv)return st.sortDir;return a.id-b.id;
+  });
+
+  var dn=F.filter(function(f){return!!st.done[f.id];}).length;
+  var hi=F.filter(function(f){return f.val==='H';}).length;
+  var pct=Math.round(dn/F.length*100);
+  document.getElementById('s-tot').textContent=F.length;
+  document.getElementById('s-dn').textContent=dn;
+  document.getElementById('s-rm').textContent=F.length-dn;
+  document.getElementById('s-hi').textContent=hi;
+  document.getElementById('s-pct').textContent=pct+'% complete';
+  document.getElementById('s-bar').style.width=pct+'%';
+
+  var tbody=document.getElementById('tbody');
+  var empty=document.getElementById('empty');
+  if(!rows.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+
+  tbody.innerHTML=rows.map(function(f){
+    var dn=!!st.done[f.id];
+    var comps=(f.comp||[]).map(function(c){
+      return '<span class="cp '+(CCLS[c]||'cp')+'">'+(CLABEL[c]||c)+'</span>';
+    }).join('');
+    return '<tr class="'+(dn?'done-row':'')+'" data-id="'+f.id+'">'
+      +'<td class="col-id" style="color:#8FA39D;text-align:center;font-size:11px;">'+f.id+'</td>'
+      +'<td class="col-ph"><span class="ph ph'+f.phase+'">'+PLABEL[f.phase]+'</span></td>'
+      +'<td class="col-ti"><div class="ft">'+f.title+'</div></td>'
+      +'<td class="col-ar"><span class="ar ar-'+f.area+'">'+(ALABEL[f.area]||f.area)+'</span></td>'
+      +'<td class="col-fe" style="color:#5A6360;line-height:1.55;">'+f.feat+'</td>'
+      +'<td class="col-vl"><span class="vl vl-'+f.val.toLowerCase()+'"><span class="vd"></span>'+(VLABEL[f.val]||f.val)+'</span></td>'
+      +'<td class="col-tm"><span class="tm '+(TCLS[f.time]||'')+'">'+(TLABEL[f.time]||f.time)+'</span></td>'
+      +'<td class="col-cp"><div class="cl">'+comps+'</div></td>'
+      +'<td class="col-dn"><div class="dc'+(dn?' on':'')+'" data-id="'+f.id+'"></div></td>'
+      +'</tr>';
+  }).join('');
+
+  tbody.querySelectorAll('.dc').forEach(function(cb){
+    cb.addEventListener('click',function(e){
+      e.stopPropagation();
+      var id=parseInt(cb.getAttribute('data-id'));
+      st.done[id]=!st.done[id];save();render();
+    });
+  });
+}
+
+document.querySelectorAll('th[data-col]').forEach(function(th){
+  th.addEventListener('click',function(){
+    var col=th.getAttribute('data-col');
+    if(col==='feat'||col==='comp') return;
+    if(st.sortCol===col){st.sortDir*=-1;}else{st.sortCol=col;st.sortDir=1;}
+    document.querySelectorAll('th').forEach(function(t){t.classList.remove('srt');});
+    th.classList.add('srt');
+    th.querySelector('.sa').textContent=st.sortDir===1?'↑':'↓';
+    render();
+  });
+});
+document.getElementById('search').addEventListener('input',function(){st.q=this.value;render();});
+document.querySelectorAll('[data-area]').forEach(function(b){b.addEventListener('click',function(){
+  document.querySelectorAll('[data-area]').forEach(function(x){x.classList.remove('on');});
+  b.classList.add('on');st.area=b.getAttribute('data-area');render();
+});});
+document.querySelectorAll('[data-val]').forEach(function(b){b.addEventListener('click',function(){
+  document.querySelectorAll('[data-val]').forEach(function(x){x.classList.remove('on','on-h','on-m','on-l');});
+  var v=b.getAttribute('data-val');
+  b.classList.add(v==='H'?'on-h':v==='M'?'on-m':v==='L'?'on-l':'on');
+  st.val=v;render();
+});});
+document.querySelectorAll('[data-phase]').forEach(function(b){b.addEventListener('click',function(){
+  document.querySelectorAll('[data-phase]').forEach(function(x){x.classList.remove('on');});
+  b.classList.add('on');st.phase=b.getAttribute('data-phase');render();
+});});
+document.getElementById('tog-done').addEventListener('click',function(){
+  st.hideDone=!st.hideDone;
+  this.textContent=st.hideDone?'Show done':'Hide done';
+  this.classList.toggle('on',st.hideDone);render();
+});
+render();
+</script>
+</body>
+</html>

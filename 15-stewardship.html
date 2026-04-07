@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO Design Review — Stewardship & Memory System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;}
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:200;}
+.nav a{font-size:13px;color:#3A5A54;text-decoration:none;}.nav a:hover{color:#00E5CC;}
+.nav-r{margin-left:auto;}
+.nbadge{background:rgba(144,96,224,.12);border:1px solid rgba(144,96,224,.25);color:#7050C0;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;}
+
+/* ── Layout ──────────────────────────────────────── */
+.wrap{max-width:1000px;margin:0 auto;padding:32px 28px 80px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:28px;}
+@media(max-width:760px){.two-col,.three-col{grid-template-columns:1fr;}}
+
+/* ── Section headers ─────────────────────────────── */
+.eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;}
+.ey-purple{color:#9060E0;}
+.ey-cy{color:#00E5CC;}
+.ey-gr{color:#00E040;}
+.section-h{font-family:'DM Serif Display',serif;font-size:1.7rem;letter-spacing:-.02em;line-height:1.18;color:#E8F4F0;margin-bottom:6px;}
+.section-h em{font-style:italic;color:#00E040;}
+.section-sub{font-size:13px;color:#5A8A80;line-height:1.7;margin-bottom:20px;max-width:560px;}
+.section-divider{height:1px;background:rgba(0,229,204,.07);margin:32px 0;}
+.section-title{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#3A5A54;margin-bottom:14px;}
+
+/* ── Profile state cards ─────────────────────────── */
+.state-card{border-radius:12px;padding:18px;position:relative;overflow:hidden;}
+.sc-active  {background:#061206;border:1px solid rgba(0,224,64,.22);}
+.sc-shadow  {background:#0A0A0A;border:1px dashed rgba(255,255,255,.12);}
+.sc-kept    {background:#04080E;border:1px solid rgba(0,150,210,.22);}
+.sc-memoriam{background:#0C0614;border:1px solid rgba(144,96,224,.25);}
+
+.sc-tag{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-bottom:10px;}
+.sct-active  {background:rgba(0,224,64,.12);color:#009828;border:1px solid rgba(0,224,64,.22);}
+.sct-shadow  {background:rgba(255,255,255,.05);color:#3A5A54;border:1px dashed rgba(255,255,255,.12);}
+.sct-kept    {background:rgba(0,150,210,.12);color:#0090C8;border:1px solid rgba(0,150,210,.22);}
+.sct-memoriam{background:rgba(144,96,224,.12);color:#8050C0;border:1px solid rgba(144,96,224,.22);}
+
+/* Profile node visual */
+.profile-node{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.pn-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;}
+.av-active  {background:rgba(0,229,204,.15);border:2px solid rgba(0,229,204,.40);color:#00E5CC;}
+.av-shadow  {background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.14);color:#2A3A36;}
+.av-kept    {background:rgba(0,150,210,.12);border:2px solid rgba(0,150,210,.35);color:#0090C8;}
+.av-memoriam{background:rgba(144,96,224,.10);border:2px solid rgba(144,96,224,.30);color:#8050C0;}
+.pn-info{flex:1;}
+.pn-name{font-size:14px;font-weight:500;color:#E8F4F0;margin-bottom:2px;}
+.pn-name.hidden{color:#3A5A54;font-style:italic;}
+.pn-rel{font-size:11px;color:#5A8A80;}
+
+/* Profile details inside card */
+.sc-detail{font-size:12px;color:#5A8A80;line-height:1.65;margin-bottom:10px;}
+.sc-detail strong{color:#C8D4D0;font-weight:500;}
+.sc-media{display:flex;gap:6px;margin-bottom:10px;}
+.media-thumb{width:38px;height:38px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;}
+.mt-active  {background:rgba(0,229,204,.10);color:#00A090;border:1px solid rgba(0,229,204,.18);}
+.mt-shadow  {background:rgba(255,255,255,.04);color:#3A5A54;border:1px dashed rgba(255,255,255,.10);}
+.mt-kept    {background:rgba(0,150,210,.10);color:#0070A0;border:1px solid rgba(0,150,210,.18);}
+.mt-locked  {background:rgba(255,255,255,.04);color:#2A3A36;border:1px dashed rgba(255,255,255,.08);}
+.media-more {background:rgba(144,96,224,.10);border:1px solid rgba(144,96,224,.20);color:#7050C0;font-size:9px;}
+
+.sc-action{display:flex;gap:6px;flex-wrap:wrap;}
+.sa-btn{padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:7px;border:1px solid transparent;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;}
+.sb-adopt{background:#0090C8;color:#FFF;border-color:#0090C8;}
+.sb-steward{background:rgba(0,229,204,.10);color:#00A090;border-color:rgba(0,229,204,.25);}
+.sb-memoriam{background:rgba(144,96,224,.10);color:#8050C0;border-color:rgba(144,96,224,.25);}
+.sb-upgrade{background:rgba(144,96,224,.12);color:#9060E0;border-color:rgba(144,96,224,.28);}
+
+/* ── Adopt flow ──────────────────────────────────── */
+.flow-step{display:flex;gap:12px;margin-bottom:10px;align-items:flex-start;}
+.fs-num{width:26px;height:26px;border-radius:50%;background:rgba(0,150,210,.15);border:1px solid rgba(0,150,210,.30);color:#0090C8;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.fs-body{flex:1;}
+.fs-title{font-size:13px;font-weight:500;color:#C8D4D0;margin-bottom:3px;}
+.fs-sub{font-size:11px;color:#5A8A80;line-height:1.55;}
+.fs-connector{width:1px;height:10px;background:rgba(0,150,210,.20);margin-left:12px;}
+
+/* ── Steward panel ───────────────────────────────── */
+.steward-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.steward-row{display:flex;align-items:center;gap:10px;background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:8px;padding:9px 12px;}
+.sr-avatar{width:30px;height:30px;border-radius:50%;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sr-info{flex:1;}
+.sr-name{font-size:12px;font-weight:500;color:#C8D4D0;}
+.sr-role{font-size:10px;color:#3A5A54;}
+.sr-tag{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 6px;border-radius:999px;}
+.srt-lead{background:rgba(0,150,210,.12);color:#0080B0;border:1px solid rgba(0,150,210,.20);}
+.srt-contrib{background:rgba(0,229,204,.08);color:#007A74;border:1px solid rgba(0,229,204,.15);}
+
+/* ── Media upgrade card ──────────────────────────── */
+.upgrade-card{background:#0C0614;border:2px solid rgba(144,96,224,.25);border-radius:14px;padding:20px;}
+.uc-tag{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#9060E0;background:rgba(144,96,224,.12);padding:3px 9px;border-radius:999px;display:inline-block;margin-bottom:10px;}
+.uc-price{font-family:'DM Serif Display',serif;font-size:2.2rem;color:#E8F4F0;line-height:1;margin-bottom:2px;}
+.uc-price sup{font-size:1rem;vertical-align:super;}
+.uc-period{font-size:12px;color:#5A8A80;margin-bottom:14px;}
+.uc-feature{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#7AADA0;margin-bottom:7px;line-height:1.45;}
+.ucf-check{color:#9060E0;flex-shrink:0;font-size:14px;}
+.media-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px;}
+.mg-cell{aspect-ratio:1;border-radius:6px;background:rgba(144,96,224,.10);border:1px solid rgba(144,96,224,.18);display:flex;align-items:center;justify-content:center;font-size:9px;color:#6040A0;font-weight:600;}
+.mg-add{border-style:dashed;color:#4030A0;font-size:14px;}
+
+/* ── In Memoriam ─────────────────────────────────── */
+.memoriam-card{background:#0C0614;border:1px solid rgba(144,96,224,.20);border-radius:12px;padding:18px;margin-bottom:12px;}
+.mc-candle{font-size:24px;margin-bottom:10px;display:block;}
+.mc-name{font-family:'DM Serif Display',serif;font-size:1.3rem;color:#E8F4F0;margin-bottom:2px;}
+.mc-dates{font-size:12px;color:#6040A0;margin-bottom:8px;font-style:italic;}
+.mc-quote{font-family:'DM Serif Display',serif;font-size:1rem;font-style:italic;color:#9070C0;line-height:1.6;margin-bottom:10px;padding-left:10px;border-left:2px solid rgba(144,96,224,.30);}
+.mc-contributors{font-size:11px;color:#4A3A60;margin-top:8px;}
+
+/* ── Privacy spec ────────────────────────────────── */
+.privacy-table{width:100%;border-collapse:collapse;}
+.privacy-table th{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3A5A54;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(0,229,204,.08);}
+.privacy-table td{font-size:12px;padding:8px 10px;border-bottom:1px solid rgba(0,229,204,.05);vertical-align:top;line-height:1.5;}
+.privacy-table tr:last-child td{border-bottom:none;}
+.td-field{color:#C8D4D0;font-weight:500;white-space:nowrap;}
+.td-collect{color:#5A8A80;}
+.td-collect strong{color:#00A028;}
+.td-collect del{color:#A03030;text-decoration-color:rgba(200,60,60,.6);}
+.td-shadow{color:#5A8A80;font-style:italic;}
+
+/* ── Note boxes ──────────────────────────────────── */
+.dnote{background:#061206;border:1px solid rgba(0,224,64,.14);border-radius:7px;padding:9px 11px;font-size:11px;color:#3A6040;line-height:1.6;margin-top:10px;display:flex;gap:7px;}
+.dn-check{color:#009828;flex-shrink:0;font-size:13px;}
+.discuss{background:#161206;border:1px dashed rgba(224,200,80,.28);border-radius:7px;padding:9px 11px;font-size:11px;color:#8A7040;line-height:1.6;margin-top:8px;}
+.discuss strong{color:#C0A040;display:block;margin-bottom:2px;}
+.design-note{background:#0A0A1A;border:1px solid rgba(144,96,224,.14);border-radius:7px;padding:9px 11px;font-size:11px;color:#5040A0;line-height:1.6;margin-top:8px;}
+.design-note strong{color:#8060D0;display:block;margin-bottom:2px;}
+.marketing-note{background:#060A14;border:1px solid rgba(0,229,204,.18);border-radius:7px;padding:12px 14px;font-size:12px;color:#3A6A64;line-height:1.7;margin-top:10px;}
+.marketing-note strong{color:#00A090;display:block;margin-bottom:4px;font-size:13px;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html">← Design Review Hub</a>
+  <div class="nav-r">
+    <span class="nbadge">15 — Stewardship &amp; Memory</span>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <div class="eyebrow ey-purple">The memory lifecycle</div>
+  <h2 class="section-h">Every branch stays <em>alive.</em></h2>
+  <p class="section-sub">Profiles don't disappear when people go quiet or pass on. The tree remembers. Others can step forward to keep the memory present — paying forward the love that was given to them.</p>
+
+  <div class="marketing-note">
+    <strong>The headline no other product can use</strong>
+    "Some branches go quiet. Not forever — only until someone who remembers them steps forward." This is ECO's deepest differentiator. It belongs on the homepage, not in a feature list. Flag for Isaiah.
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ── FOUR PROFILE STATES ──────────────────────── -->
+  <div class="section-title">The four states of a profile</div>
+  <div class="two-col">
+
+    <!-- Active -->
+    <div class="state-card sc-active">
+      <div class="sc-tag sct-active">Active · on tree</div>
+      <div class="profile-node">
+        <div class="pn-avatar av-active">KB</div>
+        <div class="pn-info">
+          <div class="pn-name">Kamla Bakshi</div>
+          <div class="pn-rel">Grandmother · Amritsar, India</div>
+        </div>
+      </div>
+      <div class="sc-detail">
+        Paid and self-managed, or managed by a household member. Full profile visible. Media visible to accepted connections.
+      </div>
+      <div class="sc-media">
+        <div class="media-thumb mt-active">📷</div>
+        <div class="media-thumb mt-active">📷</div>
+        <div class="media-thumb mt-active">🎥</div>
+        <div class="media-thumb mt-locked" title="Standard limit reached">+0</div>
+      </div>
+      <div style="font-size:10px;color:#3A5A54;">3 photos + 3 videos — standard profile</div>
+    </div>
+
+    <!-- Shadow -->
+    <div class="state-card sc-shadow">
+      <div class="sc-tag sct-shadow">Shadow · needs steward</div>
+      <div class="profile-node">
+        <div class="pn-avatar av-shadow">?</div>
+        <div class="pn-info">
+          <div class="pn-name hidden">Name hidden</div>
+          <div class="pn-rel">Grandmother · Amritsar, India</div>
+        </div>
+      </div>
+      <div class="sc-detail">
+        Profile exists but no active steward. Visible to all connections as a silhouette — <strong>relationship + city only.</strong> No name, no media, no history. Waiting for someone to step forward.
+      </div>
+      <div class="sc-media">
+        <div class="media-thumb mt-shadow">?</div>
+        <div class="media-thumb mt-shadow">?</div>
+        <div class="media-thumb mt-shadow">?</div>
+      </div>
+      <div class="sc-action">
+        <button class="sa-btn sb-adopt">Keep this memory alive — $1.99</button>
+      </div>
+    </div>
+
+    <!-- Steward-kept -->
+    <div class="state-card sc-kept">
+      <div class="sc-tag sct-kept">Kept alive · steward</div>
+      <div class="profile-node">
+        <div class="pn-avatar av-kept">KB</div>
+        <div class="pn-info">
+          <div class="pn-name">Kamla Bakshi</div>
+          <div class="pn-rel">Grandmother · Amritsar, India · kept by Vikas</div>
+        </div>
+      </div>
+      <div class="sc-detail">
+        Someone has paid $1.99 to adopt this profile and keep it alive. They — and other stewards — can add photos, stories, and history. Profile is clearly marked as maintained by others.
+      </div>
+      <div class="sc-media">
+        <div class="media-thumb mt-kept">📷</div>
+        <div class="media-thumb mt-kept">📷</div>
+        <div class="media-thumb mt-kept">📷</div>
+        <div class="media-thumb media-more">+12</div>
+      </div>
+      <div class="sc-action">
+        <button class="sa-btn sb-steward">Join as steward</button>
+        <button class="sa-btn sb-upgrade">Upgrade memory ✦</button>
+      </div>
+    </div>
+
+    <!-- In Memoriam -->
+    <div class="state-card sc-memoriam">
+      <div class="sc-tag sct-memoriam">In memoriam ·  passed</div>
+      <div class="profile-node">
+        <div class="pn-avatar av-memoriam">KB</div>
+        <div class="pn-info">
+          <div class="pn-name">Kamla Bakshi</div>
+          <div class="pn-rel">Grandmother · Amritsar, India · born March 1924 · passed November 2018</div>
+        </div>
+      </div>
+      <div class="sc-detail">
+        Marked as passed. Profile is permanent — the tree does not delete people who die. Relationships, photos, and stories remain accessible to family forever. The branch stays on the tree.
+      </div>
+      <div class="sc-media">
+        <div class="media-thumb mt-kept">📷</div>
+        <div class="media-thumb mt-kept">📷</div>
+        <div class="media-thumb mt-kept">🎥</div>
+        <div class="media-thumb media-more">+8</div>
+      </div>
+      <div class="sc-action">
+        <button class="sa-btn sb-memoriam">Add a memory</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ── ADOPT FLOW ────────────────────────────────── -->
+  <div class="two-col">
+    <div>
+      <div class="section-title">Adopting a shadow profile</div>
+
+      <div class="flow-step">
+        <div class="fs-num">1</div>
+        <div class="fs-body">
+          <div class="fs-title">See the shadow on a connected tree</div>
+          <div class="fs-sub">A silhouette labelled "Grandmother · Lahore" appears on a tree you're connected to. You recognise who it is — your great-grandmother. No one has claimed her yet.</div>
+        </div>
+      </div>
+      <div class="fs-connector"></div>
+
+      <div class="flow-step">
+        <div class="fs-num">2</div>
+        <div class="fs-body">
+          <div class="fs-title">Tap "Keep this memory alive"</div>
+          <div class="fs-sub">A screen appears confirming the relationship, city, and the current state. Anyone on ECO can adopt — no family connection required. First to pay activates it.</div>
+        </div>
+      </div>
+      <div class="fs-connector"></div>
+
+      <div class="flow-step">
+        <div class="fs-num">3</div>
+        <div class="fs-body">
+          <div class="fs-title">Pay $1.99 — profile activates</div>
+          <div class="fs-sub">The profile transitions from shadow to "kept alive" state. The name appears. You become the lead steward. Others can now join as co-stewards.</div>
+        </div>
+      </div>
+      <div class="fs-connector"></div>
+
+      <div class="flow-step">
+        <div class="fs-num">4</div>
+        <div class="fs-body">
+          <div class="fs-title">Add photos, stories, history</div>
+          <div class="fs-sub">Up to 3 photos + 3 videos on the standard profile. Upgrade to unlimited memory for $5.99/month per profile. Other stewards can contribute simultaneously.</div>
+        </div>
+      </div>
+      <div class="fs-connector"></div>
+
+      <div class="flow-step">
+        <div class="fs-num" style="background:rgba(144,96,224,.15);border-color:rgba(144,96,224,.30);color:#8050C0;">✦</div>
+        <div class="fs-body">
+          <div class="fs-title">Optional — mark as In Memoriam</div>
+          <div class="fs-sub">If the person has passed, any steward or direct connection can mark the profile as In Memoriam — with a confirmation window so others can acknowledge before it's finalised.</div>
+        </div>
+      </div>
+
+      <div class="dnote">
+        <span class="dn-check">✓</span>
+        <span>Open stewardship — any ECO member, first to pay activates it. Creates a viral discovery mechanic where people search shadow profiles on connected trees looking for relatives they've lost touch with.</span>
+      </div>
+    </div>
+
+    <!-- Steward panel -->
+    <div>
+      <div class="section-title">Shared stewardship — multiple contributors</div>
+      <div style="background:#04080E;border:1px solid rgba(0,150,210,.15);border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:500;color:#C8D4D0;margin-bottom:10px;">Kamla Bakshi · stewards (3)</div>
+        <div class="steward-list">
+          <div class="steward-row">
+            <div class="sr-avatar" style="background:rgba(0,229,204,.12);color:#00A090;">VB</div>
+            <div class="sr-info">
+              <div class="sr-name">Vikas Bakshi</div>
+              <div class="sr-role">San Jose, CA · grandson · paid $1.99</div>
+            </div>
+            <span class="sr-tag srt-lead">Lead</span>
+          </div>
+          <div class="steward-row">
+            <div class="sr-avatar" style="background:rgba(0,224,64,.10);color:#009020;">IB</div>
+            <div class="sr-info">
+              <div class="sr-name">Isaiah Bakshi</div>
+              <div class="sr-role">New York · grandson · contributor</div>
+            </div>
+            <span class="sr-tag srt-contrib">Co-steward</span>
+          </div>
+          <div class="steward-row">
+            <div class="sr-avatar" style="background:rgba(144,96,224,.10);color:#7050B0;">PS</div>
+            <div class="sr-info">
+              <div class="sr-name">Priya Sharma</div>
+              <div class="sr-role">London · granddaughter · contributor</div>
+            </div>
+            <span class="sr-tag srt-contrib">Co-steward</span>
+          </div>
+        </div>
+        <button class="sa-btn sb-steward" style="font-size:11px;">Join as co-steward</button>
+      </div>
+
+      <div class="dnote">
+        <span class="dn-check">✓</span>
+        <span>All stewards can add media and stories. The lead steward (first to pay) has additional rights on core profile fields. A grandmother's life documented by three grandchildren across three continents is richer than any single person's version.</span>
+      </div>
+      <div class="design-note">
+        <strong>Conflict resolution note</strong>
+        When multiple stewards edit the same profile, the most recent change wins for text fields. Media contributions are additive — no steward can delete another steward's photos. Disputes escalate to a "family vote" mechanic (to be designed in a future session).
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ── MEDIA UPGRADE ──────────────────────────────── -->
+  <div class="two-col">
+    <div>
+      <div class="section-title">Memory upgrade — $5.99/month per profile</div>
+      <div class="upgrade-card">
+        <div class="uc-tag">Memory upgrade ✦</div>
+        <div class="uc-price"><sup>$</sup>5.99</div>
+        <div class="uc-period">per profile · per month · cancel any time</div>
+        <div class="uc-feature"><span class="ucf-check">✦</span>Unlimited photos for this profile</div>
+        <div class="uc-feature"><span class="ucf-check">✦</span>Unlimited videos for this profile</div>
+        <div class="uc-feature"><span class="ucf-check">✦</span>Can be paid by any steward</div>
+        <div class="uc-feature"><span class="ucf-check">✦</span>Media preserved if subscription pauses</div>
+        <div class="uc-feature"><span class="ucf-check">✦</span>Priority media storage + backup</div>
+        <div style="border-top:1px solid rgba(144,96,224,.15);margin-top:12px;padding-top:12px;">
+          <div style="font-size:11px;color:#4A3A60;margin-bottom:8px;">Standard profile includes:</div>
+          <div style="font-size:12px;color:#5A8A80;line-height:1.6;">
+            3 photos · 3 videos · bio text · location history · relationships · birth month + year
+          </div>
+        </div>
+      </div>
+      <div class="discuss">
+        <strong>Decision 27 still open — what happens if steward stops paying?</strong>
+        If the $5.99/month lapses: (A) media hidden but preserved, reverts to 3+3 standard — restores when payment resumes, (B) 90-day grace then hidden but preserved, (C) profile returns to shadow state, (D) media stays visible permanently. Awaiting answer.
+      </div>
+    </div>
+
+    <!-- In Memoriam card -->
+    <div>
+      <div class="section-title">In Memoriam profiles</div>
+      <div class="memoriam-card">
+        <span class="mc-candle">🕯</span>
+        <div class="mc-name">Kamla Bakshi</div>
+        <div class="mc-dates">Born March 1924, Amritsar · Passed November 2018</div>
+        <div class="mc-quote">"She made the best chai in three countries and remembered every birthday without writing anything down."</div>
+        <div class="sc-media" style="margin-bottom:8px;">
+          <div class="media-thumb mt-kept">📷</div>
+          <div class="media-thumb mt-kept">📷</div>
+          <div class="media-thumb mt-kept">📷</div>
+          <div class="media-thumb media-more">+6</div>
+        </div>
+        <div class="mc-contributors">Maintained by Vikas Bakshi, Isaiah Bakshi, Priya Sharma</div>
+      </div>
+
+      <div style="background:#0D1820;border:1px solid rgba(144,96,224,.12);border-radius:10px;padding:14px;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:#6040A0;margin-bottom:8px;">Date format — privacy model</div>
+        <div style="font-size:12px;color:#5A8A80;line-height:1.65;">
+          Birth and passing dates are collected and stored as <strong style="color:#C8D4D0;">month + year only.</strong><br>
+          "Born March 1924" — not "Born 14 March 1924".<br>
+          This protects against identity reconstruction while preserving the meaningful temporal context for family.
+        </div>
+      </div>
+
+      <div class="discuss">
+        <strong>Decision 28 still open — who can mark as In Memoriam?</strong>
+        Options: (A) any steward or direct connection, 7-day dispute window, (B) requires 2 family confirmations, (C) lead steward only, (D) open to any ECO member. Awaiting answer.
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ── PRIVACY SPEC ───────────────────────────────── -->
+  <div class="section-title">Complete privacy model — what we collect vs what we show</div>
+  <div style="background:#0D1820;border:1px solid rgba(0,229,204,.09);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+    <table class="privacy-table">
+      <thead>
+        <tr>
+          <th style="width:140px;">Field</th>
+          <th style="width:200px;">What we collect</th>
+          <th>What connections see</th>
+          <th>Shadow profile shows</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-field">Name</td>
+          <td class="td-collect"><strong>Full name</strong> stored privately</td>
+          <td class="td-collect">Full name (active/kept profiles)</td>
+          <td class="td-shadow">Hidden — name not shown</td>
+        </tr>
+        <tr>
+          <td class="td-field">Date of birth</td>
+          <td class="td-collect"><strong>Month + year only</strong><br><del>No exact date</del></td>
+          <td class="td-collect">"Born March 1942"</td>
+          <td class="td-shadow">Not shown</td>
+        </tr>
+        <tr>
+          <td class="td-field">Date of passing</td>
+          <td class="td-collect"><strong>Month + year only</strong><br><del>No exact date</del></td>
+          <td class="td-collect">"Passed November 2018"</td>
+          <td class="td-shadow">Not shown</td>
+        </tr>
+        <tr>
+          <td class="td-field">Location</td>
+          <td class="td-collect"><strong>City + country only</strong><br><del>No street</del> <del>No postcode</del></td>
+          <td class="td-collect">City name on profile + globe node</td>
+          <td class="td-shadow">"Amritsar, India" — city shown</td>
+        </tr>
+        <tr>
+          <td class="td-field">Relationship</td>
+          <td class="td-collect"><strong>Relationship label</strong> + cross-refs</td>
+          <td class="td-collect">Shown on profile</td>
+          <td class="td-shadow">"Grandmother" — relationship shown</td>
+        </tr>
+        <tr>
+          <td class="td-field">Email address</td>
+          <td class="td-collect"><strong>Stored for invites only</strong></td>
+          <td class="td-collect"><del>Never shown to any user</del></td>
+          <td class="td-shadow">Not shown</td>
+        </tr>
+        <tr>
+          <td class="td-field">Photos / videos</td>
+          <td class="td-collect"><strong>Stored securely</strong></td>
+          <td class="td-collect">Accepted connections only</td>
+          <td class="td-shadow">Not shown</td>
+        </tr>
+        <tr>
+          <td class="td-field">Location history</td>
+          <td class="td-collect"><strong>City + year moved</strong><br><del>No street</del> <del>No exact date</del></td>
+          <td class="td-collect">Migration path on globe</td>
+          <td class="td-shadow">Not shown</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="marketing-note">
+    <strong>The privacy principle — say it explicitly in the product</strong>
+    "We collect what connects people, not what exposes them." Month and year instead of exact date. City instead of address. Relationship instead of name (for shadows). This isn't just a security decision — it's a philosophical statement about what this product values. It belongs in the Privacy Policy, the About page, and the onboarding flow. For the families this product serves — multigenerational, globally dispersed, from regions where data privacy has real stakes — this framing will build more trust than any security certification.
+  </div>
+
+</div>
+</body>
+</html>

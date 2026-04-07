@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FMTO — Visual Family Tree</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-ancestors 'none';">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:#070D14;}
+body{font-family:'DM Sans',system-ui,sans-serif;color:#E8F4F0;-webkit-font-smoothing:antialiased;}
+
+/* ── Toolbar ── */
+.toolbar{background:#0A1520;border-bottom:1px solid rgba(0,229,204,.10);height:48px;display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0;overflow-x:auto;}
+.toolbar::-webkit-scrollbar{height:0;}
+.t-title{font-family:'DM Serif Display',serif;font-size:.95rem;color:#E8F4F0;white-space:nowrap;margin-right:6px;}
+.t-sep{width:1px;height:20px;background:rgba(0,229,204,.09);flex-shrink:0;}
+.t-btn{height:30px;padding:0 11px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:none;background:#132030;color:#7AADA0;transition:all .13s;font-family:'DM Sans',system-ui,sans-serif;display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;}
+.t-btn:hover{background:#1A2E40;color:#00E5CC;}
+.t-btn.on{background:rgba(0,229,204,.12);color:#00E5CC;border:1px solid rgba(0,229,204,.22);}
+.t-btn svg{width:11px;height:11px;stroke:currentColor;}
+.t-layer-lbl{font-size:9px;color:#3A5A54;font-weight:700;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
+.t-legend{display:flex;gap:10px;margin-left:auto;flex-shrink:0;}
+.t-leg{display:flex;align-items:center;gap:4px;font-size:9px;color:#5A8A80;white-space:nowrap;}
+.t-leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── Canvas ── */
+.canvas-wrap{flex:1;overflow:auto;position:relative;}
+.canvas-wrap::-webkit-scrollbar{width:5px;height:5px;}
+.canvas-wrap::-webkit-scrollbar-thumb{background:rgba(0,229,204,.15);border-radius:99px;}
+#main-svg{display:block;cursor:grab;}
+#main-svg:active{cursor:grabbing;}
+
+/* ── Shell ── */
+.shell{display:flex;flex-direction:column;height:100vh;}
+
+/* ── Tooltip ── */
+.tt{position:fixed;background:#0D1820;border:1px solid rgba(0,229,204,.28);border-radius:10px;padding:12px 15px;font-size:12px;color:#C8D4D0;pointer-events:none;opacity:0;transition:opacity .1s;z-index:9999;max-width:230px;line-height:1.65;box-shadow:0 8px 32px rgba(0,0,0,.6);}
+.tt-name{font-family:'DM Serif Display',serif;font-size:1rem;color:#E8F4F0;margin-bottom:3px;}
+.tt-dates{font-size:10px;color:#5A8A80;font-family:'JetBrains Mono',monospace;margin-bottom:5px;}
+.tt-loc{font-size:11px;color:#7AADA0;margin-bottom:2px;}
+.tt-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:999px;margin-top:5px;}
+
+/* ── Feature strip ── */
+.feat-strip{display:flex;gap:10px;padding:14px;overflow-x:auto;flex-shrink:0;border-top:1px solid rgba(0,229,204,.08);}
+.feat-strip::-webkit-scrollbar{height:4px;}
+.feat-strip::-webkit-scrollbar-thumb{background:rgba(0,229,204,.15);border-radius:99px;}
+.feat{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:10px;padding:12px 14px;min-width:190px;flex-shrink:0;}
+.feat.new{border-color:rgba(0,224,64,.20);}
+.feat-icon{font-size:18px;margin-bottom:6px;}
+.feat-title{font-size:11px;font-weight:600;color:#C8D4D0;margin-bottom:3px;}
+.feat-desc{font-size:10px;color:#5A8A80;line-height:1.6;}
+.feat-badge{font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:rgba(0,224,64,.10);color:#009828;border:1px solid rgba(0,224,64,.20);margin-top:6px;display:inline-block;}
+
+/* ── Globe strip ── */
+.globe-section{border-top:1px solid rgba(0,229,204,.08);padding:14px;flex-shrink:0;}
+.globe-lbl{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;margin-bottom:8px;}
+#globe-svg{display:block;width:100%;border-radius:10px;background:#030C1C;border:1px solid rgba(0,229,204,.10);}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <span class="t-title">🌳 Adeyemi–Whitfield Tree</span>
+  <div class="t-sep"></div>
+  <span class="t-layer-lbl">Layers</span>
+  <button class="t-btn" id="btn-hidden" onclick="toggle('hidden',this)">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><path d="M1 6s2-3.5 5-3.5S11 6 11 6s-2 3.5-5 3.5S1 6 1 6z"/><circle cx="6" cy="6" r="1.5"/><path d="M1 1l10 10" stroke-width="1.3"/></svg>Hidden
+  </button>
+  <button class="t-btn on" id="btn-conflict" onclick="toggle('conflict',this)">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><circle cx="6" cy="6" r="5"/><path d="M6 3.5v3M6 8.5h.01"/></svg>Conflicts
+  </button>
+  <button class="t-btn" id="btn-birth" onclick="toggle('birth',this)">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><path d="M6 1a3 3 0 013 3c0 2.5-3 7-3 7S3 6.5 3 4a3 3 0 013-3z"/><circle cx="6" cy="4" r="1.2"/></svg>Birth cities
+  </button>
+  <button class="t-btn" id="btn-current" onclick="toggle('current',this)">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><circle cx="6" cy="6" r="4"/><path d="M6 2v4l2 2"/></svg>Current city
+  </button>
+  <button class="t-btn" id="btn-travel" onclick="toggle('travel',this)">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><path d="M2 10l2.5-6 3 4 2-3"/></svg>Travel history
+  </button>
+  <div class="t-sep"></div>
+  <button class="t-btn" onclick="fitScreen()">
+    <svg viewBox="0 0 12 12" fill="none" stroke-width="1.7"><path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/></svg>Fit
+  </button>
+  <div class="t-legend">
+    <div class="t-leg"><div class="t-leg-dot" style="background:#00E040;"></div>Active</div>
+    <div class="t-leg"><div class="t-leg-dot" style="background:#8050C0;"></div>In memoriam</div>
+    <div class="t-leg"><div class="t-leg-dot" style="background:#0090C8;"></div>Kept alive</div>
+    <div class="t-leg"><div class="t-leg-dot" style="background:rgba(255,255,255,.2);border:1px dashed rgba(255,255,255,.3);"></div>Shadow</div>
+    <div class="t-leg"><div class="t-leg-dot" style="background:rgba(224,144,64,.6);"></div>Hidden</div>
+    <div class="t-leg"><div class="t-leg-dot" style="background:#E04040;"></div>Conflict</div>
+  </div>
+</div>
+
+<!-- Canvas -->
+<div class="canvas-wrap" id="canvasWrap">
+  <svg id="main-svg"></svg>
+</div>
+
+<!-- Feature strip -->
+<div class="feat-strip" id="featStrip"></div>
+
+<!-- Globe -->
+<div class="globe-section" id="globeSection" style="display:none;">
+  <div class="globe-lbl">Globe — location layers preview</div>
+  <svg id="globe-svg" height="140" viewBox="0 0 900 140"></svg>
+</div>
+
+<!-- Tooltip -->
+<div class="tt" id="tt"></div>
+
+</div><!-- /shell -->
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  DATA MODEL
+// ══════════════════════════════════════════════════════════════
+
+const PEOPLE = [
+  // Gen 0 — paid top-level ancestors
+  {id:'gg1',name:'Solomon Adeyemi',      born:1890,died:1962,birth:'Lagos, Nigeria',       current:null,             gen:0,sex:'M',status:'memoriam',paid:true},
+  {id:'gg2',name:'Abigail Adeyemi',      born:1893,died:1970,birth:'Lagos, Nigeria',       current:null,             gen:0,sex:'F',status:'memoriam',paid:true},
+  {id:'gg3',name:'James Whitfield',      born:1888,died:1955,birth:'Birmingham, AL',       current:null,             gen:0,sex:'M',status:'memoriam',paid:false},
+  {id:'gg4',name:'Rosa Whitfield',       born:1892,died:1968,birth:'Birmingham, AL',       current:null,             gen:0,sex:'F',status:'memoriam',paid:false},
+
+  // Gen 1
+  {id:'g1', name:'Emmanuel Adeyemi',     born:1918,died:1995,birth:'Lagos, Nigeria',       current:null,             gen:1,sex:'M',status:'memoriam'},
+  {id:'g2', name:'Grace Adeyemi',        born:1922,died:2001,birth:'Accra, Ghana',         current:null,             gen:1,sex:'F',status:'memoriam'},
+  {id:'g3', name:'Robert Whitfield',     born:1915,died:1992,birth:'Atlanta, GA',          current:null,             gen:1,sex:'M',status:'memoriam'},
+  {id:'g4', name:'Dorothy Whitfield',    born:1920,died:2005,birth:'Atlanta, GA',          current:null,             gen:1,sex:'F',status:'memoriam'},
+
+  // Gen 2
+  {id:'p1', name:'Victor Adeyemi',       born:1945,died:2018,birth:'Lagos, Nigeria',       current:null,             gen:2,sex:'M',status:'memoriam'},
+  {id:'p2', name:'Comfort Adeyemi',      born:1948,          birth:'Ibadan, Nigeria',      current:'London, UK',     gen:2,sex:'F',status:'kept'},
+  {id:'p3', name:'Charles Whitfield',    born:1942,died:2010,birth:'Atlanta, GA',          current:null,             gen:2,sex:'M',status:'memoriam'},
+  {id:'p4', name:'Marion Whitfield',     born:1946,          birth:'Atlanta, GA',          current:'Atlanta, GA',    gen:2,sex:'F',status:'active'},
+
+  // Gen 3
+  {id:'a1', name:'Taiwo Adeyemi',        born:1970,          birth:'Lagos, Nigeria',       current:'London, UK',     gen:3,sex:'M',status:'active'},
+  {id:'a2', name:'Ngozi Adeyemi',        born:1972,          birth:'Lagos, Nigeria',       current:'London, UK',     gen:3,sex:'F',status:'active', coupleWith:'a1'},
+  {id:'a3', name:'Kolade Adeyemi',       born:1974,          birth:'Lagos, Nigeria',       current:'Houston, TX',    gen:3,sex:'M',status:'active'},
+  {id:'a4', name:'Serena (Whitfield) A.',born:1971,          birth:'Atlanta, GA',          current:'Houston, TX',    gen:3,sex:'F',status:'active', coupleWith:'a3'},
+  {id:'a5', name:'[Hidden]',             born:1968,          birth:'Lagos, Nigeria',       current:null,             gen:3,sex:'F',status:'hidden', hideMode:'person',  note:'Estranged — hidden by owner'},
+  {id:'a6', name:'[Branch hidden]',      born:1966,died:2020,birth:'Atlanta, GA',          current:null,             gen:3,sex:'M',status:'hidden', hideMode:'branch',  note:'Entire branch hidden'},
+  {id:'a7', name:'Isaiah Adeyemi',       born:1975,          birth:'Lagos, Nigeria',       current:'New York, NY',   gen:3,sex:'M',status:'active', isUser:true,
+    travel:[
+      {city:'Lagos, Nigeria', from:'1975-01',to:'1998-06',desc:'Childhood & university'},
+      {city:'London, UK',     from:'1998-07',to:'2003-12',desc:'Graduate school'},
+      {city:'New York, NY',   from:'2004-01',to:null,      desc:'Career & family'},
+    ]
+  },
+  {id:'a8', name:'Priya (Sharma) A.',    born:1978,          birth:'Mumbai, India',        current:'New York, NY',   gen:3,sex:'F',status:'active', coupleWith:'a7',
+    travel:[
+      {city:'Mumbai, India',  from:'1978-01',to:'2002-06',desc:'Childhood & university'},
+      {city:'London, UK',     from:'2002-07',to:'2005-12',desc:'Postgrad'},
+      {city:'New York, NY',   from:'2006-01',to:null,      desc:'Career, marriage, family'},
+    ]
+  },
+  {id:'a9', name:'Dele Adeyemi',         born:1980,          birth:'Lagos, Nigeria',       current:'Toronto, Canada',gen:3,sex:'M',status:'conflict',
+    conflictNote:'Also in Toronto tree as "Adedele Adeyemi". AI temp ID: Lagos-Adeyemi-1980-M. Moderators reviewing.'},
+
+  // Gen 4
+  {id:'k1', name:'Zara Adeyemi',         born:2004,          birth:'New York, NY',         current:'New York, NY',   gen:4,sex:'F',status:'active'},
+  {id:'k2', name:'Marcus Adeyemi',       born:2007,          birth:'New York, NY',         current:'New York, NY',   gen:4,sex:'M',status:'active'},
+  {id:'k3', name:'Lila Adeyemi',         born:2010,          birth:'New York, NY',         current:'New York, NY',   gen:4,sex:'F',status:'active'},
+  {id:'k4', name:'Devon Adeyemi',        born:2000,          birth:'Houston, TX',          current:'Austin, TX',     gen:4,sex:'M',status:'active'},
+  {id:'k5', name:'Aisha Adeyemi',        born:2003,          birth:'Houston, TX',          current:'Houston, TX',    gen:4,sex:'F',status:'active'},
+  {id:'k6', name:'Emeka Adeyemi',        born:2001,          birth:'London, UK',           current:'London, UK',     gen:4,sex:'M',status:'active'},
+  {id:'k7', name:'Temi Adeyemi',         born:2005,          birth:'London, UK',           current:'London, UK',     gen:4,sex:'F',status:'active'},
+  // Multi-parent child (Wilt scenario)
+  {id:'k8', name:'Jordan Williams',      born:1998,          birth:'Chicago, IL',          current:'Chicago, IL',    gen:4,sex:'M',status:'active',
+    multiParent:true, parentNote:"Kolade's child from prior relationship — full branch member, no label"},
+  // Branch-hidden placeholder
+  {id:'k9', name:'?',                    born:null,          birth:null,                   current:null,             gen:4,sex:'?',status:'shadow',  isBranchHidden:true},
+
+  // Gen 5
+  {id:'gc1',name:'Nia Adeyemi',          born:2024,          birth:'New York, NY',         current:'New York, NY',   gen:5,sex:'F',status:'active'},
+];
+
+const COUPLES = [
+  {a:'gg1',b:'gg2',type:'married'},
+  {a:'gg3',b:'gg4',type:'married'},
+  {a:'g1', b:'g2', type:'married'},
+  {a:'g3', b:'g4', type:'married'},
+  {a:'p1', b:'p2', type:'married'},
+  {a:'p3', b:'p4', type:'married'},
+  {a:'a1', b:'a2', type:'married'},
+  {a:'a3', b:'a4', type:'married'},
+  {a:'a7', b:'a8', type:'married'},
+];
+
+// [parentId, childId]
+const PC = [
+  ['gg1','g1'],['gg2','g1'],
+  ['gg3','g3'],['gg4','g3'],
+  ['g1','p1'],['g2','p1'],
+  ['g3','p3'],['g4','p3'],
+  ['g1','p2'],['g2','p2'],
+  ['p1','a1'],['p2','a1'],
+  ['p1','a3'],['p2','a3'],
+  ['p1','a5'],['p2','a5'],
+  ['p1','a7'],['p2','a7'],
+  ['p1','a9'],['p2','a9'],
+  ['p3','a6'],['p4','a6'],
+  ['p3','a4'],['p4','a4'],
+  ['a7','k1'],['a8','k1'],
+  ['a7','k2'],['a8','k2'],
+  ['a7','k3'],['a8','k3'],
+  ['a3','k4'],['a4','k4'],
+  ['a3','k5'],['a4','k5'],
+  ['a1','k6'],['a2','k6'],
+  ['a1','k7'],['a2','k7'],
+  ['a3','k8'], // multi-parent — only one listed parent
+  ['a6','k9'],
+  ['k1','gc1'],
+];
+
+// ── Layout ────────────────────────────────────────────────────
+const GEN_Y  = {0:100,1:220,2:355,3:510,4:670,5:820};
+const SVG_W  = 1100;
+const SVG_H  = 930;
+
+function layout() {
+  const byGen = {};
+  PEOPLE.forEach(p => { (byGen[p.gen]=byGen[p.gen]||[]).push(p); });
+  const SPACING = {0:180,1:165,2:150,3:130,4:118,5:100};
+  Object.keys(byGen).forEach(gen => {
+    const grp = byGen[gen];
+    const sp  = SPACING[gen]||120;
+    const totalW = (grp.length-1)*sp;
+    grp.forEach((p,i) => { p.x = SVG_W/2 - totalW/2 + i*sp; p.y = GEN_Y[gen]; });
+  });
+}
+
+// ── State ─────────────────────────────────────────────────────
+const layers = {hidden:false, conflict:true, birth:false, current:false, travel:false};
+
+function toggle(key, btn) {
+  layers[key] = !layers[key];
+  btn.classList.toggle('on', layers[key]);
+  const gs = document.getElementById('globeSection');
+  if (key==='birth'||key==='current'||key==='travel') {
+    gs.style.display = (layers.birth||layers.current||layers.travel) ? 'block' : 'none';
+    renderGlobe();
+  }
+  render();
+}
+window.toggle = toggle;
+
+function fitScreen() {
+  document.getElementById('canvasWrap').scrollTo({left:0,top:0,behavior:'smooth'});
+}
+window.fitScreen = fitScreen;
+
+// ── Node style by status ──────────────────────────────────────
+const ST = {
+  active:   {ring:'#00E040',  bloom:'#00E040',  textC:'#C8D4D0',  dash:null,    glow:true,  opacity:1},
+  memoriam: {ring:'#8050C0',  bloom:'#8050C0',  textC:'#8050C0',  dash:'7 3',   glow:false, opacity:1},
+  kept:     {ring:'#0090C8',  bloom:'#0090C8',  textC:'#7AADA0',  dash:null,    glow:false, opacity:1},
+  shadow:   {ring:'rgba(255,255,255,.20)',bloom:'rgba(255,255,255,.08)',textC:'#3A5A54',dash:'4 3',glow:false,opacity:.7},
+  hidden:   {ring:'rgba(224,144,64,.55)',bloom:'rgba(224,144,64,.18)',textC:'rgba(200,130,50,.5)',dash:'5 2',glow:false,opacity:.6},
+  conflict: {ring:'#E04040',  bloom:'#E04040',  textC:'#E04040',  dash:null,    glow:true,  opacity:1},
+};
+
+const R = {active:23,memoriam:27,kept:25,shadow:17,hidden:19,conflict:23};
+
+function ns(tag) { return document.createElementNS('http://www.w3.org/2000/svg',tag); }
+function el(tag,attrs,parent) {
+  const e = ns(tag);
+  Object.entries(attrs).forEach(([k,v]) => { if(v!=null) e.setAttribute(k,v); });
+  if(parent) parent.appendChild(e);
+  return e;
+}
+function txt(str,attrs,parent) {
+  const e = ns('text');
+  Object.entries(attrs).forEach(([k,v]) => { if(v!=null) e.setAttribute(k,v); });
+  e.textContent = str;
+  if(parent) parent.appendChild(e);
+  return e;
+}
+
+// ── Main render ───────────────────────────────────────────────
+function render() {
+  const svg = document.getElementById('main-svg');
+  svg.innerHTML = '';
+  svg.setAttribute('width',  SVG_W);
+  svg.setAttribute('height', SVG_H);
+  svg.setAttribute('viewBox',`0 0 ${SVG_W} ${SVG_H}`);
+
+  const defs = ns('defs');
+  defs.innerHTML = `
+    <filter id="fg"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="fc"><feGaussianBlur stdDeviation="4"   result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="rg-active"  cx="50%" cy="50%"><stop offset="0%" stop-color="#00E040" stop-opacity=".28"/><stop offset="100%" stop-color="#00E040" stop-opacity=".02"/></radialGradient>
+    <radialGradient id="rg-memoriam"cx="50%" cy="50%"><stop offset="0%" stop-color="#8050C0" stop-opacity=".28"/><stop offset="100%" stop-color="#8050C0" stop-opacity=".02"/></radialGradient>
+    <radialGradient id="rg-kept"    cx="50%" cy="50%"><stop offset="0%" stop-color="#0090C8" stop-opacity=".28"/><stop offset="100%" stop-color="#0090C8" stop-opacity=".02"/></radialGradient>
+    <radialGradient id="rg-conflict"cx="50%" cy="50%"><stop offset="0%" stop-color="#E04040" stop-opacity=".22"/><stop offset="100%" stop-color="#E04040" stop-opacity=".02"/></radialGradient>
+    <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(0,60,25,.0)"/><stop offset="50%" stop-color="rgba(0,80,30,.40)"/><stop offset="100%" stop-color="rgba(0,60,25,.0)"/></linearGradient>
+  `;
+  svg.appendChild(defs);
+
+  drawBackground(svg);
+
+  const pmap = {};
+  PEOPLE.forEach(p => { pmap[p.id] = p; });
+
+  // ── Couple lines ──
+  COUPLES.forEach(c => {
+    const a = pmap[c.a], b = pmap[c.b];
+    if (!a||!b) return;
+    if ((a.status==='hidden'||b.status==='hidden') && !layers.hidden) return;
+    el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,
+      stroke: c.type==='divorced'?'rgba(224,144,64,.45)':'rgba(0,229,204,.35)',
+      'stroke-width': c.type==='divorced'?'1.2':'2',
+      'stroke-dasharray': c.type==='divorced'?'6 3':null,
+    }, svg);
+  });
+
+  // ── Parent–child curves ──
+  const drawnPairs = new Set();
+  PC.forEach(([pid,cid]) => {
+    const par = pmap[pid], chi = pmap[cid];
+    if (!par||!chi) return;
+    const pairKey = pid+'→'+cid;
+    if (drawnPairs.has(pairKey)) return;
+    drawnPairs.add(pairKey);
+
+    if (par.status==='hidden' && !layers.hidden) return;
+    if (chi.isBranchHidden && !layers.hidden) return;
+    if (par.status==='conflict' && !layers.conflict) return;
+
+    const mx = (par.x+chi.x)/2, my = (par.y+chi.y)/2;
+    el('path',{
+      d:`M${par.x},${par.y} C${par.x},${my} ${chi.x},${my} ${chi.x},${chi.y}`,
+      fill:'none',
+      stroke: chi.multiParent ? 'rgba(224,144,64,.38)' : 'rgba(0,229,204,.18)',
+      'stroke-width':'1.5',
+      'stroke-dasharray': chi.multiParent ? '6 3' : null,
+    }, svg);
+  });
+
+  // ── People ──
+  PEOPLE.forEach(p => {
+    if (p.status==='hidden'   && !layers.hidden)   return;
+    if (p.status==='conflict' && !layers.conflict) return;
+    if (p.isBranchHidden      && !layers.hidden)   return;
+    drawPerson(svg, p);
+  });
+
+  // ── Location overlays ──
+  if (layers.birth||layers.current||layers.travel) drawLocOverlay(svg, pmap);
+}
+
+// ── Background magnolia illustration ─────────────────────────
+function drawBackground(svg) {
+  // Trunk
+  el('path',{
+    d:'M545 920 C542 850 538 770 540 700 C542 625 548 540 550 470 C552 395 555 310 552 240 C549 165 548 110 550 80',
+    fill:'none', stroke:'url(#trunk)', 'stroke-width':'24', 'stroke-linecap':'round',
+  }, svg);
+  // Secondary trunk texture
+  el('path',{
+    d:'M550 920 C553 850 556 760 554 690 C552 615 548 535 550 465',
+    fill:'none', stroke:'rgba(0,50,20,.18)', 'stroke-width':'8', 'stroke-linecap':'round',
+  }, svg);
+
+  // Main boughs
+  const boughs = [
+    ['M550 470 C490 455 410 435 310 415','rgba(0,65,30,.28)','12'],
+    ['M550 470 C610 455 690 435 790 415','rgba(0,65,30,.25)','11'],
+    ['M550 370 C480 352 400 325 305 295','rgba(0,60,28,.22)','10'],
+    ['M550 370 C620 352 700 325 795 295','rgba(0,60,28,.20)','9'],
+    ['M550 280 C495 262 440 238 375 210','rgba(0,55,25,.18)','8'],
+    ['M550 280 C605 262 660 238 725 210','rgba(0,55,25,.17)','7'],
+    ['M550 190 C515 172 478 152 435 128','rgba(0,50,22,.15)','7'],
+    ['M550 190 C585 172 622 152 665 128','rgba(0,50,22,.14)','6'],
+    // Drooping lower boughs
+    ['M550 560 C500 555 430 548 360 540','rgba(0,60,28,.18)','8'],
+    ['M550 560 C600 555 670 548 740 540','rgba(0,60,28,.16)','7'],
+  ];
+  boughs.forEach(([d,stroke,sw]) => {
+    el('path',{d,fill:'none',stroke,'stroke-width':sw,'stroke-linecap':'round'},svg);
+  });
+
+  // Decorative scattered blooms (background atmosphere)
+  const bloomPts = [
+    [130,400,16],[210,340,13],[290,275,15],[170,230,11],[360,155,14],
+    [480,120,12],[630,118,14],[720,195,13],[810,285,12],[870,385,11],
+    [820,455,10],[680,455,11],[350,455,10],[190,470,9],[100,320,10],
+    [840,330,9],[440,225,10],[650,235,11],[300,395,8],[760,440,9],
+  ];
+  bloomPts.forEach(([bx,by,r]) => drawDecorBloom(svg,bx,by,r));
+}
+
+function drawDecorBloom(svg, cx, cy, r) {
+  const g = ns('g');
+  for (let i=0;i<5;i++) {
+    const ang = (i/5)*Math.PI*2 - Math.PI/2;
+    const px = cx + Math.cos(ang)*r*0.65, py = cy + Math.sin(ang)*r*0.65;
+    el('ellipse',{cx:px,cy:py,rx:r*.5,ry:r*.8,
+      transform:`rotate(${i*72+18},${px},${py})`,
+      fill:'rgba(0,224,64,.055)',stroke:'rgba(0,224,64,.10)','stroke-width':'0.5',
+    }, g);
+  }
+  svg.appendChild(g);
+}
+
+// ── Draw one person ───────────────────────────────────────────
+function drawPerson(svg, p) {
+  const st = ST[p.status] || ST.active;
+  const r  = R[p.status]  || 22;
+  const g  = ns('g');
+  g.setAttribute('transform',`translate(${p.x},${p.y})`);
+  g.setAttribute('cursor','pointer');
+  g.setAttribute('opacity', st.opacity);
+  g.setAttribute('data-id', p.id);
+
+  // Paid outer ring
+  if (p.paid) {
+    el('circle',{r:r+9,fill:'none',stroke:'rgba(224,144,64,.5)','stroke-width':'1.5','stroke-dasharray':'3 2'},g);
+    txt('★ PAID',{y:-(r+16),'text-anchor':'middle','font-size':'8',fill:'rgba(224,144,64,.75)','font-family':'DM Sans,sans-serif','font-weight':'700','letter-spacing':'.08em'},g);
+  }
+
+  // Radial gradient fill circle
+  const fillId = ['active','memoriam','kept','conflict'].includes(p.status) ? `rg-${p.status}` : null;
+  el('circle',{r:r+14,fill:fillId?`url(#${fillId})`:'none'},g);
+
+  // Bloom petals
+  drawBloom(g, r, st.bloom, p.status);
+
+  // Ring
+  const ring = el('circle',{r:r+1,fill:'none',stroke:st.ring,'stroke-width':'2',
+    'stroke-dasharray':st.dash,
+    filter: st.glow ? (p.status==='conflict'?'url(#fc)':'url(#fg)') : null,
+  }, g);
+
+  // Center
+  el('circle',{r:5,fill:['shadow','hidden'].includes(p.status)?'rgba(255,255,255,.07)':st.bloom,opacity:.75},g);
+
+  // YOU marker
+  if (p.isUser) {
+    txt('▶ YOU',{y:-(r+16),'text-anchor':'middle','font-size':'9',fill:'#00E040','font-family':'DM Sans,sans-serif','font-weight':'700','letter-spacing':'.09em'},g);
+  }
+  // Conflict marker
+  if (p.status==='conflict') {
+    txt('⚠ MERGE CONFLICT',{y:-(r+13),'text-anchor':'middle','font-size':'8',fill:'#E04040','font-family':'DM Sans,sans-serif'},g);
+  }
+  // Multi-parent marker
+  if (p.multiParent) {
+    txt('◆ multi-parent',{y:r+26,'text-anchor':'middle','font-size':'8',fill:'rgba(224,144,64,.65)','font-family':'DM Sans,sans-serif'},g);
+  }
+  // Branch hidden marker
+  if (p.isBranchHidden) {
+    txt('branch hidden',{y:r+22,'text-anchor':'middle','font-size':'8',fill:'rgba(224,144,64,.4)','font-family':'DM Sans,sans-serif','font-style':'italic'},g);
+  }
+
+  // Name
+  if (p.status !== 'shadow') {
+    const nameY = r + (p.paid ? 22 : 16);
+    const shortName = p.name.length > 16 ? p.name.slice(0,15)+'…' : p.name;
+    txt(shortName,{y:nameY,'text-anchor':'middle','font-size':'10','font-weight':'500',
+      fill: p.status==='hidden' ? 'rgba(180,110,40,.5)' : st.textC,
+      'font-family':'DM Sans,sans-serif'}, g);
+    if (p.born) {
+      txt(p.born+(p.died?'–'+p.died:''),{y:nameY+11,'text-anchor':'middle','font-size':'8',
+        fill:'rgba(90,138,128,.55)','font-family':'JetBrains Mono,monospace'}, g);
+    }
+  } else {
+    txt('?',{'text-anchor':'middle','dominant-baseline':'central','font-size':'14',fill:'rgba(255,255,255,.14)'},g);
+  }
+
+  // Hit area
+  el('circle',{r:r+12,fill:'transparent'},g);
+
+  // Events
+  g.addEventListener('mouseenter', e => showTT(e, p));
+  g.addEventListener('mousemove',  e => { const t=document.getElementById('tt'); t.style.left=(e.clientX+15)+'px'; t.style.top=(e.clientY-10)+'px'; });
+  g.addEventListener('mouseleave', () => { document.getElementById('tt').style.opacity='0'; });
+  g.addEventListener('click', () => clickPerson(p));
+
+  svg.appendChild(g);
+}
+
+function drawBloom(g, r, color, status) {
+  const op = {active:.48, memoriam:.38, kept:.42, shadow:.12, hidden:.18, conflict:.40}[status] || .4;
+  for (let i=0;i<5;i++) {
+    const ang = (i/5)*Math.PI*2 - Math.PI/2;
+    const px = Math.cos(ang)*r*.62, py = Math.sin(ang)*r*.62;
+    el('ellipse',{cx:px,cy:py,rx:r*.5,ry:r*.76,
+      transform:`rotate(${i*72+18},${px},${py})`,
+      fill:color, opacity:op,
+    }, g);
+  }
+}
+
+// ── Location overlay ──────────────────────────────────────────
+function drawLocOverlay(svg, pmap) {
+  PEOPLE.forEach(p => {
+    if (!p.x) return;
+    if (layers.birth && p.birth) {
+      el('circle',{cx:p.x+26,cy:p.y-26,r:4,fill:'#9060E0',opacity:.75},svg);
+      txt('📍'+p.birth.split(',')[0],{x:p.x+32,y:p.y-22,'font-size':'7',fill:'rgba(144,96,224,.7)','font-family':'JetBrains Mono,monospace'},svg);
+    }
+    if (layers.current && p.current) {
+      el('circle',{cx:p.x-26,cy:p.y-26,r:4,fill:'#00E040',opacity:.8},svg);
+      txt('⬤'+p.current.split(',')[0],{x:p.x-22,y:p.y-22,'font-size':'7',fill:'rgba(0,224,64,.75)','font-family':'JetBrains Mono,monospace'},svg);
+    }
+    if (layers.travel && p.travel) {
+      p.travel.forEach((t,i) => {
+        const ox = p.x - 28 + i*18;
+        el('circle',{cx:ox,cy:p.y+44,r:3.5,fill:'#E09040',opacity:.65},svg);
+        txt(t.city.split(',')[0],{x:ox,y:p.y+57,'text-anchor':'middle','font-size':'7',fill:'rgba(224,144,64,.55)','font-family':'DM Sans,sans-serif'},svg);
+      });
+    }
+  });
+}
+
+// ── Tooltip ───────────────────────────────────────────────────
+function showTT(e, p) {
+  const t = document.getElementById('tt');
+  const sc = {active:'#009828',memoriam:'#8050C0',kept:'#0080B0',shadow:'#3A5A54',hidden:'#906030',conflict:'#C04040'};
+  const sl = {active:'Active',memoriam:'In Memoriam',kept:'Kept Alive',shadow:'Shadow',hidden:'Hidden',conflict:'Merge Conflict'};
+  let h = `<div class="tt-name">${p.name}</div>`;
+  if (p.born) h += `<div class="tt-dates">${p.born}${p.died?'–'+p.died:''}</div>`;
+  if (p.birth)   h += `<div class="tt-loc">🌍 Born: ${p.birth}</div>`;
+  if (p.current) h += `<div class="tt-loc">📍 Now: ${p.current}</div>`;
+  h += `<span class="tt-tag" style="background:${sc[p.status]}18;color:${sc[p.status]};border:1px solid ${sc[p.status]}40;">${sl[p.status]||p.status}</span>`;
+  if (p.paid)        h += ` <span class="tt-tag" style="background:rgba(224,144,64,.12);color:#906030;border:1px solid rgba(224,144,64,.25);">★ Paid profile</span>`;
+  if (p.multiParent) h += `<div style="font-size:10px;color:#E09040;margin-top:5px;">◆ ${p.parentNote}</div>`;
+  if (p.conflictNote)h += `<div style="font-size:10px;color:#E04040;margin-top:5px;">⚠ ${p.conflictNote}</div>`;
+  if (p.note)        h += `<div style="font-size:10px;color:#7AADA0;margin-top:5px;font-style:italic;">${p.note}</div>`;
+  if (p.travel)      h += `<div style="font-size:10px;color:#5A8A80;margin-top:5px;">🗺 ${p.travel.length} life locations</div>`;
+  t.innerHTML = h;
+  t.style.left  = (e.clientX+15)+'px';
+  t.style.top   = (e.clientY-10)+'px';
+  t.style.opacity = '1';
+}
+
+function clickPerson(p) {
+  if (p.status==='conflict') {
+    alert('Merge conflict on: '+p.name+'\n\n'+p.conflictNote+'\n\nGo to Moderators → Dispute queue to resolve.\nBoth trees\' moderators have been notified.');
+  } else if (p.status==='hidden') {
+    const mode = p.hideMode==='branch'
+      ? 'Entire branch hidden below this person. Their children are not visible to you.\n\nTo show: toggle "Hidden" layer in toolbar, then manage in Settings → Branch visibility.'
+      : 'This person is hidden. Their children stay connected through an anonymous placeholder.\n\nTo show: toggle "Hidden" layer in toolbar.';
+    alert(mode + (p.note ? '\n\nNote: ' + p.note : ''));
+  } else if (p.multiParent) {
+    alert(p.parentNote + '\n\nAll relationship types are respected equally. No "adopted" or "step" label is shown publicly unless the parent explicitly chooses it.');
+  }
+}
+
+// ── Globe preview ─────────────────────────────────────────────
+function renderGlobe() {
+  const svg = document.getElementById('globe-svg');
+  if (!svg) return;
+  svg.innerHTML = `
+    <rect width="900" height="140" fill="#030C1C" rx="10"/>
+    ${[28,56,84,112].map(y=>`<line x1="0" y1="${y}" x2="900" y2="${y}" stroke="rgba(0,229,204,.05)" stroke-width="1"/>`).join('')}
+    ${[90,180,270,360,450,540,630,720,810].map(x=>`<line x1="${x}" y1="0" x2="${x}" y2="140" stroke="rgba(0,229,204,.04)" stroke-width="1"/>`).join('')}
+    <ellipse cx="185" cy="80" rx="85" ry="48" fill="rgba(0,55,25,.55)"/>
+    <ellipse cx="390" cy="70" rx="75" ry="46" fill="rgba(0,55,25,.55)"/>
+    <ellipse cx="565" cy="65" rx="95" ry="42" fill="rgba(0,55,25,.55)"/>
+    <ellipse cx="760" cy="95" rx="50" ry="32" fill="rgba(0,55,25,.55)"/>
+    ${layers.birth?`
+      <circle cx="395" cy="92" r="5" fill="#9060E0" opacity=".9"/>
+      <text x="403" y="90" font-size="8" fill="rgba(144,96,224,.85)" font-family="DM Sans">Lagos ×5</text>
+      <circle cx="355" cy="62" r="4" fill="#9060E0" opacity=".75"/>
+      <text x="363" y="60" font-size="7" fill="rgba(144,96,224,.7)" font-family="DM Sans">Accra</text>
+      <circle cx="200" cy="98" r="4" fill="#9060E0" opacity=".75"/>
+      <text x="208" y="96" font-size="7" fill="rgba(144,96,224,.7)" font-family="DM Sans">Atlanta ×3</text>
+      <circle cx="590" cy="72" r="4" fill="#9060E0" opacity=".75"/>
+      <text x="598" y="70" font-size="7" fill="rgba(144,96,224,.7)" font-family="DM Sans">Mumbai</text>
+      <circle cx="195" cy="88" r="3" fill="#9060E0" opacity=".6"/>
+      <text x="203" y="86" font-size="7" fill="rgba(144,96,224,.6)" font-family="DM Sans">Chicago</text>
+    `:''}
+    ${layers.current?`
+      <circle cx="365" cy="56" r="6" fill="#00E040" opacity=".9" filter="url(#fg)"/>
+      <text x="373" y="54" font-size="8" fill="rgba(0,224,64,.9)" font-family="DM Sans">London ×3</text>
+      <circle cx="228" cy="88" r="6" fill="#00E040" opacity=".85"/>
+      <text x="236" y="86" font-size="8" fill="rgba(0,224,64,.85)" font-family="DM Sans">New York ×2</text>
+      <circle cx="197" cy="100" r="5" fill="#00E040" opacity=".75"/>
+      <text x="205" y="98" font-size="7" fill="rgba(0,224,64,.75)" font-family="DM Sans">Atlanta</text>
+      <circle cx="215" cy="93" r="4" fill="#00E040" opacity=".7"/>
+      <text x="223" y="91" font-size="7" fill="rgba(0,224,64,.7)" font-family="DM Sans">Houston</text>
+      <circle cx="472" cy="54" r="4" fill="#00E040" opacity=".7"/>
+      <text x="480" y="52" font-size="7" fill="rgba(0,224,64,.7)" font-family="DM Sans">Toronto</text>
+      <circle cx="215" cy="78" r="4" fill="#00E040" opacity=".65"/>
+      <text x="223" y="76" font-size="7" fill="rgba(0,224,64,.65)" font-family="DM Sans">Austin</text>
+    `:''}
+    ${layers.travel?`
+      <polyline points="590,72 365,56 228,88" fill="none" stroke="rgba(224,144,64,.45)" stroke-width="1.5" stroke-dasharray="5 3"/>
+      <circle cx="590" cy="72" r="3.5" fill="#E09040" opacity=".7"/>
+      <circle cx="365" cy="56" r="3.5" fill="#E09040" opacity=".7"/>
+      <circle cx="228" cy="88" r="3.5" fill="#E09040" opacity=".7"/>
+      <text x="470" y="48" font-size="7" fill="rgba(224,144,64,.6)" font-family="DM Sans" font-style="italic">Priya's path: Mumbai → London → NYC</text>
+      <polyline points="395,92 365,56 228,88" fill="none" stroke="rgba(224,144,64,.30)" stroke-width="1" stroke-dasharray="4 3"/>
+      <text x="300" y="118" font-size="7" fill="rgba(224,144,64,.5)" font-family="DM Sans" font-style="italic">Isaiah's path: Lagos → London → NYC</text>
+    `:''}
+    <filter id="fg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <circle cx="18"  cy="128" r="4" fill="#9060E0"/>
+    <text x="26"  y="131" font-size="9" fill="rgba(144,96,224,.8)" font-family="DM Sans">Birth city</text>
+    <circle cx="90"  cy="128" r="4" fill="#00E040"/>
+    <text x="98"  y="131" font-size="9" fill="rgba(0,224,64,.8)"   font-family="DM Sans">Current city</text>
+    <circle cx="175" cy="128" r="4" fill="#E09040"/>
+    <text x="183" y="131" font-size="9" fill="rgba(224,144,64,.8)" font-family="DM Sans">Travel path</text>
+    <line  x1="258" y1="128" x2="274" y2="128" stroke="rgba(0,229,204,.45)" stroke-width="2"/>
+    <text x="278" y="131" font-size="9" fill="rgba(0,229,204,.7)"  font-family="DM Sans">Family connections</text>
+  `;
+}
+
+// ── Feature cards ─────────────────────────────────────────────
+function renderFeatures() {
+  const feats = [
+    {icon:'🔀',title:'Cross-tree merge',desc:'Two trees meet. Both sets of moderators notified. AI generates temp ID (e.g. "Lagos-Adeyemi-1980-M"). Neither tree wins by default.',isNew:true},
+    {icon:'👁',title:'Branch hiding',desc:'Per-hide choice: just this person (children stay via placeholder) or entire branch below. Your view only — others see normally.',isNew:true},
+    {icon:'⚖️',title:'Complex relationships',desc:'Divorce · remarriage · multiple-partner children · same-sex partnerships. Adoption label: parent\'s private choice, invisible to all others.',isNew:true},
+    {icon:'📍',title:'Location history',desc:'Birth city · cities lived in (zip/city/state/country + From–To + description) · current city · trips. US zip auto-populates.',isNew:true},
+    {icon:'🗺️',title:'4 globe layers',desc:'Toggle independently: birth, lived-in, current, travel. Each layer is a distinct visual on the globe.',isNew:true},
+    {icon:'📸',title:'Travel feed (Phase 3)',desc:'Trip photos + geo-tag family members in those photos. Your uncle\'s travels become a visual family connection trail.',isNew:false},
+    {icon:'🤖',title:'AI merge assistant',desc:'During merge, Claude API suggests canonical names, flags date mismatches, identifies likely duplicates across both trees.',isNew:true},
+    {icon:'👑',title:'Paid top-level profiles',desc:'Oldest acknowledged ancestors sit at the crown. Paying $1.99/mo to keep great-great-grandparents\' stories alive.',isNew:false},
+  ];
+  document.getElementById('featStrip').innerHTML = feats.map(f =>
+    `<div class="feat${f.isNew?' new':''}">
+      <div class="feat-icon">${f.icon}</div>
+      <div class="feat-title">${f.title}</div>
+      <div class="feat-desc">${f.desc}</div>
+      ${f.isNew?'<div class="feat-badge">Decided S3</div>':''}
+    </div>`
+  ).join('');
+}
+
+// ── Init ──────────────────────────────────────────────────────
+layout();
+render();
+renderFeatures();
+renderGlobe();
+</script>
+</body>
+</html>

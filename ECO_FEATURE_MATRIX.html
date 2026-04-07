@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO — Feature Matrix v1.0</title>
+<style>
+  :root {
+    --bg: #080D14; --surface: #0D1A26; --surface2: #1A2A3A;
+    --text: #E8F4F0; --dim: #A8C8D5; --hint: #5A8090;
+    --blue: #00AAFF; --green: #00CC44; --amber: #E09040; --red: #CC3333;
+    --border: rgba(0,170,255,.18); --radius: 10px;
+    --font: 'DM Sans', Arial, sans-serif; --mono: 'DM Mono', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+  /* ── NAV ── */
+  nav { background: rgba(8,13,20,.95); border-bottom: 1px solid var(--border); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .nav-brand { font-family: var(--mono); font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .nav-brand span:first-child { color: var(--blue); }
+  .nav-brand span:last-child { color: var(--green); }
+  .nav-meta { font-family: var(--mono); font-size: .7rem; color: var(--hint); }
+
+  /* ── HEADER ── */
+  .page-header { padding: 2.5rem 2rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .page-header h1 { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-bottom: .4rem; }
+  .page-header p { font-size: .9rem; color: var(--dim); max-width: 700px; }
+
+  /* ── CONTROLS ── */
+  .controls { display: flex; gap: 1rem; padding: 1rem 2rem; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .filter-group { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .filter-btn { padding: .3rem .8rem; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--dim); font-size: .78rem; font-family: var(--mono); cursor: pointer; transition: all .15s; font-weight: 600; letter-spacing: .04em; }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--blue); color: var(--blue); background: rgba(0,170,255,.08); }
+  .filter-btn[data-phase="P0"].active { border-color: var(--blue); color: var(--blue); }
+  .filter-btn[data-phase="P1"].active { border-color: var(--green); color: var(--green); }
+  .filter-btn[data-phase="P2"].active { border-color: var(--amber); color: var(--amber); }
+  .filter-btn[data-phase="P3"].active { border-color: #AA66FF; color: #AA66FF; }
+  .search-box { padding: .4rem .8rem; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); border-radius: 8px; font-size: .82rem; font-family: var(--font); outline: none; min-width: 200px; }
+  .search-box:focus { border-color: var(--blue); }
+  .ctrl-label { font-size: .75rem; color: var(--hint); font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em; align-self: center; }
+
+  /* ── SUMMARY PILLS ── */
+  .summary { display: flex; gap: .6rem; padding: .8rem 2rem; flex-wrap: wrap; }
+  .pill { display: flex; align-items: center; gap: .4rem; padding: .25rem .7rem; border-radius: 20px; font-family: var(--mono); font-size: .72rem; font-weight: 700; }
+  .pill-done { background: rgba(0,204,68,.1); border: 1px solid rgba(0,204,68,.3); color: var(--green); }
+  .pill-todo { background: rgba(0,170,255,.08); border: 1px solid rgba(0,170,255,.2); color: var(--blue); }
+  .pill-total { background: rgba(232,244,240,.05); border: 1px solid var(--border); color: var(--dim); }
+
+  /* ── TABLE ── */
+  .table-wrap { padding: 1rem 2rem 3rem; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+  thead tr { background: var(--surface2); }
+  th { padding: .7rem 1rem; text-align: left; font-family: var(--mono); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--hint); border-bottom: 2px solid var(--border); white-space: nowrap; }
+  td { padding: .65rem 1rem; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: top; }
+  tr:hover td { background: rgba(0,170,255,.03); }
+  tr.hidden { display: none; }
+
+  /* Phase badge */
+  .phase { display: inline-block; padding: .18rem .55rem; border-radius: 20px; font-family: var(--mono); font-size: .68rem; font-weight: 700; letter-spacing: .06em; white-space: nowrap; }
+  .phase-P0 { background: rgba(0,170,255,.1); border: 1px solid rgba(0,170,255,.25); color: var(--blue); }
+  .phase-P1 { background: rgba(0,204,68,.08); border: 1px solid rgba(0,204,68,.2); color: var(--green); }
+  .phase-P2 { background: rgba(224,144,64,.08); border: 1px solid rgba(224,144,64,.2); color: var(--amber); }
+  .phase-P3 { background: rgba(170,102,255,.08); border: 1px solid rgba(170,102,255,.2); color: #AA66FF; }
+
+  /* Priority dot */
+  .prio { display: inline-flex; align-items: center; gap: .3rem; font-family: var(--mono); font-size: .75rem; color: var(--dim); }
+  .prio-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .prio-P0 .prio-dot { background: var(--blue); }
+  .prio-P1 .prio-dot { background: var(--green); }
+  .prio-P2 .prio-dot { background: var(--amber); }
+  .prio-P3 .prio-dot { background: #AA66FF; }
+
+  /* Status badge */
+  .status { display: inline-flex; align-items: center; gap: .3rem; font-size: .75rem; font-family: var(--mono); white-space: nowrap; }
+  .s-done { color: var(--green); }
+  .s-todo { color: var(--blue); }
+  .s-hold { color: var(--amber); }
+
+  /* Feature ID */
+  .fid { font-family: var(--mono); font-size: .72rem; color: var(--hint); white-space: nowrap; }
+
+  /* Feature name */
+  .fname { font-weight: 600; color: var(--text); }
+
+  /* Notes */
+  .notes { color: var(--dim); font-size: .8rem; }
+
+  /* ── SECTION ROWS ── */
+  .section-row td { background: var(--surface2); color: var(--blue); font-family: var(--mono); font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: .5rem 1rem; border-bottom: 1px solid var(--border); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 1rem; }
+    .controls, .table-wrap { padding-left: 1rem; padding-right: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <span>ETERNAL</span>&nbsp;<span>CURRENT.ONLINE</span>
+  </div>
+  <div class="nav-meta">Feature Matrix · v1.0 · 2026-03-27</div>
+</nav>
+
+<div class="page-header">
+  <h1>ECO Feature Matrix</h1>
+  <p>Complete feature registry for EternalCurrent.Online. Organized by phase (P0→P3). Filter by phase, status, or search by feature name. This document is the single source of truth for build priority.</p>
+</div>
+
+<div class="controls">
+  <span class="ctrl-label">Phase</span>
+  <div class="filter-group" id="phaseFilters">
+    <button class="filter-btn active" data-phase="ALL">All</button>
+    <button class="filter-btn" data-phase="P0">P0 — POC</button>
+    <button class="filter-btn" data-phase="P1">P1 — Foundation</button>
+    <button class="filter-btn" data-phase="P2">P2 — Beta</button>
+    <button class="filter-btn" data-phase="P3">P3 — Revenue</button>
+  </div>
+  <span class="ctrl-label" style="margin-left:.5rem">Status</span>
+  <div class="filter-group" id="statusFilters">
+    <button class="filter-btn active" data-status="ALL">All</button>
+    <button class="filter-btn" data-status="done">✅ Done</button>
+    <button class="filter-btn" data-status="todo">🔵 To Do</button>
+    <button class="filter-btn" data-status="hold">⏸ Hold</button>
+  </div>
+  <input class="search-box" type="text" id="searchBox" placeholder="Search features…">
+</div>
+
+<div class="summary" id="summary"></div>
+
+<div class="table-wrap">
+<table id="featureTable">
+<thead>
+  <tr>
+    <th>ID</th>
+    <th>Phase</th>
+    <th>Feature</th>
+    <th>Priority</th>
+    <th>Status</th>
+    <th>Sprint</th>
+    <th>Notes</th>
+  </tr>
+</thead>
+<tbody id="tbody">
+</tbody>
+</table>
+</div>
+
+<script>
+const FEATURES = [
+  // ── PHASE 0 ──
+  { id:'P0-01', phase:'P0', name:'Google Sheets — 4-tab database setup', prio:'P0', status:'todo', sprint:'S-01', notes:'Create Sheet, populate correct headers, share with service account.' },
+  { id:'P0-02', phase:'P0', name:'Datta family seed data (20 people)', prio:'P0', status:'todo', sprint:'S-01', notes:'Import from Gemini-generated Sheets. Validate IDs, Tiers, Relationships.' },
+  { id:'P0-03', phase:'P0', name:'Google Sheets API — service account auth', prio:'P0', status:'todo', sprint:'S-02', notes:'Service account JSON, read/write all 4 tabs, test from Node.js.' },
+  { id:'P0-04', phase:'P0', name:'index.html — marketing homepage', prio:'P0', status:'done', sprint:'—', notes:'Exists. Update copy to reflect new ECO spec and feature set.' },
+  { id:'P0-05', phase:'P0', name:'ai-portal.html — AI chat interface', prio:'P0', status:'done', sprint:'S-04', notes:'Exists. Wire to Claude AI Edge Function. Database writes on answer.' },
+  { id:'P0-06', phase:'P0', name:'entry-portal.html — hard data entry', prio:'P0', status:'done', sprint:'S-05', notes:'Exists. Add Lynch Pin selector, Auto-ID generation, Validation Gate.' },
+  { id:'P0-07', phase:'P0', name:'globe-live.html — journey globe', prio:'P0', status:'done', sprint:'S-06', notes:'Exists. Feed from Journeys_Media tab via Sheets API.' },
+  { id:'P0-08', phase:'P0', name:'Claude AI Architect Edge Function', prio:'P0', status:'todo', sprint:'S-03', notes:'claude-haiku-4-5-20251001. System prompt from Master Spec Section 3. Hook-Reward Loop.' },
+  { id:'P0-09', phase:'P0', name:'Ghost Node creation logic', prio:'P0', status:'todo', sprint:'S-03', notes:'AI infers missing relatives and creates Placeholder rows automatically.' },
+  { id:'P0-10', phase:'P0', name:'Data sanitization — address & year rejection', prio:'P0', status:'todo', sprint:'S-03', notes:'Reject street addresses. Reject birth years. Log warnings to console.' },
+  { id:'P0-11', phase:'P0', name:'css/theme.css — ECO brand locked', prio:'P0', status:'done', sprint:'—', notes:'Colors, fonts, tokens locked. Do not modify. CSS variables only.' },
+  { id:'P0-12', phase:'P0', name:'robots.txt — Disallow all', prio:'P0', status:'todo', sprint:'S-01', notes:'Privacy mandatory. No portal pages indexed.' },
+  { id:'P0-13', phase:'P0', name:'Auto-ID generation (People_Master)', prio:'P0', status:'todo', sprint:'S-05', notes:'Initials + ParentID convention. Collision detection. Lock after Save.' },
+  { id:'P0-14', phase:'P0', name:'Lynch Pin selector (entry portal)', prio:'P0', status:'todo', sprint:'S-05', notes:'Dropdown of existing People_Master records. Anchors new data to branch.' },
+  { id:'P0-15', phase:'P0', name:'Validation Gate (entry portal Save button)', prio:'P0', status:'todo', sprint:'S-05', notes:'Disabled unless ParentID or PartnerID relationship exists.' },
+  { id:'P0-16', phase:'P0', name:'Google Drive media integration (File ID storage)', prio:'P0', status:'todo', sprint:'S-05', notes:'Upload to Eternal_Currents_Media/[UserID]/ folder. Store File ID only.' },
+  { id:'P0-17', phase:'P0', name:'Currents tracking — gamification log', prio:'P0', status:'todo', sprint:'S-07', notes:'Gamification tab in Google Sheets (Phase 0). Currents column in People_Master.' },
+  { id:'P0-18', phase:'P0', name:'Bridge Builder mission (Ghost Node naming)', prio:'P0', status:'todo', sprint:'S-07', notes:'50 Currents + Branch Unlock animation trigger.' },
+  { id:'P0-19', phase:'P0', name:'World Traveler mission (3+ locations)', prio:'P0', status:'todo', sprint:'S-07', notes:'30 Currents + Global Citizen badge.' },
+  { id:'P0-20', phase:'P0', name:'POC demo review — all 20 Datta family members', prio:'P0', status:'todo', sprint:'S-08', notes:'Globe working. AI chat working. Entry portal working. Demo ready.' },
+
+  // ── PHASE 1 ──
+  { id:'P1-01', phase:'P1', name:'Supabase project setup', prio:'P1', status:'todo', sprint:'S-09', notes:'New Supabase project. ECO-specific — never share with F4F.' },
+  { id:'P1-02', phase:'P1', name:'PostgreSQL schema migration from Sheets', prio:'P1', status:'todo', sprint:'S-09', notes:'4 core tables + invites + households + gamification_log. SQL numbered from 001.' },
+  { id:'P1-03', phase:'P1', name:'RLS policies — branch visibility gating', prio:'P1', status:'todo', sprint:'S-09', notes:'Branch A cannot see Branch B private journey notes. Common events bypass.' },
+  { id:'P1-04', phase:'P1', name:'Magic link authentication (no passwords)', prio:'P1', status:'todo', sprint:'S-10', notes:'Supabase Auth. Magic link only. No password flow.' },
+  { id:'P1-05', phase:'P1', name:'Invite system — token generation', prio:'P1', status:'todo', sprint:'S-10', notes:'Admin generates one-time tokens. 7-day expiry. Single use.' },
+  { id:'P1-06', phase:'P1', name:'invite.html — token claim page', prio:'P1', status:'todo', sprint:'S-10', notes:'Token validation, first-name collection, account creation.' },
+  { id:'P1-07', phase:'P1', name:'profile.html — individual profile view/edit', prio:'P1', status:'todo', sprint:'S-11', notes:'View own People_Master record. Edit own data only (RLS enforced).' },
+  { id:'P1-08', phase:'P1', name:'dashboard.html — member dashboard', prio:'P1', status:'todo', sprint:'S-11', notes:'Currents score, badges, branch stats, recent activity.' },
+  { id:'P1-09', phase:'P1', name:'tree.html — visual family tree (D3.js)', prio:'P1', status:'todo', sprint:'S-12', notes:'Radial or vertical layout. Blue center dot = you. Ghost Nodes dimmed.' },
+  { id:'P1-10', phase:'P1', name:'household.html — household grouping view', prio:'P1', status:'todo', sprint:'S-13', notes:'Shows co-habitants. HouseholdID cluster on tree and globe.' },
+  { id:'P1-11', phase:'P1', name:'pets.html — Pets_Extended management', prio:'P1', status:'todo', sprint:'S-13', notes:'CRUD for Pets_Extended table. Pet photos via Google Drive.' },
+  { id:'P1-12', phase:'P1', name:'admin.html — admin hub', prio:'P1', status:'todo', sprint:'S-14', notes:'Invite generation, user list, DB health, Currents audit.' },
+  { id:'P1-13', phase:'P1', name:'Geocoding for globe (city → lat/lng)', prio:'P1', status:'todo', sprint:'S-12', notes:'Nominatim geocoding on Journeys_Media write. Store lat/lng.' },
+  { id:'P1-14', phase:'P1', name:'Ghost Node visibility filter', prio:'P1', status:'todo', sprint:'S-12', notes:'Filter Placeholder status from all public-facing queries.' },
+  { id:'P1-15', phase:'P1', name:'Badge JSON storage (People_Master)', prio:'P1', status:'todo', sprint:'S-11', notes:'Add badges JSONB column to people_master. Populate on mission completion.' },
+  { id:'P1-16', phase:'P1', name:'Pet Guardian mission', prio:'P1', status:'todo', sprint:'S-13', notes:'20 Currents + Extended Family badge on first pet add.' },
+  { id:'P1-17', phase:'P1', name:'The Connector mission', prio:'P1', status:'todo', sprint:'S-13', notes:'20 Currents on 2+ social links added.' },
+
+  // ── PHASE 2 ──
+  { id:'P2-01', phase:'P2', name:'Multi-family support (multiple Lynch Pin pairs)', prio:'P2', status:'todo', sprint:'—', notes:'Each family gets own root record. Supports non-Datta families at launch.' },
+  { id:'P2-02', phase:'P2', name:'Common Event system (cross-branch visibility)', prio:'P2', status:'todo', sprint:'—', notes:'Events shared between branches unlock visibility across the privacy gate.' },
+  { id:'P2-03', phase:'P2', name:'Birthday reminder system (MM-DD based)', prio:'P2', status:'todo', sprint:'—', notes:'Email reminders via Resend. No year displayed. Privacy-safe.' },
+  { id:'P2-04', phase:'P2', name:'DNA test affiliate integration', prio:'P2', status:'todo', sprint:'—', notes:'AncestryDNA / 23andMe referral links. Revenue share.' },
+  { id:'P2-05', phase:'P2', name:'Records partner affiliate integration', prio:'P2', status:'todo', sprint:'—', notes:'Genealogy records database partners. Referral links.' },
+  { id:'P2-06', phase:'P2', name:'Face morph (parent-child similarity)', prio:'P2', status:'hold', sprint:'—', notes:'Prototype in Website-archive/app/face-morph.html. Deferred — compute cost.' },
+  { id:'P2-07', phase:'P2', name:'Visual River timeline', prio:'P2', status:'hold', sprint:'—', notes:'Prototype in Website-archive/app/visual-river.html. Deferred.' },
+  { id:'P2-08', phase:'P2', name:'Dormant profile reactivation', prio:'P2', status:'hold', sprint:'—', notes:'Prototype in Website-archive/app/dormant-profiles.html. Deferred.' },
+  { id:'P2-09', phase:'P2', name:'Vendor marketplace', prio:'P2', status:'hold', sprint:'—', notes:'Prototype in Website-archive/app/vendor-marketplace.html. Deferred.' },
+  { id:'P2-10', phase:'P2', name:'Print product revenue stream (Printful/Gelato)', prio:'P2', status:'todo', sprint:'—', notes:'Family tree prints, mugs, photo books. Partner API integration.' },
+  { id:'P2-11', phase:'P2', name:'Story Keeper mission (media uploads)', prio:'P2', status:'todo', sprint:'—', notes:'15 Currents on first Journey photo/video added.' },
+  { id:'P2-12', phase:'P2', name:'The Witness mission (Ghost Node verification)', prio:'P2', status:'todo', sprint:'—', notes:'40 Currents when verifying another member\'s Ghost Node.' },
+  { id:'P2-13', phase:'P2', name:'Generation Builder mission (3 next-tier members)', prio:'P2', status:'todo', sprint:'—', notes:'60 Currents on adding 3+ members one Tier below own.' },
+  { id:'P2-14', phase:'P2', name:'QA tester portal', prio:'P2', status:'todo', sprint:'—', notes:'Build in parallel with dev, not as afterthought. Dedicated testing-admin.html.' },
+  { id:'P2-15', phase:'P2', name:'AI customer support chatbot', prio:'P2', status:'todo', sprint:'—', notes:'Interim pre-revenue support. Claude API. Parking lot item.' },
+
+  // ── PHASE 3 ──
+  { id:'P3-01', phase:'P3', name:'Stripe billing — $12/profile/year', prio:'P3', status:'todo', sprint:'—', notes:'Annual subscription. Grace period. Auto-renewal. Stripe webhook.' },
+  { id:'P3-02', phase:'P3', name:'Moderator tools (merge requests, disputes)', prio:'P3', status:'todo', sprint:'—', notes:'Prototype in Website-archive/app/moderator.html.' },
+  { id:'P3-03', phase:'P3', name:'Stewardship transfer (ownership succession)', prio:'P3', status:'todo', sprint:'—', notes:'If owner passes — graceful tree handoff to next steward.' },
+  { id:'P3-04', phase:'P3', name:'Human support escalation (30,000 user threshold)', prio:'P3', status:'todo', sprint:'—', notes:'AI-first until this threshold. Staff accordingly.' },
+  { id:'P3-05', phase:'P3', name:'Public family showcase (opt-in)', prio:'P3', status:'todo', sprint:'—', notes:'Families that choose to make their tree public. Optional feature.' },
+  { id:'P3-06', phase:'P3', name:'Referral credits system', prio:'P3', status:'todo', sprint:'—', notes:'Currents or subscription credit for inviting new members.' },
+];
+
+// ── RENDER ──
+const tbody = document.getElementById('tbody');
+let phaseFilter = 'ALL', statusFilter = 'ALL', searchTerm = '';
+
+function statusHTML(s) {
+  if (s === 'done') return '<span class="status s-done">✅ Done</span>';
+  if (s === 'hold') return '<span class="status s-hold">⏸ Hold</span>';
+  return '<span class="status s-todo">🔵 To Do</span>';
+}
+function phaseLabel(p) {
+  const m = { P0:'P0 — POC', P1:'P1 — Foundation', P2:'P2 — Beta', P3:'P3 — Revenue' };
+  return m[p] || p;
+}
+
+function render() {
+  tbody.innerHTML = '';
+  let shown = 0, done = 0, todo = 0;
+  let lastPhase = null;
+
+  FEATURES.forEach(f => {
+    const matchPhase = phaseFilter === 'ALL' || f.phase === phaseFilter;
+    const matchStatus = statusFilter === 'ALL' || f.status === statusFilter;
+    const matchSearch = !searchTerm || f.name.toLowerCase().includes(searchTerm) || f.notes.toLowerCase().includes(searchTerm) || f.id.toLowerCase().includes(searchTerm);
+    if (!matchPhase || !matchStatus || !matchSearch) return;
+
+    if (f.phase !== lastPhase) {
+      const sr = document.createElement('tr');
+      sr.className = 'section-row';
+      sr.innerHTML = `<td colspan="7">Phase ${f.phase} — ${['POC (Google Sheets + Static HTML)','Foundation (Supabase Migration + Auth)','Public Beta','Revenue & Scale'][['P0','P1','P2','P3'].indexOf(f.phase)]}</td>`;
+      tbody.appendChild(sr);
+      lastPhase = f.phase;
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="fid">${f.id}</td>
+      <td><span class="phase phase-${f.phase}">${f.phase}</span></td>
+      <td class="fname">${f.name}</td>
+      <td><span class="prio prio-${f.prio}"><span class="prio-dot"></span>${f.prio}</span></td>
+      <td>${statusHTML(f.status)}</td>
+      <td><span style="font-family:var(--mono);font-size:.75rem;color:var(--hint)">${f.sprint}</span></td>
+      <td class="notes">${f.notes}</td>
+    `;
+    tbody.appendChild(tr);
+    shown++;
+    if (f.status === 'done') done++; else todo++;
+  });
+
+  document.getElementById('summary').innerHTML = `
+    <span class="pill pill-total">📦 ${shown} features</span>
+    <span class="pill pill-done">✅ ${done} done</span>
+    <span class="pill pill-todo">🔵 ${shown - done} remaining</span>
+  `;
+}
+
+// ── FILTERS ──
+document.getElementById('phaseFilters').addEventListener('click', e => {
+  if (!e.target.dataset.phase) return;
+  document.querySelectorAll('[data-phase]').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  phaseFilter = e.target.dataset.phase;
+  render();
+});
+document.getElementById('statusFilters').addEventListener('click', e => {
+  if (!e.target.dataset.status) return;
+  document.querySelectorAll('[data-status]').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  statusFilter = e.target.dataset.status;
+  render();
+});
+document.getElementById('searchBox').addEventListener('input', e => {
+  searchTerm = e.target.value.toLowerCase().trim();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

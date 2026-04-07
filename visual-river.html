@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EternalCurrent.Online — River View · Adeyemi–Whitfield</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── LOCKED PALETTE (D42) ──────────────────────────────────
+   Deep Water  #0B3D52   River Mid   #1A6B8A   Current  #4DA8C8
+   Foam        #A8D8EA   River Bank  #4A7C59   Travel Gold #C8882A
+   River Stone #F0EDE6
+──────────────────────────────────────────────────────────── */
+:root {
+  --deep:         #0B3D52;
+  --mid:          #1A6B8A;
+  --current:      #4DA8C8;
+  --foam:         #A8D8EA;
+  --foam-pale:    #D6EEF7;
+  --bank:         #4A7C59;
+  --gold:         #C8882A;
+  --stone:        #F0EDE6;
+  --sand:         #E8E2D5;
+  --earth:        #8B7355;
+  --dusk:         #7C5C8A;   /* married-in / tributary nodes — not in main palette */
+  --dam-fill:     #6B4010;
+  --dam-stroke:   #8B5A20;
+  --text-primary: #1A1A1A;
+  --text-muted:   #6B6B6B;
+  --text-faint:   #A0A0A0;
+  --font-d:       'Playfair Display', Georgia, serif;
+  --font-b:       'DM Sans', system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --deep:        #0D2B3A;
+    --mid:         #1A5470;
+    --current:     #3A8FB5;
+    --foam:        #6BBCD6;
+    --foam-pale:   #1E3D4F;
+    --bank:        #3A6147;
+    --gold:        #B87520;
+    --stone:       #1E2025;
+    --sand:        #252830;
+    --earth:       #6B5A42;
+    --dusk:        #6B4E78;
+    --text-primary:#E8E4DC;
+    --text-muted:  #9A9690;
+    --text-faint:  #5A5650;
+  }
+}
+
+html { font-family: var(--font-b); color: var(--text-primary); background: var(--stone); }
+
+body {
+  min-height: 100vh;
+  background: var(--stone);
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(168,216,234,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 20% 100%, rgba(74,124,89,0.08) 0%, transparent 60%);
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.site-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 28px;
+  border-bottom: 1px solid rgba(139,115,85,0.2);
+  background: rgba(240,237,230,0.88);
+  backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 100;
+}
+@media (prefers-color-scheme: dark) {
+  .site-header { background: rgba(30,32,37,0.92); border-color: rgba(90,86,80,0.3); }
+}
+
+.logo {
+  font-family: var(--font-d); font-size: 17px; font-weight: 400;
+  color: var(--deep); letter-spacing: -0.015em; text-decoration: none;
+  display: flex; align-items: baseline; gap: 0;
+}
+.logo .word-eternal { color: var(--deep); }
+.logo .word-current { color: var(--current); font-style: italic; }
+.logo .word-tld     { color: var(--text-faint); font-size: 13px; font-style: normal; }
+
+.eco-chip {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 20px; margin-left: 8px;
+  background: rgba(77,168,200,0.10); color: var(--mid);
+  border: 1px solid rgba(77,168,200,0.28);
+  align-self: center;
+}
+
+.header-nav { display: flex; gap: 6px; align-items: center; }
+.nav-pill {
+  font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 20px;
+  border: 1px solid rgba(139,115,85,0.25); color: var(--text-muted);
+  text-decoration: none; cursor: pointer; background: transparent;
+  transition: all 0.18s; letter-spacing: 0.01em;
+}
+.nav-pill:hover { background: var(--foam); color: var(--deep); border-color: var(--current); }
+.nav-pill.active { background: var(--deep); color: #fff; border-color: var(--deep); }
+
+/* ── PAGE HERO ──────────────────────────────────────────── */
+.page-hero {
+  padding: 32px 40px 0;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.hero-eyebrow {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--current); margin-bottom: 6px;
+}
+.hero-title {
+  font-family: var(--font-d); font-size: 28px; font-weight: 400;
+  color: var(--deep); line-height: 1.2;
+}
+.hero-title em { font-style: italic; color: var(--current); }
+.hero-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 300; }
+.hero-tagline {
+  font-family: var(--font-d); font-size: 12px; font-style: italic;
+  color: var(--text-faint); margin-top: 8px; letter-spacing: 0.01em;
+}
+.hero-meta { font-size: 12px; color: var(--text-faint); text-align: right; line-height: 1.6; }
+
+/* ── LAYER TOGGLES ──────────────────────────────────────── */
+.layer-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 40px; flex-wrap: wrap;
+}
+.layer-label {
+  font-size: 11px; font-weight: 500; color: var(--text-faint);
+  letter-spacing: 0.06em; text-transform: uppercase; margin-right: 4px;
+}
+.layer-toggle {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 400; color: var(--text-muted);
+  padding: 4px 12px 4px 8px; border-radius: 20px;
+  border: 1px solid rgba(139,115,85,0.2); cursor: pointer;
+  background: transparent; transition: all 0.18s; user-select: none;
+}
+.layer-toggle:hover { border-color: var(--current); color: var(--deep); }
+.layer-toggle.on { background: var(--foam); border-color: var(--current); color: var(--deep); }
+@media (prefers-color-scheme: dark) {
+  .layer-toggle.on { background: rgba(26,107,138,0.28); border-color: rgba(77,168,200,0.5); color: #7DD4F0; }
+}
+.layer-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-birth   { background: var(--dusk); }
+.dot-lived   { background: var(--bank); }
+.dot-current { background: var(--current); }
+.dot-travel  { background: var(--gold); }
+
+/* ── LEGEND ─────────────────────────────────────────────── */
+.legend-bar {
+  display: flex; align-items: center; gap: 20px;
+  padding: 0 40px 16px; flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-faint); }
+.legend-swatch { width: 22px; height: 4px; border-radius: 2px; }
+
+/* ── SEGMENT CHIPS ──────────────────────────────────────── */
+.segment-bar {
+  display: flex; align-items: center; gap: 8px; padding: 10px 40px;
+  flex-wrap: wrap; border-top: 1px solid rgba(139,115,85,0.14); margin: 0 0 4px;
+}
+.seg-label {
+  font-size: 11px; font-weight: 500; color: var(--text-faint);
+  letter-spacing: 0.06em; text-transform: uppercase; margin-right: 4px;
+}
+.seg-chip {
+  font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px;
+  border: 1px solid rgba(139,115,85,0.22); color: var(--text-muted);
+  cursor: pointer; background: transparent; transition: all 0.18s; letter-spacing: 0.02em;
+}
+.seg-chip.on { background: var(--foam); color: var(--deep); border-color: var(--current); }
+@media (prefers-color-scheme: dark) {
+  .seg-chip.on { background: rgba(26,107,138,0.28); color: #7DD4F0; border-color: rgba(77,168,200,0.5); }
+}
+
+/* ── RIVER CANVAS ───────────────────────────────────────── */
+.river-wrapper {
+  margin: 0 24px 40px;
+  border-radius: 16px;
+  border: 1px solid rgba(77,168,200,0.22);
+  overflow: hidden;
+  /* Day palette river — deep water gradient */
+  background: linear-gradient(180deg,
+    #9DD8EE 0%,    /* shallow source */
+    #6CBEDA 12%,
+    #4DA8C8 28%,   /* --current */
+    #2E8AAA 45%,
+    #1A6B8A 62%,   /* --mid */
+    #0F4E6E 80%,
+    #0B3D52 100%   /* --deep */
+  );
+  position: relative;
+  box-shadow: 0 4px 32px rgba(11,61,82,0.18), inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+@media (prefers-color-scheme: dark) {
+  .river-wrapper {
+    background: linear-gradient(180deg,
+      #0D2535 0%, #0F2E45 15%, #112D42 35%,
+      #133250 55%, #153760 75%, #0B3D52 100%
+    );
+  }
+}
+
+/* Water shimmer */
+.river-wrapper::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image: repeating-linear-gradient(
+    175deg,
+    rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px,
+    transparent 1px, transparent 24px
+  );
+}
+
+.river-svg { display: block; width: 100%; height: auto; position: relative; z-index: 1; }
+
+/* ── NODE STYLES ────────────────────────────────────────── */
+.node-group { cursor: pointer; }
+.node-island {
+  fill: var(--stone); stroke: rgba(139,115,85,0.5); stroke-width: 1;
+  transition: fill 0.2s, stroke 0.2s;
+  filter: drop-shadow(0 2px 6px rgba(11,61,82,0.25));
+}
+@media (prefers-color-scheme: dark) {
+  .node-island { fill: #252830; stroke: rgba(90,80,65,0.6); }
+}
+.node-group:hover .node-island {
+  fill: #fff; stroke: var(--current); stroke-width: 1.5;
+}
+@media (prefers-color-scheme: dark) {
+  .node-group:hover .node-island { fill: #2E3240; stroke: #4DA8C8; }
+}
+
+.node-name {
+  font-family: var(--font-b); font-size: 11px; font-weight: 500;
+  fill: var(--text-primary); text-anchor: middle; dominant-baseline: central;
+  pointer-events: none;
+}
+.node-years {
+  font-family: var(--font-b); font-size: 9px; font-weight: 300;
+  fill: var(--text-muted); text-anchor: middle; dominant-baseline: central;
+  pointer-events: none;
+}
+.node-dot { transition: r 0.2s; }
+.node-group:hover .node-dot { r: 5; }
+
+/* Marriage confluence */
+.confluence-ring {
+  fill: none; stroke: rgba(255,255,255,0.45);
+  stroke-width: 1.5; stroke-dasharray: 4 3;
+}
+
+/* Privacy dam */
+.dam-body { fill: #6B4010; stroke: #8B5A20; stroke-width: 1; }
+@media (prefers-color-scheme: dark) { .dam-body { fill: #4A2A08; stroke: #6B4010; } }
+.dam-label {
+  font-family: var(--font-b); font-size: 9px; font-weight: 500;
+  fill: #F5E6D0; text-anchor: middle; dominant-baseline: central; letter-spacing: 0.04em;
+}
+.dam-gate-line { stroke: rgba(245,230,208,0.4); stroke-width: 0.5; }
+
+/* Generation labels */
+.gen-label { font-family: var(--font-d); font-size: 11px; font-style: italic; fill: rgba(255,255,255,0.45); text-anchor: start; }
+
+/* Source spring */
+.source-spring { fill: none; stroke: rgba(255,255,255,0.35); stroke-width: 1; stroke-dasharray: 3 3; }
+
+/* Location dots */
+.loc-dot { opacity: 0.75; transition: opacity 0.3s; }
+.loc-dot.hidden { opacity: 0; pointer-events: none; }
+
+/* Flow lines */
+.flow-main { fill: none; stroke: rgba(255,255,255,0.22); stroke-linecap: round; }
+.flow-trib { fill: none; stroke: rgba(255,255,255,0.18); stroke-linecap: round; stroke-dasharray: 6 4; }
+
+/* River bank organic edges */
+.bank-left  { fill: rgba(74,124,89,0.15); }
+.bank-right { fill: rgba(74,124,89,0.15); }
+
+/* ── TOOLTIP ────────────────────────────────────────────── */
+.tooltip { position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.18s; z-index: 50; }
+.tooltip.visible { opacity: 1; }
+.tooltip-card {
+  background: rgba(240,237,230,0.97); border: 1px solid rgba(77,168,200,0.4);
+  border-radius: 12px; padding: 12px 14px; width: 204px;
+  box-shadow: 0 8px 24px rgba(11,61,82,0.18);
+}
+@media (prefers-color-scheme: dark) {
+  .tooltip-card { background: rgba(30,32,37,0.97); border-color: rgba(58,143,181,0.4); }
+}
+.tt-name { font-family: var(--font-d); font-size: 14px; font-weight: 500; color: var(--deep); margin-bottom: 2px; }
+.tt-years { font-size: 11px; color: var(--text-faint); margin-bottom: 8px; }
+.tt-loc { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; display: flex; gap: 6px; align-items: center; }
+.tt-loc-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.tt-action {
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(139,115,85,0.18);
+  font-size: 11px; color: var(--current); font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; gap: 4px; pointer-events: all;
+}
+.tt-action:hover { color: var(--mid); }
+
+/* ── INFO BAR ───────────────────────────────────────────── */
+.info-bar {
+  margin: 0 24px 32px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;
+}
+.info-card {
+  background: var(--sand); border: 1px solid rgba(139,115,85,0.18);
+  border-radius: 12px; padding: 14px 16px; transition: border-color 0.18s;
+}
+@media (prefers-color-scheme: dark) {
+  .info-card { background: rgba(37,40,48,0.8); border-color: rgba(90,80,65,0.25); }
+}
+.info-card:hover { border-color: var(--current); }
+.info-card-label { font-size: 11px; font-weight: 500; color: var(--text-faint); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px; }
+.info-card-value { font-family: var(--font-d); font-size: 22px; font-weight: 400; }
+.info-card-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── FOOTER TAGLINE ─────────────────────────────────────── */
+.footer-tagline {
+  text-align: center; padding: 20px 24px 40px;
+  font-family: var(--font-d); font-size: 13px; font-style: italic;
+  color: var(--text-faint); letter-spacing: 0.01em;
+}
+
+/* ── ANIMATIONS ─────────────────────────────────────────── */
+@keyframes flowPulse {
+  0%, 100% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -24; }
+}
+@keyframes ripple {
+  0%   { r: 12; opacity: 0.6; }
+  100% { r: 28; opacity: 0; }
+}
+.flow-animated { stroke-dasharray: 8 6; animation: flowPulse 3s linear infinite; }
+.spring-pulse  { animation: ripple 2.5s ease-out infinite; }
+
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <a href="../index.html" class="logo">
+    <span class="word-eternal">Eternal</span><span class="word-current">Current</span><span class="word-tld">.Online</span>
+    <span class="eco-chip">ECO</span>
+  </a>
+  <nav class="header-nav">
+    <a href="tree.html"         class="nav-pill">Network</a>
+    <a href="visual-river.html" class="nav-pill active">River view</a>
+    <a href="globe.html"        class="nav-pill">Globe</a>
+    <a href="household.html"    class="nav-pill">Household</a>
+    <a href="moderator.html"    class="nav-pill">River keeper</a>
+  </nav>
+</header>
+
+<!-- ── PAGE HERO ── -->
+<div class="page-hero">
+  <div>
+    <div class="hero-eyebrow">Find Your Source</div>
+    <h1 class="hero-title">Adeyemi <em>&amp;</em> Whitfield</h1>
+    <p class="hero-sub">Five generations · two source tributaries · one living river</p>
+    <p class="hero-tagline">"Every drop in the past has added to the strength you are today."</p>
+  </div>
+  <div class="hero-meta">
+    Est. 1921 · 23 living members<br>
+    Last updated 3 days ago<br>
+    <span style="color:var(--current);font-weight:500">Adeyemi–Whitfield</span>
+  </div>
+</div>
+
+<!-- ── LAYER TOGGLES ── -->
+<div class="layer-bar">
+  <span class="layer-label">Location flows</span>
+  <button class="layer-toggle on" data-layer="birth"   onclick="toggleLayer(this)"><span class="layer-dot dot-birth"></span> Birth places</button>
+  <button class="layer-toggle on" data-layer="lived"   onclick="toggleLayer(this)"><span class="layer-dot dot-lived"></span> Lived</button>
+  <button class="layer-toggle on" data-layer="current" onclick="toggleLayer(this)"><span class="layer-dot dot-current"></span> Current</button>
+  <button class="layer-toggle"    data-layer="travel"  onclick="toggleLayer(this)"><span class="layer-dot dot-travel"></span> Travel</button>
+</div>
+
+<!-- ── SEGMENT CHIPS ── -->
+<div class="segment-bar">
+  <span class="seg-label">Tributaries</span>
+  <button class="seg-chip on" onclick="this.classList.toggle('on')">Adeyemi source</button>
+  <button class="seg-chip on" onclick="this.classList.toggle('on')">Whitfield source</button>
+  <button class="seg-chip on" onclick="this.classList.toggle('on')">Married in</button>
+  <button class="seg-chip"    onclick="this.classList.toggle('on')">Extended</button>
+</div>
+
+<!-- ── LEGEND ── -->
+<div class="legend-bar">
+  <span class="legend-item"><span class="legend-swatch" style="background:rgba(255,255,255,0.35)"></span> Main current</span>
+  <span class="legend-item"><span class="legend-swatch" style="background:rgba(255,255,255,0.18);border-top:1px dashed rgba(255,255,255,0.4)"></span> Tributary</span>
+  <span class="legend-item">
+    <svg width="14" height="10" viewBox="0 0 14 10"><rect x="0" y="3" width="14" height="4" rx="2" fill="#6B4010"/></svg>
+    Privacy dam
+  </span>
+  <span class="legend-item">
+    <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="none" stroke="rgba(255,255,255,0.45)" stroke-width="1" stroke-dasharray="3 2"/></svg>
+    Confluence (marriage)
+  </span>
+</div>
+
+<!-- ── RIVER CANVAS ── -->
+<div class="river-wrapper" id="riverWrapper">
+
+  <div class="tooltip" id="tooltip">
+    <div class="tooltip-card">
+      <div class="tt-name"  id="tt-name">–</div>
+      <div class="tt-years" id="tt-years">–</div>
+      <div class="tt-loc" id="tt-loc-birth" style="display:none">
+        <span class="tt-loc-dot" style="background:#7C5C8A"></span>
+        <span id="tt-birth-text"></span>
+      </div>
+      <div class="tt-loc" id="tt-loc-current" style="display:none">
+        <span class="tt-loc-dot" style="background:#4DA8C8"></span>
+        <span id="tt-current-text"></span>
+      </div>
+      <div class="tt-action" onclick="openHousehold(currentNode)">Open household →</div>
+    </div>
+  </div>
+
+  <svg class="river-svg" viewBox="0 0 900 1100" xmlns="http://www.w3.org/2000/svg" id="riverSVG">
+
+    <!-- River banks -->
+    <path class="bank-left"  d="M0,0 L120,0 Q105,60 115,120 Q90,200 100,300 Q80,400 95,500 Q75,600 90,700 Q70,800 85,900 Q65,1000 80,1100 L0,1100 Z" opacity="0.5"/>
+    <path class="bank-right" d="M900,0 L780,0 Q798,80 785,160 Q810,260 795,360 Q815,460 800,560 Q820,660 805,760 Q825,860 808,960 Q828,1060 810,1100 L900,1100 Z" opacity="0.5"/>
+
+    <!-- Background water current lines -->
+    <path class="flow-animated" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="3"
+      d="M390,80 Q400,200 395,350 Q390,500 400,650 Q405,800 395,950"/>
+    <path class="flow-animated" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"
+      d="M450,80 Q465,200 458,350 Q452,500 462,650 Q468,800 458,950" style="animation-delay:-1s"/>
+    <path class="flow-animated" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"
+      d="M340,80 Q352,200 347,350 Q342,500 350,650 Q355,800 346,950" style="animation-delay:-2s"/>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- GEN I — SOURCES                                       -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <text class="gen-label" x="130" y="80">Generation I — sources</text>
+
+    <!-- Adeyemi spring (left) -->
+    <circle cx="270" cy="100" r="28" class="source-spring"/>
+    <circle cx="270" cy="100" r="22" class="source-spring spring-pulse" style="animation-delay:0s"/>
+    <circle cx="270" cy="100" r="8"  fill="rgba(255,255,255,0.55)"/>
+    <text x="270" y="142" class="gen-label" text-anchor="middle" style="font-size:10px;fill:rgba(255,255,255,0.55)">Adeyemi source</text>
+
+    <!-- Whitfield spring (right) -->
+    <circle cx="630" cy="100" r="28" class="source-spring"/>
+    <circle cx="630" cy="100" r="22" class="source-spring spring-pulse" style="animation-delay:1.25s"/>
+    <circle cx="630" cy="100" r="8"  fill="rgba(255,255,255,0.55)"/>
+    <text x="630" y="142" class="gen-label" text-anchor="middle" style="font-size:10px;fill:rgba(255,255,255,0.55)">Whitfield source</text>
+
+    <!-- Source tributaries flowing down -->
+    <path class="flow-trib" stroke="rgba(255,255,255,0.28)" stroke-width="5" d="M270,108 Q280,180 320,220"/>
+    <path class="flow-trib" stroke="rgba(255,255,255,0.28)" stroke-width="5" d="M630,108 Q620,180 580,220"/>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- GEN II — GRANDPARENTS                                 -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <text class="gen-label" x="130" y="215">Generation II</text>
+
+    <!-- Kwame Adeyemi -->
+    <g class="node-group" onmouseenter="showTip(event,'Kwame Adeyemi','b. 1921 · Lagos, NG','Lagos, Nigeria','Accra, Ghana')" onmouseleave="hideTip()" onclick="openHousehold('kwame')">
+      <ellipse cx="320" cy="240" rx="52" ry="22" class="node-island"/>
+      <text x="320" y="236" class="node-name">Kwame Adeyemi</text>
+      <text x="320" y="250" class="node-years">1921–1988</text>
+      <circle cx="320" cy="240" r="3" class="node-dot" fill="#4DA8C8" opacity="0.8"/>
+    </g>
+
+    <!-- Abena Mensah (tributary in) -->
+    <g class="node-group" onmouseenter="showTip(event,'Abena Mensah','b. 1924 · Accra, GH','Accra, Ghana','Accra, Ghana')" onmouseleave="hideTip()" onclick="openHousehold('abena')">
+      <ellipse cx="200" cy="270" rx="48" ry="20" class="node-island" style="stroke:rgba(124,92,138,0.5)"/>
+      <text x="200" y="266" class="node-name">Abena Mensah</text>
+      <text x="200" y="278" class="node-years">1924–2001</text>
+      <circle cx="200" cy="270" r="3" class="node-dot" fill="#7C5C8A" opacity="0.8"/>
+    </g>
+    <path class="flow-trib" stroke="rgba(255,255,255,0.22)" stroke-width="4" d="M245,270 Q275,268 310,252" fill="none"/>
+    <circle cx="300" cy="260" r="18" class="confluence-ring"/>
+
+    <!-- Harold Whitfield -->
+    <g class="node-group" onmouseenter="showTip(event,'Harold Whitfield','b. 1919 · Birmingham, UK','Birmingham, UK','Bristol, UK')" onmouseleave="hideTip()" onclick="openHousehold('harold')">
+      <ellipse cx="580" cy="240" rx="52" ry="22" class="node-island"/>
+      <text x="580" y="236" class="node-name">Harold Whitfield</text>
+      <text x="580" y="250" class="node-years">1919–1979</text>
+      <circle cx="580" cy="240" r="3" class="node-dot" fill="#4DA8C8" opacity="0.8"/>
+    </g>
+
+    <!-- Dorothy Osei (tributary in) -->
+    <g class="node-group" onmouseenter="showTip(event,'Dorothy Osei','b. 1922 · Kumasi, GH','Kumasi, Ghana','London, UK')" onmouseleave="hideTip()" onclick="openHousehold('dorothy')">
+      <ellipse cx="710" cy="265" rx="48" ry="20" class="node-island" style="stroke:rgba(124,92,138,0.5)"/>
+      <text x="710" y="261" class="node-name">Dorothy Osei</text>
+      <text x="710" y="273" class="node-years">1922–2010</text>
+      <circle cx="710" cy="265" r="3" class="node-dot" fill="#7C5C8A" opacity="0.8"/>
+    </g>
+    <path class="flow-trib" stroke="rgba(255,255,255,0.22)" stroke-width="4" d="M665,265 Q630,265 610,252" fill="none"/>
+    <circle cx="614" cy="256" r="18" class="confluence-ring"/>
+
+    <!-- Two source streams converging toward Gen III -->
+    <path class="flow-main flow-animated" stroke="rgba(255,255,255,0.28)" stroke-width="9"
+      d="M320,262 Q355,330 420,370" fill="none" style="animation-delay:-0.5s"/>
+    <path class="flow-main flow-animated" stroke="rgba(255,255,255,0.28)" stroke-width="9"
+      d="M580,262 Q548,330 480,370" fill="none" style="animation-delay:-1.5s"/>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- GEN III — CONFLUENCE                                  -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <text class="gen-label" x="130" y="360">Generation III — confluence</text>
+
+    <!-- Confluence pool glow -->
+    <ellipse cx="450" cy="400" rx="90" ry="28" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+
+    <!-- Kofi Adeyemi -->
+    <g class="node-group" onmouseenter="showTip(event,'Kofi Adeyemi','b. 1952 · Accra, GH','Accra, Ghana','Atlanta, GA')" onmouseleave="hideTip()" onclick="openHousehold('kofi')">
+      <ellipse cx="380" cy="400" rx="58" ry="23" class="node-island" style="stroke:#4DA8C8;stroke-width:1.5"/>
+      <text x="380" y="396" class="node-name">Kofi Adeyemi</text>
+      <text x="380" y="408" class="node-years">b. 1952 · Atlanta</text>
+      <circle cx="380" cy="400" r="3" class="node-dot" fill="#4DA8C8" opacity="0.9"/>
+    </g>
+
+    <!-- Grace Whitfield -->
+    <g class="node-group" onmouseenter="showTip(event,'Grace Whitfield','b. 1955 · London, UK','London, UK','Atlanta, GA')" onmouseleave="hideTip()" onclick="openHousehold('grace')">
+      <ellipse cx="528" cy="400" rx="58" ry="23" class="node-island"/>
+      <text x="528" y="396" class="node-name">Grace Whitfield</text>
+      <text x="528" y="408" class="node-years">b. 1955 · Atlanta</text>
+      <circle cx="528" cy="400" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+
+    <!-- Marriage confluence -->
+    <circle cx="454" cy="400" r="22" class="confluence-ring" style="stroke:rgba(255,255,255,0.55)"/>
+    <text x="454" y="400" text-anchor="middle" dominant-baseline="central"
+      style="font-size:9px;fill:rgba(255,255,255,0.5);font-family:var(--font-d);font-style:italic">m. 1978</text>
+
+    <!-- Thomas Whitfield (sibling tributary) -->
+    <g class="node-group" onmouseenter="showTip(event,'Thomas Whitfield','b. 1958 · London, UK','London, UK','Bristol, UK')" onmouseleave="hideTip()" onclick="openHousehold('thomas')">
+      <ellipse cx="690" cy="380" rx="52" ry="21" class="node-island"/>
+      <text x="690" y="376" class="node-name">Thomas Whitfield</text>
+      <text x="690" y="388" class="node-years">b. 1958 · Bristol</text>
+      <circle cx="690" cy="380" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+    <path class="flow-trib" stroke="rgba(255,255,255,0.18)" stroke-width="4" d="M600,385 Q645,382 640,380" fill="none"/>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- PRIVACY DAM — Kofi controls                           -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <rect x="320" y="448" width="160" height="18" rx="4" class="dam-body"/>
+    <line x1="330" y1="448" x2="330" y2="466" class="dam-gate-line"/>
+    <line x1="350" y1="448" x2="350" y2="466" class="dam-gate-line"/>
+    <line x1="370" y1="448" x2="370" y2="466" class="dam-gate-line"/>
+    <line x1="390" y1="448" x2="390" y2="466" class="dam-gate-line"/>
+    <line x1="410" y1="448" x2="410" y2="466" class="dam-gate-line"/>
+    <line x1="430" y1="448" x2="430" y2="466" class="dam-gate-line"/>
+    <line x1="450" y1="448" x2="450" y2="466" class="dam-gate-line"/>
+    <line x1="470" y1="448" x2="470" y2="466" class="dam-gate-line"/>
+    <text class="dam-label" x="400" y="458">privacy dam · Kofi controls</text>
+
+    <path class="flow-main" stroke="rgba(255,255,255,0.20)" stroke-width="12"
+      d="M454,423 Q454,438 400,448" fill="none"/>
+    <path class="flow-main flow-animated" stroke="rgba(255,255,255,0.22)" stroke-width="8"
+      d="M400,466 Q420,490 450,510" fill="none" style="animation-delay:-0.8s"/>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- GEN IV — CURRENT ADULTS                               -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <text class="gen-label" x="130" y="510">Generation IV</text>
+
+    <!-- Ama Adeyemi-Clark -->
+    <g class="node-group" onmouseenter="showTip(event,'Ama Adeyemi-Clark','b. 1980 · Atlanta, GA','Atlanta, GA','Chicago, IL')" onmouseleave="hideTip()" onclick="openHousehold('ama')">
+      <ellipse cx="310" cy="545" rx="62" ry="23" class="node-island"/>
+      <text x="310" y="541" class="node-name">Ama Adeyemi-Clark</text>
+      <text x="310" y="553" class="node-years">b. 1980 · Chicago</text>
+      <circle cx="310" cy="545" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+
+    <!-- James Clark (tributary in) -->
+    <g class="node-group" onmouseenter="showTip(event,'James Clark','b. 1978 · Chicago, IL','Chicago, IL','Chicago, IL')" onmouseleave="hideTip()" onclick="openHousehold('james')">
+      <ellipse cx="175" cy="570" rx="50" ry="20" class="node-island" style="stroke:rgba(124,92,138,0.5)"/>
+      <text x="175" y="566" class="node-name">James Clark</text>
+      <text x="175" y="578" class="node-years">b. 1978 · Chicago</text>
+      <circle cx="175" cy="570" r="3" class="node-dot" fill="#7C5C8A" opacity="0.8"/>
+    </g>
+    <path class="flow-trib" stroke="rgba(255,255,255,0.20)" stroke-width="3" d="M222,570 Q255,563 250,555" fill="none"/>
+    <circle cx="253" cy="558" r="14" class="confluence-ring"/>
+
+    <!-- Kweku Adeyemi -->
+    <g class="node-group" onmouseenter="showTip(event,'Kweku Adeyemi','b. 1983 · Atlanta, GA','Atlanta, GA','Atlanta, GA')" onmouseleave="hideTip()" onclick="openHousehold('kweku')">
+      <ellipse cx="480" cy="540" rx="56" ry="22" class="node-island"/>
+      <text x="480" y="536" class="node-name">Kweku Adeyemi</text>
+      <text x="480" y="548" class="node-years">b. 1983 · Atlanta</text>
+      <circle cx="480" cy="540" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+
+    <!-- Sophie Whitfield-Osei -->
+    <g class="node-group" onmouseenter="showTip(event,'Sophie Whitfield-Osei','b. 1986 · Bristol, UK','Bristol, UK','London, UK')" onmouseleave="hideTip()" onclick="openHousehold('sophie')">
+      <ellipse cx="680" cy="545" rx="62" ry="23" class="node-island"/>
+      <text x="680" y="541" class="node-name">Sophie Whitfield-Osei</text>
+      <text x="680" y="553" class="node-years">b. 1986 · London</text>
+      <circle cx="680" cy="545" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+
+    <!-- Dam flow to Gen IV -->
+    <path class="flow-main flow-animated" stroke="rgba(255,255,255,0.20)" stroke-width="7"
+      d="M450,510 Q380,528 310,524" fill="none" style="animation-delay:-1.2s"/>
+    <path class="flow-main flow-animated" stroke="rgba(255,255,255,0.20)" stroke-width="7"
+      d="M450,510 Q465,524 480,519" fill="none" style="animation-delay:-2s"/>
+    <path class="flow-trib" stroke="rgba(255,255,255,0.18)" stroke-width="5"
+      d="M600,390 Q660,450 680,524" fill="none"/>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- GEN V — THE LIVING DELTA                              -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <text class="gen-label" x="130" y="660">Generation V — the living delta</text>
+
+    <!-- Zara Clark-Adeyemi -->
+    <g class="node-group" onmouseenter="showTip(event,'Zara Clark-Adeyemi','b. 2005 · Chicago, IL','Chicago, IL','Chicago, IL')" onmouseleave="hideTip()" onclick="openHousehold('zara')">
+      <ellipse cx="200" cy="700" rx="58" ry="22" class="node-island"/>
+      <text x="200" y="696" class="node-name">Zara Clark-Adeyemi</text>
+      <text x="200" y="708" class="node-years">b. 2005 · Chicago</text>
+      <circle cx="200" cy="700" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+
+    <!-- Marcus Clark-Adeyemi -->
+    <g class="node-group" onmouseenter="showTip(event,'Marcus Clark-Adeyemi','b. 2008 · Chicago, IL','Chicago, IL','Chicago, IL')" onmouseleave="hideTip()" onclick="openHousehold('marcus')">
+      <ellipse cx="370" cy="715" rx="60" ry="22" class="node-island"/>
+      <text x="370" y="711" class="node-name">Marcus Clark-Adeyemi</text>
+      <text x="370" y="723" class="node-years">b. 2008 · Chicago</text>
+      <circle cx="370" cy="715" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+
+    <!-- Nana Adeyemi -->
+    <g class="node-group" onmouseenter="showTip(event,'Nana Adeyemi','b. 2010 · Atlanta, GA','Atlanta, GA','Atlanta, GA')" onmouseleave="hideTip()" onclick="openHousehold('nana')">
+      <ellipse cx="540" cy="700" rx="52" ry="21" class="node-island"/>
+      <text x="540" y="696" class="node-name">Nana Adeyemi</text>
+      <text x="540" y="708" class="node-years">b. 2010 · Atlanta</text>
+      <circle cx="540" cy="700" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+
+    <!-- Ellie Whitfield -->
+    <g class="node-group" onmouseenter="showTip(event,'Ellie Whitfield','b. 2012 · London, UK','London, UK','London, UK')" onmouseleave="hideTip()" onclick="openHousehold('ellie')">
+      <ellipse cx="700" cy="710" rx="52" ry="21" class="node-island"/>
+      <text x="700" y="706" class="node-name">Ellie Whitfield</text>
+      <text x="700" y="718" class="node-years">b. 2012 · London</text>
+      <circle cx="700" cy="710" r="3" class="node-dot" fill="#4DA8C8" opacity="0.7"/>
+    </g>
+
+    <!-- Gen IV → Gen V flow -->
+    <path class="flow-main flow-animated" stroke="rgba(255,255,255,0.20)" stroke-width="6"
+      d="M285,566 Q240,620 200,678" fill="none" style="animation-delay:-1.8s"/>
+    <path class="flow-main flow-animated" stroke="rgba(255,255,255,0.20)" stroke-width="6"
+      d="M330,567 Q355,630 370,693" fill="none" style="animation-delay:-0.3s"/>
+    <path class="flow-main flow-animated" stroke="rgba(255,255,255,0.18)" stroke-width="5"
+      d="M480,562 Q505,625 540,678" fill="none" style="animation-delay:-2.1s"/>
+    <path class="flow-trib" stroke="rgba(255,255,255,0.18)" stroke-width="4"
+      d="M680,568 Q692,632 700,688" fill="none"/>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- DELTA MOUTH                                           -->
+    <!-- ══════════════════════════════════════════════════════ -->
+    <path fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="18"
+      d="M380,740 Q390,800 400,860"/>
+    <path fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10"
+      d="M380,740 Q340,800 290,870"/>
+    <path fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10"
+      d="M400,740 Q440,800 510,870"/>
+    <text x="400" y="920" text-anchor="middle" class="gen-label"
+      style="font-size:12px;fill:rgba(255,255,255,0.30)">delta — every drop has the power to change the landscape</text>
+
+    <!-- ══════════════════════════════════════════════════════ -->
+    <!-- LOCATION DOTS                                         -->
+    <!-- ══════════════════════════════════════════════════════ -->
+
+    <!-- Birth (dusk / purple) -->
+    <g class="loc-layer" data-layer="birth">
+      <circle class="loc-dot" cx="270" cy="232" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="195" cy="260" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="578" cy="232" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="708" cy="258" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="375" cy="392" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="525" cy="392" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="305" cy="537" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="475" cy="532" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="675" cy="537" r="4" fill="#7C5C8A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+    </g>
+
+    <!-- Current location (ECO current blue) -->
+    <g class="loc-layer" data-layer="current">
+      <circle class="loc-dot" cx="290" cy="232" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="545" cy="392" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="398" cy="392" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="328" cy="537" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="498" cy="532" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="698" cy="537" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="218" cy="692" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="388" cy="707" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="558" cy="692" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+      <circle class="loc-dot" cx="718" cy="702" r="5" fill="#4DA8C8" stroke="rgba(255,255,255,0.6)" stroke-width="1"/>
+    </g>
+
+    <!-- Lived (River Bank green) -->
+    <g class="loc-layer" data-layer="lived">
+      <circle class="loc-dot" cx="352" cy="398" r="4" fill="#4A7C59" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="510" cy="396" r="4" fill="#4A7C59" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="295" cy="543" r="4" fill="#4A7C59" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="660" cy="539" r="4" fill="#4A7C59" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+    </g>
+
+    <!-- Travel (Travel Gold) — hidden by default -->
+    <g class="loc-layer" data-layer="travel" style="display:none">
+      <circle class="loc-dot" cx="362" cy="540" r="4" fill="#C8882A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="492" cy="700" r="4" fill="#C8882A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+      <circle class="loc-dot" cx="730" cy="702" r="4" fill="#C8882A" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+    </g>
+
+  </svg>
+</div><!-- /river-wrapper -->
+
+<!-- ── INFO BAR ── -->
+<div class="info-bar">
+  <div class="info-card">
+    <div class="info-card-label">Generations</div>
+    <div class="info-card-value" style="color:var(--deep)">5</div>
+    <div class="info-card-sub">1921 → present</div>
+  </div>
+  <div class="info-card">
+    <div class="info-card-label">Living members</div>
+    <div class="info-card-value" style="color:var(--mid)">23</div>
+    <div class="info-card-sub">across 4 countries</div>
+  </div>
+  <div class="info-card">
+    <div class="info-card-label">Source tributaries</div>
+    <div class="info-card-value" style="color:var(--bank)">2</div>
+    <div class="info-card-sub">Adeyemi + Whitfield</div>
+  </div>
+  <div class="info-card">
+    <div class="info-card-label">Confluences</div>
+    <div class="info-card-value" style="color:var(--dusk)">6</div>
+    <div class="info-card-sub">marriages &amp; partnerships</div>
+  </div>
+  <div class="info-card">
+    <div class="info-card-label">Privacy dams</div>
+    <div class="info-card-value" style="color:var(--dam-fill)">1</div>
+    <div class="info-card-sub">Kofi's branch · active</div>
+  </div>
+</div>
+
+<!-- ── FOOTER TAGLINE ── -->
+<div class="footer-tagline">
+  "Every drop has the power to change the landscape." — EternalCurrent.Online
+</div>
+
+<script>
+let currentNode = null;
+const tooltip       = document.getElementById('tooltip');
+const ttName        = document.getElementById('tt-name');
+const ttYears       = document.getElementById('tt-years');
+const ttBirthRow    = document.getElementById('tt-loc-birth');
+const ttCurrentRow  = document.getElementById('tt-loc-current');
+const ttBirthText   = document.getElementById('tt-birth-text');
+const ttCurrentText = document.getElementById('tt-current-text');
+const wrapper       = document.getElementById('riverWrapper');
+
+function showTip(e, name, years, birth, current) {
+  currentNode = name;
+  ttName.textContent  = name;
+  ttYears.textContent = years;
+  ttBirthRow.style.display   = birth   ? 'flex' : 'none';
+  ttCurrentRow.style.display = current ? 'flex' : 'none';
+  if (birth)   ttBirthText.textContent   = 'Born: '   + birth;
+  if (current) ttCurrentText.textContent = 'Now: '  + current;
+
+  const rect    = wrapper.getBoundingClientRect();
+  const svgPt   = e.currentTarget.getBoundingClientRect();
+  let tx = svgPt.left - rect.left + svgPt.width / 2 + 16;
+  let ty = svgPt.top  - rect.top  - 20;
+  if (tx + 220 > rect.width)  tx = svgPt.left - rect.left - 224;
+  if (ty < 10) ty = 10;
+  tooltip.style.left = tx + 'px';
+  tooltip.style.top  = ty + 'px';
+  tooltip.classList.add('visible');
+}
+
+function hideTip() { tooltip.classList.remove('visible'); }
+
+function openHousehold(id) {
+  window.location.href = 'household.html?id=' + (typeof id === 'string' ? id : currentNode);
+}
+
+function toggleLayer(btn) {
+  btn.classList.toggle('on');
+  const layer  = btn.dataset.layer;
+  const groups = document.querySelectorAll('.loc-layer[data-layer="' + layer + '"]');
+  const isOn   = btn.classList.contains('on');
+  groups.forEach(g => { g.style.display = isOn ? '' : 'none'; });
+}
+</script>
+
+</body>
+</html>

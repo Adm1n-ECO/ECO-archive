@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO — River Selector + Household Roster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;}
+
+/* ── Nav ──────────────────────────────────────────── */
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:200;}
+.nav a{font-size:13px;color:#3A5A54;text-decoration:none;}.nav a:hover{color:#00E5CC;}
+.nav-r{margin-left:auto;display:flex;gap:8px;}
+.nbadge{background:rgba(0,224,64,.10);border:1px solid rgba(0,224,64,.22);color:#009828;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;}
+
+/* ── Two-panel layout ─────────────────────────────── */
+.panels{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 52px);}
+@media(max-width:820px){.panels{grid-template-columns:1fr;}}
+.panel{padding:32px 28px 80px;border-right:1px solid rgba(0,229,204,.07);}
+.panel:last-child{border-right:none;}
+
+/* ── Section header ───────────────────────────────── */
+.panel-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#00E5CC;margin-bottom:8px;}
+.panel-h{font-family:'DM Serif Display',serif;font-size:1.8rem;letter-spacing:-.02em;line-height:1.18;color:#E8F4F0;margin-bottom:8px;}
+.panel-h em{font-style:italic;color:#00E040;}
+.panel-sub{font-size:13px;color:#5A8A80;line-height:1.7;margin-bottom:24px;max-width:380px;}
+
+/* ── AI search box ────────────────────────────────── */
+.search-wrap{position:relative;margin-bottom:10px;}
+.search-input{width:100%;padding:13px 48px 13px 16px;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;color:#E8F4F0;background:#0D1820;border:1.5px solid rgba(0,229,204,.20);border-radius:12px;outline:none;transition:border-color .14s,box-shadow .14s;}
+.search-input:focus{border-color:#00E5CC;box-shadow:0 0 0 3px rgba(0,229,204,.10);}
+.search-input::placeholder{color:#3A5A54;}
+.search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:34px;height:34px;background:#00E5CC;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:filter .14s;}
+.search-btn:hover{filter:brightness(1.1);}
+.search-btn svg{width:16px;height:16px;}
+.search-hint{font-size:11px;color:#3A5A54;margin-bottom:16px;line-height:1.5;}
+
+/* Example prompts */
+.prompt-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.pp{padding:4px 12px;font-size:11px;color:#3A5A54;border:1px solid rgba(0,229,204,.12);border-radius:999px;cursor:pointer;transition:all .14s;background:transparent;}
+.pp:hover{color:#00E5CC;border-color:rgba(0,229,204,.30);background:rgba(0,229,204,.05);}
+
+/* AI loading state */
+.ai-loading{display:none;align-items:center;gap:10px;padding:12px;background:#0D1820;border-radius:10px;margin-bottom:16px;}
+.ai-loading.on{display:flex;}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:#00E5CC;animation:pulse 1.2s ease-in-out infinite;}
+.ai-dot:nth-child(2){animation-delay:.2s;}
+.ai-dot:nth-child(3){animation-delay:.4s;}
+@keyframes pulse{0%,100%{opacity:.25;transform:scale(.8);}50%{opacity:1;transform:scale(1.1);}}
+.ai-loading-text{font-size:12px;color:#3A5A54;font-family:'JetBrains Mono',monospace;}
+
+/* Tree species cards */
+.species-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.species-card{background:#0D1820;border:1.5px solid rgba(0,229,204,.10);border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;display:flex;gap:14px;align-items:flex-start;}
+.species-card:hover{border-color:rgba(0,229,204,.28);background:#101E2C;}
+.species-card.on{border-color:#00E040;background:rgba(0,224,64,.06);}
+.species-svg{flex-shrink:0;width:52px;display:flex;align-items:flex-end;justify-content:center;}
+.species-info{flex:1;}
+.species-name{font-size:14px;font-weight:500;color:#E8F4F0;margin-bottom:2px;}
+.species-sci{font-size:11px;color:#3A5A54;font-style:italic;font-family:'JetBrains Mono',monospace;margin-bottom:6px;}
+.species-story{font-size:12px;color:#5A8A80;line-height:1.6;}
+.species-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;margin-top:6px;margin-right:4px;}
+.st-gr{background:rgba(0,224,64,.10);color:#009828;border:1px solid rgba(0,224,64,.20);}
+.st-cy{background:rgba(0,229,204,.10);color:#007A74;border:1px solid rgba(0,229,204,.20);}
+.st-am{background:rgba(224,144,64,.10);color:#906030;border:1px solid rgba(224,144,64,.20);}
+.species-tick{width:22px;height:22px;border-radius:50%;background:#00E040;color:#070D14;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:opacity .14s;align-self:center;}
+.species-card.on .species-tick{opacity:1;}
+
+/* Orientation selector */
+.orient-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#3A5A54;margin-bottom:10px;margin-top:4px;}
+.orient-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.orient-opt{background:#0D1820;border:1.5px solid rgba(0,229,204,.10);border-radius:10px;padding:12px;cursor:pointer;transition:all .14s;text-align:center;}
+.orient-opt:hover{border-color:rgba(0,229,204,.25);}
+.orient-opt.on{border-color:#00E5CC;background:rgba(0,229,204,.07);}
+.orient-name{font-size:12px;font-weight:500;color:#C8D4D0;margin-bottom:3px;}
+.orient-sub{font-size:10px;color:#3A5A54;line-height:1.4;}
+.lock-note{background:#0A1A0A;border:1px solid rgba(0,224,64,.12);border-radius:8px;padding:10px 12px;font-size:11px;color:#3A6040;line-height:1.55;margin-bottom:20px;}
+
+/* Confirm button */
+.btn-confirm{width:100%;padding:13px;background:#00E040;color:#070D14;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;transition:filter .14s;margin-bottom:8px;}
+.btn-confirm:hover{filter:brightness(1.08);}
+.btn-confirm:disabled{opacity:.4;cursor:not-allowed;filter:none;}
+
+/* ═══════════════════════════════════
+   RIGHT PANEL — HOUSEHOLD ROSTER
+═══════════════════════════════════ */
+.roster-wrap{display:flex;flex-direction:column;gap:0;}
+
+/* Name lock / section label */
+.roster-section{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;padding:10px 0 6px;margin-top:8px;}
+.roster-section:first-child{margin-top:0;}
+
+/* Profile entry row */
+.profile-entry{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:11px;padding:14px;margin-bottom:8px;position:relative;transition:border-color .14s;}
+.profile-entry:hover{border-color:rgba(0,229,204,.20);}
+.profile-entry.paid{border-color:rgba(0,224,64,.20);}
+.profile-entry.ghost{border-color:rgba(255,255,255,.06);opacity:.7;}
+.pe-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.pe-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+.av-cy{background:rgba(0,229,204,.12);color:#00E5CC;border:1.5px solid rgba(0,229,204,.22);}
+.av-gr{background:rgba(0,224,64,.12);color:#00A028;border:1.5px solid rgba(0,224,64,.22);}
+.av-ghost{background:rgba(255,255,255,.05);color:#3A5A54;border:1.5px dashed rgba(255,255,255,.10);}
+.av-pet{background:rgba(224,144,64,.10);color:#C07030;border:1.5px solid rgba(224,144,64,.20);}
+.pe-name{font-size:13px;font-weight:500;color:#C8D4D0;flex:1;}
+.pe-status{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;}
+.ps-paid{background:rgba(0,224,64,.10);color:#009020;border:1px solid rgba(0,224,64,.18);}
+.ps-ghost{background:rgba(255,255,255,.05);color:#3A5A54;border:1px solid rgba(255,255,255,.08);}
+.ps-invite{background:rgba(224,144,64,.08);color:#906030;border:1px solid rgba(224,144,64,.15);}
+
+/* Relationship fields */
+.pe-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.pe-fields.full{grid-template-columns:1fr;}
+.pe-field label{display:block;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3A5A54;margin-bottom:4px;}
+.pe-input{width:100%;padding:7px 10px;font-family:'DM Sans',system-ui,sans-serif;font-size:12px;color:#E8F4F0;background:#132030;border:1px solid rgba(0,229,204,.12);border-radius:7px;outline:none;transition:border-color .14s;}
+.pe-input:focus{border-color:#00E5CC;}
+.pe-input::placeholder{color:#3A5A54;}
+select.pe-input{cursor:pointer;-webkit-appearance:none;}
+
+/* Relationship tags (secondary relationships) */
+.rel-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.rel-tag{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#132030;border:1px solid rgba(0,229,204,.12);border-radius:999px;font-size:10px;color:#5A8A80;cursor:pointer;}
+.rel-tag:hover{border-color:rgba(0,229,204,.25);color:#C8D4D0;}
+.rel-tag-add{border-style:dashed;color:#3A5A54;}
+
+/* Price line */
+.pe-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(0,229,204,.07);}
+.pe-price{font-size:12px;font-weight:600;color:#E8F4F0;font-family:'JetBrains Mono',monospace;}
+.pe-activate{padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:#00E040;color:#070D14;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;}
+.pe-invite{padding:5px 12px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:#00E5CC;border:1px solid rgba(0,229,204,.25);border-radius:6px;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;}
+
+/* Add buttons */
+.add-row{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.add-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:transparent;border:1px dashed rgba(0,229,204,.18);border-radius:9px;cursor:pointer;font-size:12px;color:#3A5A54;font-family:'DM Sans',system-ui,sans-serif;transition:all .14s;}
+.add-btn:hover{border-color:rgba(0,229,204,.35);color:#C8D4D0;background:rgba(0,229,204,.04);}
+.add-icon{width:22px;height:22px;border-radius:50%;background:rgba(0,229,204,.10);border:1px solid rgba(0,229,204,.20);color:#00E5CC;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.add-icon.pet{background:rgba(224,144,64,.10);border-color:rgba(224,144,64,.20);color:#C07030;}
+
+/* Roster summary footer */
+.roster-summary{background:#0A1A0A;border:1px solid rgba(0,224,64,.15);border-radius:10px;padding:14px;margin-top:8px;}
+.rs-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;}
+.rs-label{color:#3A6040;}
+.rs-val{color:#C8D4D0;font-family:'JetBrains Mono',monospace;}
+.rs-divider{height:1px;background:rgba(0,224,64,.10);margin:8px 0;}
+.rs-total-label{font-size:12px;color:#5A8A80;}
+.rs-total-val{font-size:20px;font-weight:600;color:#00E040;font-family:'DM Serif Display',serif;}
+.rs-note{font-size:10px;color:#3A5A54;margin-top:4px;}
+
+/* Note boxes */
+.design-note{background:#0A0A1A;border:1px solid rgba(144,96,224,.14);border-radius:8px;padding:10px 12px;font-size:11px;color:#5040A0;line-height:1.6;margin-top:16px;}
+.design-note strong{color:#8060D0;display:block;margin-bottom:3px;}
+.decision-note{background:#061206;border:1px solid rgba(0,224,64,.14);border-radius:8px;padding:10px 12px;font-size:11px;color:#3A6040;line-height:1.6;margin-top:8px;display:flex;gap:8px;}
+.dn-check{color:#009828;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html">← Design Review Hub</a>
+  <div class="nav-r">
+    <span class="nbadge">13 — River Selector + Roster</span>
+  </div>
+</nav>
+
+<div class="panels">
+
+  <!-- ═══════════════════════════════════
+       LEFT PANEL — AI TREE SELECTOR
+  ═══════════════════════════════════ -->
+  <div class="panel">
+    <div class="panel-eyebrow">Step 3 of onboarding</div>
+    <h2 class="panel-h">Find your<br><em>family's tree.</em></h2>
+    <p class="panel-sub">Describe what feels right — in any words. The tree you choose becomes your family's symbol, and its story travels with every invitation you send.</p>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <input class="search-input" id="tree-search" placeholder="e.g. ancient, strong, reminds me of India…" oninput="onSearchInput()">
+      <button class="search-btn" onclick="runSearch()" title="Find my tree">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#070D14" stroke-width="2" stroke-linecap="round">
+          <circle cx="6.5" cy="6.5" r="4.5"/><path d="M10.5 10.5l3 3"/>
+        </svg>
+      </button>
+    </div>
+    <p class="search-hint">Try: "tall and ancient" · "wide and tropical" · "blooms beautifully" · "grows in cold places" · "resilient and spreading" · "sacred in Asia"</p>
+
+    <div class="prompt-pills" id="prompt-pills">
+      <div class="pp" onclick="setPrompt('tall, ancient, enduring')">tall and ancient</div>
+      <div class="pp" onclick="setPrompt('wide, spreading, tropical')">wide and tropical</div>
+      <div class="pp" onclick="setPrompt('flowering, beautiful, fragrant')">flowering and fragrant</div>
+      <div class="pp" onclick="setPrompt('sacred, spiritual, South Asia')">sacred in South Asia</div>
+      <div class="pp" onclick="setPrompt('evergreen, cold, northern')">evergreen, northern</div>
+      <div class="pp" onclick="setPrompt('resilient, fast growing, Africa')">resilient, African</div>
+    </div>
+
+    <!-- AI loading -->
+    <div class="ai-loading" id="ai-loading">
+      <div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>
+      <span class="ai-loading-text" id="ai-loading-text">Searching the forest…</span>
+    </div>
+
+    <!-- Results -->
+    <div class="species-grid" id="species-grid"></div>
+
+    <!-- Orientation (shown after species picked) -->
+    <div id="orient-section" style="display:none;">
+      <div class="orient-label">How does your tree grow? (you can change this any time before locking)</div>
+      <div class="orient-grid">
+        <div class="orient-opt on" onclick="pickOrient(this,'top-down')" id="or-topdown">
+          <svg width="36" height="48" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:6px;">
+            <circle cx="30" cy="10" r="8" fill="rgba(0,229,204,.25)" stroke="#00E5CC" stroke-width="1.5"/>
+            <line x1="30" y1="18" x2="30" y2="38" stroke="rgba(0,229,204,.4)" stroke-width="1.5"/>
+            <circle cx="15" cy="50" r="6" fill="rgba(0,224,64,.20)" stroke="#00E040" stroke-width="1.5"/>
+            <circle cx="45" cy="50" r="6" fill="rgba(0,224,64,.20)" stroke="#00E040" stroke-width="1.5"/>
+            <line x1="30" y1="38" x2="15" y2="44" stroke="rgba(0,229,204,.3)" stroke-width="1.5"/>
+            <line x1="30" y1="38" x2="45" y2="44" stroke="rgba(0,229,204,.3)" stroke-width="1.5"/>
+            <circle cx="8" cy="68" r="4" fill="rgba(0,224,64,.15)" stroke="#00E040" stroke-width="1"/>
+            <circle cx="22" cy="68" r="4" fill="rgba(0,224,64,.15)" stroke="#00E040" stroke-width="1"/>
+            <circle cx="38" cy="68" r="4" fill="rgba(0,224,64,.15)" stroke="#00E040" stroke-width="1"/>
+            <circle cx="52" cy="68" r="4" fill="rgba(0,224,64,.15)" stroke="#00E040" stroke-width="1"/>
+          </svg>
+          <div class="orient-name">Elders at top</div>
+          <div class="orient-sub">Grandparents above · children below<br>Traditional lineage</div>
+        </div>
+        <div class="orient-opt" onclick="pickOrient(this,'bottom-up')" id="or-bottomup">
+          <svg width="36" height="48" viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:6px;">
+            <circle cx="8" cy="12" r="4" fill="rgba(0,224,64,.15)" stroke="#00E040" stroke-width="1"/>
+            <circle cx="22" cy="12" r="4" fill="rgba(0,224,64,.15)" stroke="#00E040" stroke-width="1"/>
+            <circle cx="38" cy="12" r="4" fill="rgba(0,224,64,.15)" stroke="#00E040" stroke-width="1"/>
+            <circle cx="52" cy="12" r="4" fill="rgba(0,224,64,.15)" stroke="#00E040" stroke-width="1"/>
+            <circle cx="15" cy="30" r="6" fill="rgba(0,224,64,.20)" stroke="#00E040" stroke-width="1.5"/>
+            <circle cx="45" cy="30" r="6" fill="rgba(0,224,64,.20)" stroke="#00E040" stroke-width="1.5"/>
+            <line x1="30" y1="42" x2="15" y2="36" stroke="rgba(0,229,204,.3)" stroke-width="1.5"/>
+            <line x1="30" y1="42" x2="45" y2="36" stroke="rgba(0,229,204,.3)" stroke-width="1.5"/>
+            <line x1="30" y1="42" x2="30" y2="62" stroke="rgba(0,229,204,.4)" stroke-width="1.5"/>
+            <circle cx="30" cy="70" r="8" fill="rgba(0,229,204,.25)" stroke="#00E5CC" stroke-width="1.5"/>
+          </svg>
+          <div class="orient-name">Roots at base</div>
+          <div class="orient-sub">Grandparents as roots · you at trunk<br>Botanical metaphor</div>
+        </div>
+      </div>
+
+      <div class="lock-note">
+        You can rotate and explore your tree any time. When you're happy with how it looks, tap <strong style="color:#00E040;">Lock orientation</strong> — after that, the structure is fixed so all your connections see the same view.
+      </div>
+
+      <button class="btn-confirm" id="confirm-btn" onclick="confirmTree()">
+        Choose this tree and set orientation →
+      </button>
+    </div>
+
+    <div id="selected-summary" style="display:none;">
+      <div style="background:#061206;border:1px solid rgba(0,224,64,.22);border-radius:10px;padding:14px;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#009828;margin-bottom:6px;">Tree selected</div>
+        <div id="sel-name" style="font-family:'DM Serif Display',serif;font-size:1.4rem;color:#E8F4F0;margin-bottom:4px;"></div>
+        <div id="sel-story" style="font-size:12px;color:#5A8A80;line-height:1.6;"></div>
+      </div>
+      <div class="decision-note">
+        <span class="dn-check">✓</span>
+        <span>This tree and its story will appear in every invitation your household sends. Recipients will see the tree's name, origin, and the quality it shares with your family before they even click to join.</span>
+      </div>
+    </div>
+
+    <div class="design-note" style="margin-top:20px;">
+      <strong>How the AI search works</strong>
+      The search box calls the Claude API with the user's free-text description. The prompt instructs Claude to act as a botanist and return 3–5 real tree species that match — each with common name, scientific name, native region, one defining visual quality, and one cultural/symbolic quality. The response is structured JSON, rendered as the species cards above. This makes every user's tree discovery feel personal and curated, not like a dropdown menu.
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       RIGHT PANEL — HOUSEHOLD ROSTER
+  ═══════════════════════════════════ -->
+  <div class="panel">
+    <div class="panel-eyebrow">Step 5 of onboarding</div>
+    <h2 class="panel-h">Build your<br><em>household roster.</em></h2>
+    <p class="panel-sub">Enter everyone — paid profiles appear on your tree now, unpaid entries become your invite list. Add all the relationships you know.</p>
+
+    <div class="roster-wrap" id="roster">
+
+      <!-- Account owner — always paid, cannot be deleted -->
+      <div class="roster-section">Your profile</div>
+      <div class="profile-entry paid">
+        <div class="pe-header">
+          <div class="pe-avatar av-cy">VB</div>
+          <div class="pe-name">Vikas Bakshi</div>
+          <div class="pe-status ps-paid">On tree</div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Name</label>
+            <input class="pe-input" value="Vikas Bakshi" placeholder="Full name">
+          </div>
+          <div class="pe-field">
+            <label>City</label>
+            <input class="pe-input" value="San Jose, CA" placeholder="City, Country">
+          </div>
+        </div>
+        <div class="pe-footer">
+          <span style="font-size:11px;color:#3A6040;">Account owner · required</span>
+          <span class="pe-price">$1.99 paid</span>
+        </div>
+      </div>
+
+      <!-- Household members -->
+      <div class="roster-section">In your household</div>
+
+      <div class="profile-entry paid">
+        <div class="pe-header">
+          <div class="pe-avatar av-gr">S</div>
+          <div class="pe-name">Spouse / Partner</div>
+          <div class="pe-status ps-paid">On tree</div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Name</label>
+            <input class="pe-input" placeholder="Full name" value="Anita Bakshi">
+          </div>
+          <div class="pe-field">
+            <label>Relationship to you</label>
+            <select class="pe-input">
+              <option selected>Spouse / partner</option>
+              <option>Parent</option><option>Child</option><option>Sibling</option>
+              <option>Grandparent</option><option>Aunt / Uncle</option><option>Cousin</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Email (for invites)</label>
+            <input class="pe-input" placeholder="email@example.com" value="anita@example.com">
+          </div>
+          <div class="pe-field">
+            <label>City</label>
+            <input class="pe-input" placeholder="City, Country" value="San Jose, CA">
+          </div>
+        </div>
+        <div class="pe-footer">
+          <span style="font-size:11px;color:#3A6040;">Household member</span>
+          <span class="pe-price">$1.99 paid</span>
+        </div>
+      </div>
+
+      <!-- Managed profile — elder with no device -->
+      <div class="profile-entry paid">
+        <div class="pe-header">
+          <div class="pe-avatar av-gr" style="background:rgba(255,255,255,.07);color:#7AADA0;border-color:rgba(255,255,255,.12);">G</div>
+          <div class="pe-name">Grandfather — managed</div>
+          <div class="pe-status ps-paid">On tree</div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Name</label>
+            <input class="pe-input" value="Ramesh Bakshi" placeholder="Full name">
+          </div>
+          <div class="pe-field">
+            <label>Relationship to you</label>
+            <select class="pe-input">
+              <option selected>Grandparent</option>
+              <option>Parent</option><option>Sibling</option><option>Spouse / partner</option>
+              <option>Child</option><option>Aunt / Uncle</option><option>Cousin</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Also related to</label>
+            <input class="pe-input" placeholder="e.g. Father of Vikas's father" value="Father of Rajesh Bakshi (Dad)">
+          </div>
+          <div class="pe-field">
+            <label>City</label>
+            <input class="pe-input" value="Amritsar, India" placeholder="City, Country">
+          </div>
+        </div>
+        <div style="background:#0A1210;border:1px solid rgba(0,229,204,.08);border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#3A5A54;line-height:1.5;">
+          Managed profile — you maintain this on his behalf. No login required.
+        </div>
+        <div class="pe-footer">
+          <span style="font-size:11px;color:#3A6040;">Managed · no device</span>
+          <span class="pe-price">$1.99 paid</span>
+        </div>
+      </div>
+
+      <!-- Pet -->
+      <div class="profile-entry paid">
+        <div class="pe-header">
+          <div class="pe-avatar av-pet">🐕</div>
+          <div class="pe-name">Bruno</div>
+          <div class="pe-status ps-paid">On tree</div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Name</label>
+            <input class="pe-input" value="Bruno" placeholder="Pet's name">
+          </div>
+          <div class="pe-field">
+            <label>Animal type</label>
+            <input class="pe-input" value="Golden Retriever" placeholder="Dog, Cat, Snake, Parrot…">
+          </div>
+        </div>
+        <div class="pe-footer">
+          <span style="font-size:11px;color:#906030;">Pet profile</span>
+          <span class="pe-price">$0.99 paid</span>
+        </div>
+      </div>
+
+      <!-- Unpaid / ghost profiles -->
+      <div class="roster-section">Known family — not yet activated</div>
+      <p style="font-size:12px;color:#3A5A54;line-height:1.6;margin-bottom:12px;">These appear as silhouettes on your tree visible only to you. Activate any profile for $1.99 or send a free invitation and let them create their own.</p>
+
+      <!-- Ghost: aunt in London -->
+      <div class="profile-entry ghost">
+        <div class="pe-header">
+          <div class="pe-avatar av-ghost">S</div>
+          <div class="pe-name" style="color:#7AADA0;">Sunita Mehta</div>
+          <div class="pe-status ps-ghost">Pending</div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Name</label>
+            <input class="pe-input" value="Sunita Mehta" placeholder="Full name">
+          </div>
+          <div class="pe-field">
+            <label>Relationship to you</label>
+            <select class="pe-input">
+              <option selected>Aunt / Uncle</option>
+              <option>Grandparent</option><option>Parent</option><option>Sibling</option>
+              <option>Spouse / partner</option><option>Child</option><option>Cousin</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Also related to</label>
+            <input class="pe-input" value="Sister of Ramesh Bakshi (Grandfather)" placeholder="Other relationship">
+          </div>
+          <div class="pe-field">
+            <label>Email (for invite)</label>
+            <input class="pe-input" value="sunita@example.com" placeholder="email@example.com">
+          </div>
+        </div>
+        <div class="rel-tags">
+          <span class="rel-tag">Aunt of Vikas</span>
+          <span class="rel-tag">Sister of Ramesh</span>
+          <span class="rel-tag rel-tag-add">+ add relationship</span>
+        </div>
+        <div class="pe-footer">
+          <span class="pe-price" style="color:#3A5A54;">$1.99 to activate</span>
+          <div style="display:flex;gap:6px;">
+            <button class="pe-invite">Send invite</button>
+            <button class="pe-activate">Activate $1.99</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ghost: cousin in New York -->
+      <div class="profile-entry ghost">
+        <div class="pe-header">
+          <div class="pe-avatar av-ghost">R</div>
+          <div class="pe-name" style="color:#7AADA0;">Raj Mehta</div>
+          <div class="pe-status ps-invite">Invite sent</div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field">
+            <label>Name</label>
+            <input class="pe-input" value="Raj Mehta" placeholder="Full name">
+          </div>
+          <div class="pe-field">
+            <label>Relationship to you</label>
+            <select class="pe-input">
+              <option selected>Cousin</option>
+              <option>Grandparent</option><option>Parent</option><option>Sibling</option>
+              <option>Spouse / partner</option><option>Child</option><option>Aunt / Uncle</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="pe-fields">
+          <div class="pe-field full">
+            <label>Also related to</label>
+            <input class="pe-input" value="Son of Sunita Mehta (Aunt)" placeholder="Other relationship">
+          </div>
+        </div>
+        <div class="pe-footer">
+          <span style="font-size:11px;color:#906030;">Invited · awaiting response</span>
+          <span class="pe-price" style="color:#3A5A54;">$1.99 if self-paid</span>
+        </div>
+      </div>
+
+      <!-- Add buttons -->
+      <div class="add-row">
+        <button class="add-btn">
+          <div class="add-icon">+</div>
+          Add person ($1.99)
+        </button>
+        <button class="add-btn">
+          <div class="add-icon pet">🐾</div>
+          Add pet ($0.99)
+        </button>
+      </div>
+
+      <!-- Roster summary -->
+      <div class="roster-summary">
+        <div class="rs-row"><span class="rs-label">Paid profiles (on tree now)</span><span class="rs-val">4 × $1.99 + 1 × $0.99</span></div>
+        <div class="rs-row"><span class="rs-label">Ghost profiles (visible to you)</span><span class="rs-val">2 pending</span></div>
+        <div class="rs-row"><span class="rs-label">Invites ready to send</span><span class="rs-val">1 unsent · 1 sent</span></div>
+        <div class="rs-divider"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+          <div><div class="rs-total-label">Paid today</div><div class="rs-note">No monthly fee · add more any time</div></div>
+          <div style="text-align:right;"><div class="rs-total-val">$8.95</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="decision-note" style="margin-top:16px;">
+      <span class="dn-check">✓</span>
+      <span>Ghost silhouettes are visible only to the account owner. Connections see only paid, activated profiles on the tree.</span>
+    </div>
+    <div class="decision-note">
+      <span class="dn-check">✓</span>
+      <span>Any pet — dog, cat, snake, tarantula, parrot, fish. The "animal type" field is free text, not a dropdown. People are proud of all their animals.</span>
+    </div>
+    <div class="design-note">
+      <strong>Relationship cross-linking</strong>
+      The "Also related to" field creates cross-references in the graph database — not just "Vikas's aunt" but "sister of Ramesh" and "mother of Raj." These cross-links are what make the tree intelligent. When Raj joins independently and builds his own tree, the system can suggest: "We think you may already be connected to the Bakshi household — Sunita Mehta appears in both trees." This is the consent-based merge experience.
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ── Tree species data (preloaded for demo — live version calls Claude API) ── */
+var SPECIES_DB = {
+  default: [
+    {
+      name:'Magnolia', sci:'Magnolia grandiflora', native:'Eastern Asia, Eastern North America',
+      visual:'Large waxy blooms open before the leaves appear — one of the oldest flowering trees on Earth.',
+      cultural:'Treasured in North India, the American South, China, and Japan. Represents endurance, dignity, and the beauty that comes with age.',
+      tags:['flowering','ancient','cross-cultural'],
+      layout:'spreading canopy — wide branches, parents at the trunk, children as outer branches',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M40 96 L40 60 Q40 50 42 38 Q43 24 42 10" stroke="#163820" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M40 72 Q24 58 16 44" stroke="#163820" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M41 56 Q58 44 64 30" stroke="#163820" stroke-width="2" fill="none" stroke-linecap="round"/><g transform="rotate(-25 18 46)"><ellipse cx="18" cy="46" rx="6" ry="9" fill="#003A0A"/><ellipse cx="18" cy="43" rx="2.5" ry="4" fill="#00C030"/><ellipse cx="18" cy="42.5" rx="1" ry="2" fill="#00E040"/></g><g transform="rotate(10 62 30)"><ellipse cx="62" cy="30" rx="5.5" ry="8" fill="#003A0A"/><ellipse cx="62" cy="27" rx="2.2" ry="3.5" fill="#00B02A"/><ellipse cx="62" cy="26.5" rx="1" ry="1.8" fill="#00E040"/></g><g transform="rotate(5 42 10)"><ellipse cx="42" cy="10" rx="6" ry="8" fill="#003A0A"/><ellipse cx="42" cy="7" rx="2.5" ry="4" fill="#00C030"/><ellipse cx="42" cy="6.5" rx="1" ry="2" fill="#00E040"/></g></svg>`
+    },
+    {
+      name:'Banyan', sci:'Ficus benghalensis', native:'Indian subcontinent',
+      visual:'A single tree becomes a forest — aerial roots descend and form new trunks, spreading across vast areas.',
+      cultural:'Sacred in Hinduism, Buddhism, and Jainism. Represents the extended family itself — one root, many lives.',
+      tags:['sacred','spreading','South Asia'],
+      layout:'wide horizontal — elders at the original trunk, each aerial root a new generation spreading outward',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M40 96 L40 58 Q38 48 38 42" stroke="#1A2C10" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M38 72 Q20 60 10 48" stroke="#1A2C10" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M40 62 Q60 52 70 40" stroke="#1A2C10" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M12 48 L12 80" stroke="#1A2C10" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M68 40 L68 80" stroke="#1A2C10" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="38" cy="28" rx="30" ry="20" fill="#003A0A"/><ellipse cx="28" cy="34" rx="18" ry="14" fill="#004C10"/><ellipse cx="50" cy="26" rx="16" ry="13" fill="#005818"/><ellipse cx="38" cy="18" rx="12" ry="10" fill="#007020"/><ellipse cx="38" cy="16" rx="4" ry="3.5" fill="#00A028"/></svg>`
+    },
+    {
+      name:'Bodhi Fig', sci:'Ficus religiosa', native:'Indian subcontinent, Southeast Asia',
+      visual:'Heart-shaped leaves with long drip-tips that tremble in the slightest breeze.',
+      cultural:'Under a Bodhi tree the Buddha attained enlightenment. Found at the centre of every Buddhist monastery. Represents wisdom, shelter, and continuity.',
+      tags:['sacred','spiritual','ancient'],
+      layout:'balanced canopy — symmetrical, generations radiating outward from a central anchor',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M40 96 L40 58 Q40 46 41 32 Q42 18 41 6" stroke="#1E3010" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M40 68 Q22 54 14 38" stroke="#1E3010" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M41 56 Q60 44 66 28" stroke="#1E3010" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="40" cy="26" rx="28" ry="24" fill="#003A0A"/><ellipse cx="32" cy="32" rx="18" ry="16" fill="#004C10"/><ellipse cx="50" cy="28" rx="16" ry="14" fill="#005A18"/><ellipse cx="40" cy="18" rx="12" ry="12" fill="#007020"/><ellipse cx="40" cy="15" rx="5" ry="5" fill="#00A828"/><ellipse cx="40" cy="14" rx="2" ry="2.5" fill="#00E040"/></svg>`
+    }
+  ],
+  tall: [
+    {
+      name:'Sequoia', sci:'Sequoiadendron giganteum', native:'Sierra Nevada, California',
+      visual:'The largest living things on Earth by volume — some standing for over 3,000 years.',
+      cultural:'A symbol of endurance, patience, and quiet strength. When you stand next to one, your whole sense of scale changes.',
+      tags:['tall','ancient','evergreen'],
+      layout:'single towering trunk — a clear vertical lineage, each generation a ring of the great trunk',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M40 96 L40 12" stroke="#1A3020" stroke-width="5" fill="none" stroke-linecap="round"/><polygon points="40,4 20,30 60,30" fill="#003A0A"/><polygon points="40,16 16,46 64,46" fill="#004C10"/><polygon points="40,32 14,62 66,62" fill="#005818"/><polygon points="40,46 12,76 68,76" fill="#006820"/></svg>`
+    },
+    {
+      name:'Scots Pine', sci:'Pinus sylvestris', native:'Europe and Asia',
+      visual:'Distinctive orange-red upper bark, blue-green needles, and an irregular crown that gets more beautiful with age and weather.',
+      cultural:'The Caledonian Forest — ancient Scotland. Represents survival in harsh conditions, self-reliance, and quiet permanence.',
+      tags:['tall','evergreen','cold'],
+      layout:'narrow spire — generations stacked vertically, oldest at the crown',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M40 96 L40 16" stroke="#2A1A08" stroke-width="5" fill="none" stroke-linecap="round"/><polygon points="40,6 28,22 52,22" fill="#003A0A"/><polygon points="40,16 24,36 56,36" fill="#004A10"/><polygon points="40,28 20,52 60,52" fill="#005518"/><polygon points="40,42 16,66 64,66" fill="#006020"/><polygon points="40,56 14,80 66,80" fill="#006820"/></svg>`
+    }
+  ],
+  flowering: [
+    {
+      name:'Jacaranda', sci:'Jacaranda mimosifolia', native:'South America, now worldwide',
+      visual:'Explosions of violet-blue flowers every spring, carpeting streets and pavements beneath.',
+      cultural:'Beloved from Buenos Aires to Johannesburg to Sydney. Associated with luck, wisdom, and the hopeful arrival of spring.',
+      tags:['flowering','tropical','widespread'],
+      layout:'spreading canopy with flowering tips — the newest generation always in bloom',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M40 96 L40 58 Q40 46 42 34 Q43 22 42 12" stroke="#1A1A30" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M40 68 Q22 54 16 40" stroke="#1A1A30" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M41 56 Q60 44 66 30" stroke="#1A1A30" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="18" cy="38" rx="8" ry="10" fill="#3A1A60" transform="rotate(-15 18 38)"/><ellipse cx="18" cy="35" rx="3" ry="4" fill="#8040C0"/><ellipse cx="64" cy="28" rx="7" ry="9" fill="#3A1A60" transform="rotate(15 64 28)"/><ellipse cx="64" cy="25" rx="3" ry="3.5" fill="#8040C0"/><ellipse cx="42" cy="10" rx="7" ry="9" fill="#3A1A60"/><ellipse cx="42" cy="7" rx="3" ry="3.5" fill="#8040C0"/></svg>`
+    },
+    {
+      name:'Cherry Blossom', sci:'Prunus serrulata', native:'China, Japan, Korea',
+      visual:'Clouds of pale pink blooms lasting only two weeks — the most celebrated flowering event in the world.',
+      cultural:'Hanami — the Japanese tradition of gathering under cherry trees. Represents the precious brevity of beautiful things, and the joy of being present with the people you love.',
+      tags:['flowering','East Asia','fleeting beauty'],
+      layout:'arching branches — generations spread outward and upward, each branch a different family line',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M40 96 C38 80 38 62 40 48 C41 34 42 18 42 6" stroke="#1A2C14" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M40 68 Q22 54 14 38" stroke="#1A2C14" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M41 50 Q60 40 68 24" stroke="#1A2C14" stroke-width="2" fill="none" stroke-linecap="round"/><g><ellipse cx="16" cy="36" rx="7" ry="9" fill="#003A0A"/><ellipse cx="16" cy="33" rx="3" ry="5" fill="#006018"/><ellipse cx="16" cy="32.5" rx="1.5" ry="2.5" fill="#00E040"/></g><g><ellipse cx="66" cy="26" rx="7" ry="9" fill="#003A0A"/><ellipse cx="66" cy="23" rx="3" ry="5" fill="#006018"/><ellipse cx="66" cy="22.5" rx="1.5" ry="2.5" fill="#00E040"/></g><g><ellipse cx="42" cy="6" rx="6" ry="8" fill="#003A0A"/><ellipse cx="42" cy="3.5" rx="2.5" ry="4" fill="#00C030"/></g></svg>`
+    }
+  ],
+  tropical: [
+    {
+      name:'Baobab', sci:'Adansonia digitata', native:'Sub-Saharan Africa, Madagascar',
+      visual:'Stores thousands of litres of water in its vast trunk. Upside-down tree — bare branches in the dry season look like roots reaching for the sky.',
+      cultural:'Called the Tree of Life across Africa. Villages gather beneath it. Elders tell stories under its canopy. Some specimens are over 2,000 years old.',
+      tags:['ancient','Africa','resilient'],
+      layout:'wide base spreading outward — the broadest trunk carries the whole family, branches reach in all directions',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M30 96 Q34 78 36 66 Q38 56 40 50" stroke="#1E3A10" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M50 96 Q46 78 44 66 Q42 56 40 50" stroke="#1E3A10" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M40 50 Q38 38 28 28" stroke="#163010" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M40 50 Q42 36 54 26" stroke="#163010" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M40 50 Q40 36 40 22" stroke="#163010" stroke-width="3" fill="none" stroke-linecap="round"/><g><ellipse cx="26" cy="26" rx="10" ry="8" fill="#003A0A"/><ellipse cx="26" cy="23" rx="5" ry="4" fill="#007020"/></g><g><ellipse cx="54" cy="24" rx="10" ry="8" fill="#003A0A"/><ellipse cx="54" cy="21" rx="5" ry="4" fill="#007020"/></g><g><ellipse cx="40" cy="20" rx="9" ry="7" fill="#004A10"/><ellipse cx="40" cy="18" rx="4.5" ry="3.5" fill="#008A28"/></g></svg>`
+    }
+  ],
+  evergreen: [
+    {
+      name:'Coast Redwood', sci:'Sequoia sempervirens', native:'California and Oregon coast',
+      visual:'The tallest trees on Earth, living 2,000 years in the fog belt of the Pacific coast.',
+      cultural:'Redwood forests feel like cathedrals. The trees share root systems with their neighbors — they hold each other up. A perfect metaphor for family.',
+      tags:['tall','evergreen','interconnected'],
+      layout:'vertical grove — individual trunks that are secretly connected at the root level',
+      svg: `<svg width="44" height="60" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg"><path d="M40 96 L40 8" stroke="#2A1A08" stroke-width="4" fill="none" stroke-linecap="round"/><polygon points="40,4 26,20 54,20" fill="#003A0A"/><polygon points="40,14 22,34 58,34" fill="#004810"/><polygon points="40,28 18,50 62,50" fill="#005018"/><polygon points="40,44 16,66 64,66" fill="#005C20"/><polygon points="40,58 14,80 66,80" fill="#006828"/></svg>`
+    }
+  ]
+};
+
+var selectedSpecies = null;
+var orientLocked = false;
+
+function setPrompt(text) {
+  document.getElementById('tree-search').value = text;
+  runSearch();
+}
+
+function onSearchInput() {}
+
+function getResults(query) {
+  var q = query.toLowerCase();
+  if (!q) return SPECIES_DB.default;
+  if (q.includes('tall') || q.includes('ancient') || q.includes('sequoia') || q.includes('pine') || q.includes('redwood')) return SPECIES_DB.tall;
+  if (q.includes('flower') || q.includes('bloom') || q.includes('fragrant') || q.includes('blossom') || q.includes('beautiful')) return SPECIES_DB.flowering;
+  if (q.includes('tropical') || q.includes('africa') || q.includes('baobab') || q.includes('warm') || q.includes('wide')) return SPECIES_DB.tropical;
+  if (q.includes('evergreen') || q.includes('cold') || q.includes('northern') || q.includes('winter')) return SPECIES_DB.evergreen;
+  if (q.includes('india') || q.includes('south asia') || q.includes('sacred') || q.includes('spiritual') || q.includes('banyan') || q.includes('buddhist')) {
+    return [SPECIES_DB.default[1], SPECIES_DB.default[2], SPECIES_DB.default[0]];
+  }
+  return SPECIES_DB.default;
+}
+
+function runSearch() {
+  var query = document.getElementById('tree-search').value.trim();
+  if (!query) return;
+
+  var loading = document.getElementById('ai-loading');
+  var loadingText = document.getElementById('ai-loading-text');
+  var grid = document.getElementById('species-grid');
+
+  var messages = [
+    'Searching the forest…',
+    'Consulting the botanist…',
+    'Matching your description…',
+    'Finding your tree…'
+  ];
+  loadingText.textContent = messages[Math.floor(Math.random() * messages.length)];
+  loading.classList.add('on');
+  grid.innerHTML = '';
+  document.getElementById('orient-section').style.display = 'none';
+  document.getElementById('selected-summary').style.display = 'none';
+  selectedSpecies = null;
+
+  setTimeout(function() {
+    loading.classList.remove('on');
+    var results = getResults(query);
+    renderSpecies(results);
+  }, 1200 + Math.random() * 600);
+}
+
+function renderSpecies(list) {
+  var grid = document.getElementById('species-grid');
+  grid.innerHTML = '';
+  list.forEach(function(s, i) {
+    var div = document.createElement('div');
+    div.className = 'species-card';
+    div.setAttribute('data-idx', i);
+    div.innerHTML = `
+      <div class="species-svg">${s.svg}</div>
+      <div class="species-info">
+        <div class="species-name">${s.name}</div>
+        <div class="species-sci">${s.sci}</div>
+        <div class="species-story">${s.visual} ${s.cultural}</div>
+        ${s.tags.map(function(t){ return '<span class="species-tag st-gr">'+t+'</span>'; }).join('')}
+        <div style="font-size:10px;color:#3A5A54;margin-top:5px;font-style:italic;">${s.layout}</div>
+      </div>
+      <div class="species-tick">✓</div>
+    `;
+    div.onclick = function() { pickSpecies(s, div); };
+    grid.appendChild(div);
+
+    div.style.opacity = '0';
+    div.style.transform = 'translateY(8px)';
+    setTimeout(function() {
+      div.style.transition = 'opacity .25s, transform .25s';
+      div.style.opacity = '1';
+      div.style.transform = 'translateY(0)';
+    }, i * 80);
+  });
+}
+
+function pickSpecies(species, el) {
+  document.querySelectorAll('.species-card').forEach(function(c){ c.classList.remove('on'); });
+  el.classList.add('on');
+  selectedSpecies = species;
+  document.getElementById('orient-section').style.display = 'block';
+  document.getElementById('confirm-btn').disabled = false;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function pickOrient(el, val) {
+  document.querySelectorAll('.orient-opt').forEach(function(o){ o.classList.remove('on'); });
+  el.classList.add('on');
+}
+
+function confirmTree() {
+  if (!selectedSpecies) return;
+  document.getElementById('orient-section').style.display = 'none';
+  document.getElementById('species-grid').innerHTML = '';
+  document.getElementById('selected-summary').style.display = 'block';
+  document.getElementById('sel-name').textContent = selectedSpecies.name + ' — ' + selectedSpecies.sci;
+  document.getElementById('sel-story').textContent = selectedSpecies.cultural + ' Every invitation you send will carry this tree\'s story.';
+}
+
+// Show default species on load
+renderSpecies(SPECIES_DB.default);
+</script>
+</body>
+</html>

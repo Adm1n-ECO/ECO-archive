@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO — Living Design Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* ── Reset ───────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;scroll-behavior:smooth;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+/* ── Sticky top bar ──────────────────────────────────── */
+.top-bar{
+  position:sticky;top:0;z-index:500;
+  background:#0D1820;border-bottom:1px solid rgba(0,229,204,0.10);
+  height:52px;display:flex;align-items:center;gap:16px;padding:0 24px;
+}
+.tb-logo{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.10em;color:#E8F4F0;white-space:nowrap;}
+.tb-logo .cy{color:#00E5CC;}.tb-logo .gr{color:#00E040;}
+.tb-badge{background:rgba(0,224,64,0.12);border:1px solid rgba(0,224,64,0.25);color:#00A028;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:999px;white-space:nowrap;}
+.tb-version{font-family:'JetBrains Mono',monospace;font-size:10px;color:#3A5A54;margin-left:auto;white-space:nowrap;}
+.tb-tab{padding:4px 10px;font-size:12px;font-weight:500;color:#3A5A54;border-radius:6px;cursor:pointer;transition:all .14s;white-space:nowrap;}
+.tb-tab:hover{color:#00E5CC;background:rgba(0,229,204,0.07);}
+.tb-tab.on{color:#00E5CC;background:rgba(0,229,204,0.10);}
+
+/* ── Layout ──────────────────────────────────────────── */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 52px);}
+@media(max-width:720px){.layout{grid-template-columns:1fr;}}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+.sidebar{
+  border-right:1px solid rgba(0,229,204,0.07);
+  padding:20px 0 40px;
+  position:sticky;top:52px;height:calc(100vh - 52px);
+  overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-track{background:transparent;}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(0,229,204,0.15);border-radius:3px;}
+
+.sb-section{padding:0 12px;margin-bottom:6px;}
+.sb-section-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;padding:10px 8px 6px;display:block;}
+.sb-link{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;font-size:12px;font-weight:500;color:#5A8A80;text-decoration:none;transition:all .14s;cursor:pointer;}
+.sb-link:hover{color:#C8D4D0;background:rgba(0,229,204,0.05);}
+.sb-link.on{color:#00E5CC;background:rgba(0,229,204,0.10);}
+.sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.sb-status{font-size:9px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-left:auto;white-space:nowrap;}
+.st-ready{color:#009828;}.st-discuss{color:#009090;}.st-draft{color:#906030;}.st-new{color:#00C030;}
+.sb-divider{height:1px;background:rgba(0,229,204,0.06);margin:8px 12px;}
+
+/* ── Main content ────────────────────────────────────── */
+.main{overflow-y:auto;padding:0;}
+.tab-panel{display:none;}
+.tab-panel.on{display:block;}
+
+/* ── Dashboard panel ─────────────────────────────────── */
+.dash{padding:28px 28px 60px;max-width:900px;}
+
+.hero-block{margin-bottom:32px;}
+.hero-eyebrow{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#00E5CC;margin-bottom:10px;}
+.hero-h1{font-family:'DM Serif Display',serif;font-size:2rem;letter-spacing:-.02em;line-height:1.18;color:#E8F4F0;margin-bottom:8px;}
+.hero-h1 em{font-style:italic;color:#00E040;}
+.hero-sub{font-size:.95rem;color:#5A8A80;line-height:1.7;max-width:520px;}
+
+/* Progress overview */
+.progress-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:24px;}
+.prog-card{background:#0D1820;border:1px solid rgba(0,229,204,0.09);border-radius:10px;padding:14px;}
+.prog-num{font-size:24px;font-weight:600;margin-bottom:2px;}
+.prog-lbl{font-size:11px;color:#3A5A54;}
+.prog-bar-wrap{height:3px;background:rgba(0,229,204,0.08);border-radius:999px;margin-top:8px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:999px;transition:width .4s;}
+
+/* Decision board */
+.decisions{margin-bottom:28px;}
+.decisions-title{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(0,229,204,0.07);}
+.decision-item{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(0,229,204,0.05);}
+.decision-item:last-child{border-bottom:none;}
+.dec-num{min-width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:1px;}
+.dec-open{background:rgba(224,144,64,0.15);color:#E09040;}
+.dec-closed{background:rgba(0,224,64,0.12);color:#00A028;}
+.dec-label{font-size:12px;font-weight:500;color:#C8D4D0;margin-bottom:2px;line-height:1.4;}
+.dec-detail{font-size:11px;color:#3A5A54;line-height:1.5;}
+.dec-tag{display:inline-block;font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:1px 6px;border-radius:999px;margin-top:4px;}
+.dec-tag-open{background:rgba(224,144,64,0.10);color:#C07030;border:1px solid rgba(224,144,64,0.20);}
+.dec-tag-done{background:rgba(0,224,64,0.08);color:#009020;border:1px solid rgba(0,224,64,0.18);}
+
+/* Session log */
+.session-log{margin-bottom:20px;}
+.session-item{background:#0D1820;border:1px solid rgba(0,229,204,0.09);border-radius:10px;padding:14px;margin-bottom:8px;}
+.session-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.session-num{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;color:#00E5CC;background:rgba(0,229,204,0.08);padding:2px 8px;border-radius:4px;}
+.session-date{font-size:11px;color:#3A5A54;}
+.session-title{font-size:13px;font-weight:500;color:#E8F4F0;}
+.session-items{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+.session-item-row{display:flex;gap:6px;align-items:center;font-size:11px;color:#5A8A80;}
+.si-dot{width:5px;height:5px;border-radius:50%;background:#00E040;flex-shrink:0;}
+
+/* ── Review panel ────────────────────────────────────── */
+.review-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:28px;}
+.rev-card{background:#0D1820;border:1px solid rgba(0,229,204,0.09);border-radius:12px;padding:20px;text-decoration:none;color:inherit;transition:all .18s;display:flex;flex-direction:column;gap:12px;position:relative;cursor:pointer;}
+.rev-card:hover{border-color:rgba(0,229,204,0.26);background:#101E2C;transform:translateY(-2px);}
+.rev-card.feat{border-color:rgba(0,224,64,0.18);}
+.rev-card.feat:hover{border-color:rgba(0,224,64,0.40);}
+.rc-icon{width:42px;height:42px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.rc-icon.cy{background:rgba(0,229,204,0.10);border:1px solid rgba(0,229,204,0.18);}
+.rc-icon.gr{background:rgba(0,224,64,0.10);border:1px solid rgba(0,224,64,0.18);}
+.rc-icon.am{background:rgba(224,144,64,0.10);border:1px solid rgba(224,144,64,0.18);}
+.rc-icon.pu{background:rgba(144,96,224,0.10);border:1px solid rgba(144,96,224,0.18);}
+.rc-head{display:flex;align-items:center;gap:10px;}
+.rc-status{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;}
+.rcs-ready  {background:rgba(0,224,64,0.10);  color:#00A028; border:1px solid rgba(0,224,64,0.20);}
+.rcs-discuss{background:rgba(0,229,204,0.10);  color:#009090; border:1px solid rgba(0,229,204,0.20);}
+.rcs-draft  {background:rgba(224,144,64,0.10); color:#906030; border:1px solid rgba(224,144,64,0.20);}
+.rcs-new    {background:rgba(0,224,64,0.14);   color:#00C030; border:1px solid rgba(0,224,64,0.28);}
+.rcs-wip    {background:rgba(144,96,224,0.10); color:#6040A0; border:1px solid rgba(144,96,224,0.20);}
+.rc-title{font-size:14px;font-weight:500;color:#E8F4F0;line-height:1.3;}
+.rc-desc{font-size:12px;color:#5A8A80;line-height:1.6;flex:1;}
+.rc-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.rc-tag{font-size:9px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;}
+.rc-tag-cy{background:rgba(0,229,204,0.07);color:#008A80;border:1px solid rgba(0,229,204,0.14);}
+.rc-tag-gr{background:rgba(0,224,64,0.07);color:#008020;border:1px solid rgba(0,224,64,0.14);}
+.rc-tag-am{background:rgba(224,144,64,0.07);color:#906030;border:1px solid rgba(224,144,64,0.14);}
+.rc-tag-pu{background:rgba(144,96,224,0.07);color:#5030A0;border:1px solid rgba(144,96,224,0.14);}
+.rc-arrow{position:absolute;top:18px;right:16px;font-size:14px;color:#3A5A54;transition:color .14s,transform .14s;}
+.rev-card:hover .rc-arrow{color:#00E5CC;transform:translate(2px,-2px);}
+.rc-session{font-size:9px;font-family:'JetBrains Mono',monospace;color:#3A5A54;margin-top:4px;}
+.review-section-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;padding:20px 28px 8px;border-top:1px solid rgba(0,229,204,0.06);}
+.review-section-label:first-child{border-top:none;padding-top:28px;}
+
+/* ── Decisions panel ─────────────────────────────────── */
+.decisions-panel{padding:28px;max-width:800px;}
+.dp-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.df{padding:4px 12px;font-size:11px;font-weight:500;border:1px solid rgba(0,229,204,0.15);border-radius:999px;background:transparent;color:#3A5A54;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;transition:all .14s;}
+.df:hover{color:#C8D4D0;border-color:rgba(0,229,204,0.30);}
+.df.on{background:rgba(0,229,204,0.10);border-color:rgba(0,229,204,0.30);color:#00E5CC;}
+.dec-full{background:#0D1820;border:1px solid rgba(0,229,204,0.09);border-radius:12px;padding:18px;margin-bottom:10px;}
+.dec-full-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+.dec-full-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.dec-open-bg{background:rgba(224,144,64,0.15);color:#E09040;}
+.dec-done-bg{background:rgba(0,224,64,0.12);color:#00A028;}
+.dec-full-title{font-size:14px;font-weight:500;color:#E8F4F0;line-height:1.4;flex:1;}
+.dec-full-area{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#3A5A54;margin-bottom:6px;}
+.dec-full-body{font-size:12px;color:#5A8A80;line-height:1.65;}
+.dec-full-options{margin-top:10px;display:flex;flex-direction:column;gap:4px;}
+.dec-opt{display:flex;gap:8px;align-items:flex-start;font-size:12px;color:#5A8A80;padding:4px 0;}
+.dec-opt-letter{width:18px;height:18px;border-radius:4px;background:rgba(0,229,204,0.08);border:1px solid rgba(0,229,204,0.15);color:#00A090;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-family:'JetBrains Mono',monospace;}
+.dec-full-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,229,204,0.07);}
+.dec-meta-item{font-size:10px;color:#3A5A54;display:flex;align-items:center;gap:4px;}
+.dec-meta-dot{width:5px;height:5px;border-radius:50%;}
+
+/* ── Session log panel ───────────────────────────────── */
+.sessions-panel{padding:28px;max-width:800px;}
+.session-full{background:#0D1820;border:1px solid rgba(0,229,204,0.09);border-radius:12px;padding:20px;margin-bottom:12px;}
+.sf-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.sf-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;color:#00E5CC;background:rgba(0,229,204,0.08);padding:3px 10px;border-radius:5px;}
+.sf-date{font-size:11px;color:#3A5A54;margin-left:auto;}
+.sf-title{font-size:14px;font-weight:500;color:#E8F4F0;}
+.sf-built{margin-bottom:12px;}
+.sf-section-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#3A5A54;margin-bottom:8px;}
+.sf-item{display:flex;gap:8px;font-size:12px;color:#7AADA0;padding:3px 0;align-items:center;}
+.sf-check{color:#00E040;font-size:11px;flex-shrink:0;}
+.sf-pending{font-size:12px;color:#5A8A80;font-style:italic;}
+
+/* ── Util ────────────────────────────────────────────── */
+.hidden{display:none!important;}
+.section-divider{height:1px;background:rgba(0,229,204,0.06);margin:0;}
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <div class="tb-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+  <div class="tb-badge">Living Design Review</div>
+  <div class="tb-tab on" onclick="switchTab('dashboard',this)">Dashboard</div>
+  <div class="tb-tab" onclick="switchTab('review',this)">Design pages</div>
+  <div class="tb-tab" onclick="switchTab('decisions',this)">Decisions</div>
+  <div class="tb-tab" onclick="switchTab('sessions',this)">Session log</div>
+  <div class="tb-tab" onclick="switchTab('visualtree',this)" style="color:#00E040;border-bottom:2px solid transparent;">🌳 River View</div>
+  <div class="tb-version">v0.7 · Session 4</div>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <!-- Brand -->
+    <div class="sb-section">
+      <span class="sb-section-label">Brand &amp; identity</span>
+      <a class="sb-link" onclick="handleSidebarLink(event,'01-logo.html')" href="01-logo.html" target="review-frame"><div class="sb-dot" style="background:#00E040"></div>Logo &amp; mark<span class="sb-status st-discuss">Discuss</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'02-theme.html')" href="02-theme.html" target="review-frame"><div class="sb-dot" style="background:#00E5CC"></div>Theme system<span class="sb-status st-discuss">Discuss</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'03-typography.html')" href="03-typography.html" target="review-frame"><div class="sb-dot" style="background:#9060E0"></div>Typography<span class="sb-status st-ready">Ready</span></a>
+    </div>
+    <div class="sb-divider"></div>
+    <!-- Marketing -->
+    <div class="sb-section">
+      <span class="sb-section-label">Marketing</span>
+      <a class="sb-link" onclick="handleSidebarLink(event,'04-homepage.html')" href="04-homepage.html" target="review-frame"><div class="sb-dot" style="background:#00E040"></div>Homepage<span class="sb-status st-discuss">Discuss</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'05-pricing.html')" href="05-pricing.html" target="review-frame"><div class="sb-dot" style="background:#00E5CC"></div>Pricing<span class="sb-status st-discuss">Discuss</span></a>
+    </div>
+    <div class="sb-divider"></div>
+    <!-- Core app -->
+    <div class="sb-section">
+      <span class="sb-section-label">Core app</span>
+      <a class="sb-link" onclick="handleSidebarLink(event,'06-globe.html')" href="06-globe.html" target="review-frame"><div class="sb-dot" style="background:#00E5CC"></div>Globe view<span class="sb-status st-discuss">Discuss</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'07-segment-demo.html')" href="07-segment-demo.html" target="review-frame"><div class="sb-dot" style="background:#00E040"></div>Segment toggle<span class="sb-status st-discuss">Discuss</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'08-tree-selector.html')" href="08-tree-selector.html" target="review-frame"><div class="sb-dot" style="background:#00E040"></div>Tree selector<span class="sb-status st-draft">Draft</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'app/face-morph.html')" href="app/face-morph.html" target="review-frame"><div class="sb-dot" style="background:#9060E0;box-shadow:0 0 6px #9060E088;"></div>Generational faces &amp; game<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'app/vendor-marketplace.html')" href="app/vendor-marketplace.html" target="review-frame"><div class="sb-dot" style="background:#E09040;box-shadow:0 0 6px #E0904088;"></div>Partner services<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'app/visual-river.html')" href="app/visual-river.html" target="review-frame"><div class="sb-dot" style="background:#00E040;box-shadow:0 0 6px #00E04088;"></div>🌳 Visual family river<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'app/tree.html')" href="app/tree.html" target="review-frame"><div class="sb-dot" style="background:#00E040"></div>Tree view — network graph<span class="sb-status st-new">S2</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'app/household.html')" href="app/household.html" target="review-frame"><div class="sb-dot" style="background:#00E5CC"></div>Household profile page<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'app/moderator.html')" href="app/moderator.html" target="review-frame"><div class="sb-dot" style="background:#00E040"></div>Moderator system<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'app/dormant-profiles.html')" href="app/dormant-profiles.html" target="review-frame"><div class="sb-dot" style="background:#9060E0"></div>Profile lifecycle states<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'09-dashboard.html')" href="09-dashboard.html" target="review-frame"><div class="sb-dot" style="background:#00E5CC"></div>Dashboard<span class="sb-status st-draft">Draft</span></a>
+    </div>
+    <div class="sb-divider"></div>
+    <!-- UI -->
+    <div class="sb-section">
+      <span class="sb-section-label">UI system</span>
+      <a class="sb-link" onclick="handleSidebarLink(event,'10-components.html')" href="10-components.html" target="review-frame"><div class="sb-dot" style="background:#9060E0"></div>Components<span class="sb-status st-ready">Ready</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'11-nav-footer.html')" href="11-nav-footer.html" target="review-frame"><div class="sb-dot" style="background:#00E5CC"></div>Nav &amp; footer<span class="sb-status st-ready">Ready</span></a>
+    </div>
+    <div class="sb-divider"></div>
+    <!-- Tools -->
+    <div class="sb-section">
+      <span class="sb-section-label">Dev tools</span>
+      <a class="sb-link" href="admin-feature-matrix.html" target="review-frame"><div class="sb-dot" style="background:#E09040"></div>Feature matrix</a>
+      <a class="sb-link" href="../index.html" target="review-frame"><div class="sb-dot" style="background:#3A5A54"></div>Homepage (annotated)</a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'12-signup-flow.html')" href="12-signup-flow.html" target="review-frame"><div class="sb-dot" style="background:#00E040"></div>Signup flow<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'13-tree-roster.html')" href="13-tree-roster.html" target="review-frame"><div class="sb-dot" style="background:#00E5CC"></div>Tree selector + roster<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'14-invite-join.html')" href="14-invite-join.html" target="review-frame"><div class="sb-dot" style="background:#00E040"></div>Invite email + join flow<span class="sb-status st-new">New</span></a>
+      <a class="sb-link" onclick="handleSidebarLink(event,'15-stewardship.html')" href="15-stewardship.html" target="review-frame"><div class="sb-dot" style="background:#9060E0"></div>Stewardship &amp; memory<span class="sb-status st-new">New</span></a>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div class="main">
+
+    <!-- ══ DASHBOARD TAB ══════════════════════════════ -->
+    <div class="tab-panel on" id="tab-dashboard">
+      <div class="dash">
+        <div class="hero-block">
+          <div class="hero-eyebrow">EternalCurrent.Online · Pre-deployment design phase</div>
+          <h1 class="hero-h1">Vikas &amp; Isaiah —<br><em>everything lives here.</em></h1>
+          <p class="hero-sub">Every feature we design, every decision we make, every discussion we have gets added to this hub. Use the tabs above to switch between the design pages, open decisions, and session log. Nothing here is final until you mark it so.</p>
+        </div>
+
+        <!-- Progress -->
+        <div class="decisions-title" style="margin-bottom:12px;">Progress overview</div>
+        <div class="progress-grid">
+          <div class="prog-card">
+            <div class="prog-num" style="color:#00E5CC">15</div>
+            <div class="prog-lbl">Pages built</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:22%;background:#00E5CC;"></div></div>
+          </div>
+          <div class="prog-card">
+            <div class="prog-num" style="color:#E09040">19</div>
+            <div class="prog-lbl">Open decisions</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:0%;background:#E09040;"></div></div>
+          </div>
+          <div class="prog-card">
+            <div class="prog-num" style="color:#00E040">14</div>
+            <div class="prog-lbl">Decisions locked</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:0%;background:#00E040;"></div></div>
+          </div>
+          <div class="prog-card">
+            <div class="prog-num" style="color:#9060E0">68</div>
+            <div class="prog-lbl">Features tracked</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:10%;background:#9060E0;"></div></div>
+          </div>
+          <div class="prog-card">
+            <div class="prog-num" style="color:#3A5A54">1</div>
+            <div class="prog-lbl">Sessions complete</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:3%;background:#3A5A54;"></div></div>
+          </div>
+          <div class="prog-card">
+            <div class="prog-num" style="color:#E8F4F0">0%</div>
+            <div class="prog-lbl">Ready to deploy</div>
+            <div class="prog-bar-wrap"><div class="prog-bar" style="width:0%;background:#00E040;"></div></div>
+          </div>
+        </div>
+
+        <!-- Priority decisions -->
+        <div class="decisions">
+          <div class="decisions-title">Priority decisions — discuss these first with Isaiah</div>
+          <div class="decision-item">
+            <div class="dec-num dec-open">1</div>
+            <div>
+              <div class="dec-label">Which theme is the default for new users?</div>
+              <div class="dec-detail">Deep Water (100% dark, max contrast, closest to CRUNOD) vs River Depth (75%, easier on eyes). This affects first impressions at signup.</div>
+              <span class="dec-tag dec-tag-open">Open · Theme</span>
+            </div>
+          </div>
+          <div class="decision-item">
+            <div class="dec-num dec-open">2</div>
+            <div>
+              <div class="dec-label">Homepage hero headline — what is the one sentence?</div>
+              <div class="dec-detail">"Your family river is alive and growing" is a placeholder. Isaiah needs to write the real line. What feeling in 3 seconds?</div>
+              <span class="dec-tag dec-tag-open">Open · Copy · Isaiah</span>
+            </div>
+          </div>
+          <div class="decision-item">
+            <div class="dec-num dec-open">3</div>
+            <div>
+              <div class="dec-label">Logo wordmark — monospace (tech) or serif (warm)?</div>
+              <div class="dec-detail">JetBrains Mono connects to CRUNOD parent brand. DM Serif Display would feel warmer and more family-oriented. Significant identity decision.</div>
+              <span class="dec-tag dec-tag-open">Open · Brand · Isaiah</span>
+            </div>
+          </div>
+          <div class="decision-item">
+            <div class="dec-num dec-open">4</div>
+            <div>
+              <div class="dec-label">Family plan price and structure</div>
+              <div class="dec-detail">Personal is confirmed at $3.99/mo. Family plan is TBD — price, household count limit, who pays, what's shared.</div>
+              <span class="dec-tag dec-tag-open">Open · Business · Vikas</span>
+            </div>
+          </div>
+          <div class="decision-item">
+            <div class="dec-num dec-open">5</div>
+            <div>
+              <div class="dec-label">Globe on homepage — show now or tease as coming?</div>
+              <div class="dec-detail">Globe is Phase 2. Do we show it on the homepage at launch (setting expectation) or hold it back and surprise users when it ships?</div>
+              <span class="dec-tag dec-tag-open">Open · Product · Both</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session log preview -->
+        <div class="decisions-title">Latest session</div>
+        <div class="session-item" style="border:1px solid rgba(0,224,64,.15);background:rgba(0,224,64,.04);border-radius:10px;padding:14px;margin-bottom:10px;">
+          <div class="session-header">
+            <span class="session-num">Session 2</span>
+            <span class="session-date">19 March 2026</span>
+          </div>
+          <div style="font-size:13px;font-weight:500;color:#E8F4F0;margin-bottom:8px;">Core app — tree view, moderators, lifecycle states, household profile</div>
+          <div class="session-items">
+            <div class="session-item-row"><div class="si-dot"></div>Decision 31 locked: Top 3 most active — no fixed threshold</div>
+            <div class="session-item-row"><div class="si-dot"></div>Decision 33 locked: No default segments — users name their own</div>
+            <div class="session-item-row"><div class="si-dot"></div>app/tree.html — D3 force graph, 21 nodes, 5 segments, household panel</div>
+            <div class="session-item-row"><div class="si-dot"></div>app/moderator.html — candidates, volunteer prompt, powers, dispute queue</div>
+            <div class="session-item-row"><div class="si-dot"></div>app/dormant-profiles.html — 4 lifecycle states with tree excerpt</div>
+            <div class="session-item-row"><div class="si-dot"></div>app/household.html — full profile page with members, events, sidebar</div>
+          </div>
+        </div>
+        <div class="session-item">
+          <div class="session-header">
+            <span class="session-num">Session 1</span>
+            <span class="session-date">19 March 2026</span>
+          </div>
+          <div style="font-size:13px;font-weight:500;color:#E8F4F0;margin-bottom:8px;">Foundation — brand, design system, core features</div>
+          <div class="session-items">
+            <div class="session-item-row"><div class="si-dot"></div>CSS theme system (4 dark themes, CRUNOD brand)</div>
+            <div class="session-item-row"><div class="si-dot"></div>Logo &amp; mark system (dual magnolia, brand spec)</div>
+            <div class="session-item-row"><div class="si-dot"></div>Globe — 3D canvas engine + day/night satellite view</div>
+            <div class="session-item-row"><div class="si-dot"></div>Segment toggle demo · Tree selector · Dashboard</div>
+            <div class="session-item-row"><div class="si-dot"></div>Feature matrix (68 features, 4 phases)</div>
+            <div class="session-item-row"><div class="si-dot"></div>Design review hub (this page) — 11 design pages</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ DESIGN PAGES TAB ══════════════════════════ -->
+    <div class="tab-panel" id="tab-review">
+
+      <iframe name="review-frame" id="review-frame" src="about:blank" style="display:none;width:100%;height:calc(100vh - 100px);border:none;border-radius:10px;" onload="this.style.display=this.src!=='about:blank'?'block':'none';"></iframe>
+
+      <div class="review-section-label" id="review-grid-area">Brand &amp; identity</div>
+      <div class="review-grid" style="padding-top:12px;">
+
+        <a class="rev-card feat" href="01-logo.html">
+          <div class="rc-head"><div class="rc-icon gr">🌳</div><span class="rc-status rcs-discuss">Discuss</span></div>
+          <div class="rc-title">Logo &amp; mark system</div>
+          <div class="rc-desc">Dual magnolia tree. Green = family, Cyan = network. Full reproduction system — print, embroidery, favicon, reversed. Brand spec document included.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-gr">Primary mark</span><span class="rc-tag rc-tag-cy">5 variants</span><span class="rc-tag rc-tag-am">Print-ready</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+        <a class="rev-card feat" href="02-theme.html">
+          <div class="rc-head"><div class="rc-icon cy">◑</div><span class="rc-status rcs-discuss">Discuss</span></div>
+          <div class="rc-title">Theme system</div>
+          <div class="rc-desc">4 dark themes. Deep Water → River Depth → Midstream → River Light. Live switcher on this page. Every component updates in real time. Max 8 colours per theme.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-cy">4 themes</span><span class="rc-tag rc-tag-gr">Live preview</span><span class="rc-tag rc-tag-am">CRUNOD DNA</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+        <a class="rev-card" href="03-typography.html">
+          <div class="rc-head"><div class="rc-icon pu" style="font-family:'DM Serif Display',serif;font-size:22px;">Aa</div><span class="rc-status rcs-ready">Ready</span></div>
+          <div class="rc-title">Typography system</div>
+          <div class="rc-desc">DM Serif Display · DM Sans · JetBrains Mono. Full scale, weights, and usage rules. Compare serif vs mono wordmark.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">3 typefaces</span><span class="rc-tag rc-tag-cy">Scale</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+      </div>
+
+      <div class="section-divider"></div>
+      <div class="review-section-label">Marketing &amp; public pages</div>
+      <div class="review-grid" style="padding-top:12px;">
+
+        <a class="rev-card feat" href="04-homepage.html">
+          <div class="rc-head"><div class="rc-icon gr">⌂</div><span class="rc-status rcs-discuss">Discuss</span></div>
+          <div class="rc-title">Homepage — full layout</div>
+          <div class="rc-desc">Hero, differentiators, segment demo, globe teaser, how it works, pricing, founders quote, CTA. Every section has yellow discussion annotations.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-gr">8 sections</span><span class="rc-tag rc-tag-cy">Annotated</span><span class="rc-tag rc-tag-am">Content TBD</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+        <a class="rev-card" href="05-pricing.html">
+          <div class="rc-head"><div class="rc-icon cy" style="font-size:22px;font-weight:600;font-family:'JetBrains Mono',monospace;">$</div><span class="rc-status rcs-discuss">Discuss</span></div>
+          <div class="rc-title">Pricing page</div>
+          <div class="rc-desc">Free · Personal ($3.99/mo) · Family (TBD). Feature comparison. The conversion moment. Family plan price and structure is an open decision.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-cy">3 tiers</span><span class="rc-tag rc-tag-am">Price TBD</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+      </div>
+
+      <a class="rev-card feat" href="12-signup-flow.html">
+          <div class="rc-head"><div class="rc-icon gr">→</div><span class="rc-status rcs-new">New</span></div>
+          <div class="rc-title">Signup &amp; onboarding flow</div>
+          <div class="rc-desc">Complete 7-step journey. Email → household → tree + city → globe aha moment → add profiles (incl. managed) → pay per-profile → live. Every decision reflected in the screens.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-gr">7 steps</span><span class="rc-tag rc-tag-cy">Per-profile pay</span><span class="rc-tag rc-tag-am">Managed profiles</span></div>
+          <div class="rc-session">Session 1 · Update · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+      <a class="rev-card feat" href="14-invite-join.html">
+          <div class="rc-head"><div class="rc-icon gr">✉</div><span class="rc-status rcs-new">New</span></div>
+          <div class="rc-title">Invite email + join flow</div>
+          <div class="rc-desc">3-column design: invitation email template (3 variants — nephew, grandchild, friend), join flow screens (3 paths: view/build/later), and full ghost node state spec (4 states, visibility rules, DB schema note).</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-gr">Email template</span><span class="rc-tag rc-tag-cy">Join flow</span><span class="rc-tag rc-tag-am">Ghost nodes</span></div>
+          <div class="rc-session">Session 1 · Update · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+            <a class="rev-card feat" href="15-stewardship.html">
+          <div class="rc-head"><div class="rc-icon pu">🕯</div><span class="rc-status rcs-new">New</span></div>
+          <div class="rc-title">Stewardship &amp; memory system</div>
+          <div class="rc-desc">4 profile lifecycle states (active, shadow, kept, in memoriam). Adopt flow for silent profiles. Shared stewardship model. Memory upgrade ($5.99/mo per profile). In Memoriam design. Full privacy model table. 2 decisions still open.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">Memory lifecycle</span><span class="rc-tag rc-tag-cy">Stewardship</span><span class="rc-tag rc-tag-am">Privacy model</span></div>
+          <div class="rc-session">Session 1 · Update · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+            <a class="rev-card feat" href="13-tree-roster.html">
+          <div class="rc-head"><div class="rc-icon cy">🌿</div><span class="rc-status rcs-new">New</span></div>
+          <div class="rc-title">AI river selector + household roster</div>
+          <div class="rc-desc">Free-text → Claude API → 3–5 real species with stories. Orientation picker. Full household roster with relationship cross-links, managed profiles, pet profiles (any animal), ghost silhouettes for pending, per-profile pricing summary.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-cy">AI-powered</span><span class="rc-tag rc-tag-gr">Relationship model</span><span class="rc-tag rc-tag-am">Per-profile pay</span></div>
+          <div class="rc-session">Session 1 · Update · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+      <div class="section-divider"></div>
+      <div class="review-section-label">Core app features</div>
+      <div class="review-grid" style="padding-top:12px;">
+
+        <a class="rev-card feat" href="06-globe.html">
+          <div class="rc-head"><div class="rc-icon cy">◉</div><span class="rc-status rcs-discuss">Discuss</span></div>
+          <div class="rc-title">Globe — day/night satellite</div>
+          <div class="rc-desc">Real-time 3D globe. Actual solar position math. City lights on night side (37 metros). Migration arcs as airline routes. Tier filters. Drag to rotate.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">Key feature</span><span class="rc-tag rc-tag-cy">Live solar</span><span class="rc-tag rc-tag-gr">Migration</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+        <a class="rev-card feat" href="07-segment-demo.html">
+          <div class="rc-head"><div class="rc-icon gr">⬡</div><span class="rc-status rcs-discuss">Discuss</span></div>
+          <div class="rc-title">Segment toggle system</div>
+          <div class="rc-desc">The #1 differentiator. Toggle Family, Friends, School, Work layers on and off. Watch the network change. The feature people demo at dinner.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">Differentiator</span><span class="rc-tag rc-tag-gr">Interactive</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+        <a class="rev-card" href="08-tree-selector.html">
+          <div class="rc-head"><div class="rc-icon gr" style="font-size:20px;">🌿</div><span class="rc-status rcs-draft">Draft</span></div>
+          <div class="rc-title">Tree selector — onboarding</div>
+          <div class="rc-desc">Choose your tree species at signup. Magnolia (default), Oak, Banyan, Cherry Blossom, Baobab. Each drawn in the ECO colour system. Interactive — click to select.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-gr">5 species</span><span class="rc-tag rc-tag-cy">Onboarding</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+        <a class="rev-card" href="09-dashboard.html">
+          <div class="rc-head"><div class="rc-icon cy">▦</div><span class="rc-status rcs-draft">Draft</span></div>
+          <div class="rc-title">Dashboard — app home</div>
+          <div class="rc-desc">First page post-login. Stats, activity feed, pending connections, invite CTA. Two-column layout with sidebar. Mock data — no real backend.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-cy">Post-login</span><span class="rc-tag rc-tag-am">Mock data</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+      </div>
+
+      <div class="section-divider"></div>
+      <div class="review-section-label">UI system</div>
+      <div class="review-grid" style="padding-top:12px;">
+
+        <a class="rev-card" href="10-components.html">
+          <div class="rc-head"><div class="rc-icon pu">◻</div><span class="rc-status rcs-ready">Ready</span></div>
+          <div class="rc-title">Component library</div>
+          <div class="rc-desc">Buttons, badges, cards, inputs, avatars, segment pills, status indicators. Every reusable UI element in the ECO system.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">All components</span><span class="rc-tag rc-tag-cy">4 themes</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+        <a class="rev-card" href="11-nav-footer.html">
+          <div class="rc-head"><div class="rc-icon cy" style="font-size:20px;">☰</div><span class="rc-status rcs-ready">Ready</span></div>
+          <div class="rc-title">Navigation &amp; footer</div>
+          <div class="rc-desc">Public nav, app nav, admin nav, footer, theme selector, admin button. All 4 nav types and the floating widget system.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-cy">4 nav types</span><span class="rc-tag rc-tag-gr">Theme selector</span></div>
+          <div class="rc-session">Session 1 · 2026-03-19</div>
+          <div class="rc-arrow">↗</div>
+        </a>
+
+      </div>
+
+      <div class="section-divider"></div>
+      <div class="review-section-label">Coming in future sessions</div>
+      <div class="review-grid" style="padding-top:12px;">
+
+        <a class="rev-card feat" href="app/tree.html">
+          <div class="rc-head"><div class="rc-icon cy">🔗</div><span class="rc-status rcs-done">Built</span></div>
+          <div class="rc-title">Tree view — network graph</div>
+          <div class="rc-desc">D3 force-directed graph. 21 nodes, 5 user-named segments with live toggle. Click any household to open the side panel. Moderator badge, ghost node, privacy levels, search, zoom, stats bar.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">Phase 1 · MVP</span></div>
+          <div class="rc-session">Session 2 · 19 Mar 2026</div>
+        </a>
+
+
+
+        <div class="rev-card" style="opacity:.55;cursor:default;">
+          <div class="rc-head"><div class="rc-icon am">📬</div><span class="rc-status rcs-wip">Planned</span></div>
+          <div class="rc-title">Invitation &amp; join flow</div>
+          <div class="rc-desc">What a new invitee sees when they click their join link. How the tree merge experience works for existing users.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-am">Phase 1 · MVP</span></div>
+          <div class="rc-session">Not yet built</div>
+        </div>
+
+        <a class="rev-card feat" href="app/household.html">
+          <div class="rc-head"><div class="rc-icon cy">⌂</div><span class="rc-status rcs-done">Built</span></div>
+          <div class="rc-title">Household profile page</div>
+          <div class="rc-desc">Hero with state badge. Members list with roles. Life events timeline. Photos grid. Sidebar: connection type, segments, privacy controls you share, mutual connections.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-cy">Phase 1 · MVP</span></div>
+          <div class="rc-session">Session 2 · 19 Mar 2026</div>
+        </a>
+
+        <a class="rev-card feat" href="app/moderator.html">
+          <div class="rc-head"><div class="rc-icon gr">🛡️</div><span class="rc-status rcs-done">Built</span></div>
+          <div class="rc-title">Moderator system</div>
+          <div class="rc-desc">5 tabs: candidate list with activity scores, active moderator slots, volunteer prompt (what the nominated user sees), full powers reference table, dispute queue with 2 live disputes.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-gr">Decision 31 locked</span><span class="rc-tag rc-tag-cy">Phase 1</span></div>
+          <div class="rc-session">Session 2 · 19 Mar 2026</div>
+        </a>
+
+        <a class="rev-card feat" href="app/dormant-profiles.html">
+          <div class="rc-head"><div class="rc-icon pu">🕯️</div><span class="rc-status rcs-done">Built</span></div>
+          <div class="rc-title">Profile lifecycle states</div>
+          <div class="rc-desc">All 4 states: Active · Shadow · Kept alive · In memoriam. Flow diagram, state cards with node visual previews, live D3 tree excerpt showing all 4 together, visibility table.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">4 states</span><span class="rc-tag rc-tag-cy">Phase 1</span></div>
+          <div class="rc-session">Session 2 · 19 Mar 2026</div>
+        </a>
+
+        <a class="rev-card feat" href="app/visual-river.html">
+          <div class="rc-head"><div class="rc-icon gr">🌳</div><span class="rc-status rcs-done">Built</span></div>
+          <div class="rc-title">Visual family river — illustrated magnolia</div>
+          <div class="rc-desc">Organic magnolia illustration. 21 nodes across 5 generations. Lifecycle states, branch hiding, merge conflict, multi-parent children, 4 globe location layers. All Session 3 decisions visible in one POC.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-gr">Session 3</span><span class="rc-tag rc-tag-cy">POC</span><span class="rc-tag rc-tag-pu">5 decisions locked</span></div>
+          <div class="rc-session">Session 3 · 19 Mar 2026</div>
+        </a>
+
+        <a class="rev-card feat" href="app/face-morph.html">
+          <div class="rc-head"><div class="rc-icon pu">🎭</div><span class="rc-status rcs-done">Built</span></div>
+          <div class="rc-title">Generational faces &amp; resemblance game</div>
+          <div class="rc-desc">AI-selected morph sequence across generations. Auto-play teaser on profile + full viewer on demand. Line selector: AI / biological / household / custom. Family resemblance game with scoring.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">Decisions 40 &amp; 41</span><span class="rc-tag rc-tag-cy">Phase 2</span></div>
+          <div class="rc-session">Session 4 · 19 Mar 2026</div>
+        </a>
+
+        <a class="rev-card feat" href="app/vendor-marketplace.html">
+          <div class="rc-head"><div class="rc-icon am">🤝</div><span class="rc-status rcs-done">Built</span></div>
+          <div class="rc-title">Partner services marketplace</div>
+          <div class="rc-desc">Exclusive partnership model — one vendor per category. Printed family book builder (select members, preview, order). Announcement printing. 6 categories across 3 phases. Revenue model: 12–15% commission.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-am">Decision 39</span><span class="rc-tag rc-tag-cy">Launch</span></div>
+          <div class="rc-session">Session 4 · 19 Mar 2026</div>
+        </a>
+
+        <div class="rev-card" style="opacity:.55;cursor:default;">
+          <div class="rc-head"><div class="rc-icon gr">★</div><span class="rc-status rcs-wip">Planned</span></div>
+          <div class="rc-title">Life events feed</div>
+          <div class="rc-desc">Create and broadcast births, weddings, moves, graduations. Choose which segments to notify. The retention feature.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-gr">Phase 3</span></div>
+          <div class="rc-session">Not yet built</div>
+        </div>
+
+        <div class="rev-card" style="opacity:.55;cursor:default;">
+          <div class="rc-head"><div class="rc-icon pu">📄</div><span class="rc-status rcs-wip">Planned</span></div>
+          <div class="rc-title">About · Blog · Support pages</div>
+          <div class="rc-desc">Isaiah's founder story. Blog section (family stories, diaspora features). Support/FAQ. All marketing-layer pages.</div>
+          <div class="rc-tags"><span class="rc-tag rc-tag-pu">Phase 2</span></div>
+          <div class="rc-session">Not yet built</div>
+        </div>
+
+      </div>
+
+      <div style="padding:20px 28px 60px;font-size:11px;color:#3A5A54;">
+        New pages are added to this hub automatically each session. Every design element we build will appear here before any code is committed to production.
+      </div>
+
+    </div>
+
+    <!-- ══ DECISIONS TAB ══════════════════════════════ -->
+    <div class="tab-panel" id="tab-decisions">
+      <div class="decisions-panel">
+        <div class="dp-filters">
+          <button class="df on" onclick="filterDec('all',this)">All decisions</button>
+          <button class="df" onclick="filterDec('brand',this)">Brand</button>
+          <button class="df" onclick="filterDec('product',this)">Product</button>
+          <button class="df" onclick="filterDec('business',this)">Business</button>
+          <button class="df" onclick="filterDec('copy',this)">Copy</button>
+          <button class="df" onclick="filterDec('open',this)">Open only</button>
+          <button class="df" onclick="filterDec('closed',this)">Locked</button>
+        </div>
+
+        <!-- All decisions listed here -->
+        <div id="dec-list"></div>
+
+      </div>
+    </div>
+
+    <!-- ══ SESSION LOG TAB ════════════════════════════ -->
+    <div class="tab-panel" id="tab-sessions">
+      <div class="sessions-panel">
+
+        <div class="session-full">
+          <div class="sf-header">
+            <span class="sf-num">Session 1</span>
+            <div>
+              <div class="sf-title">Foundation — brand system, design system, core features</div>
+            </div>
+            <span class="sf-date">19 March 2026</span>
+          </div>
+          <div class="sf-built">
+            <div class="sf-section-label">Built &amp; designed</div>
+            <div class="sf-item"><span class="sf-check">✓</span>CSS theme system — 4 dark themes (Deep Water 100% → River Light 25%), CRUNOD brand colours</div>
+            <div class="sf-item"><span class="sf-check">✓</span>site-components.js — nav/footer injection for all page types</div>
+            <div class="sf-item"><span class="sf-check">✓</span>SQL 001 — complete initial database schema with RLS policies</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Logo &amp; mark system — dual magnolia tree, brand specification document</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Globe — 3D canvas engine, momentum physics, tier filters, home button</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Globe — day/night satellite view, real solar position math, 37-city lights</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Globe — migration arcs as airline-route paths, animate mode</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Segment toggle demo — interactive, 4 layers, visual network update</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Tree selector — 5 species (Magnolia, Oak, Banyan, Cherry Blossom, Baobab)</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Dashboard mock — stats, activity feed, pending connections, sidebar</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Component library — buttons, badges, cards, inputs, avatars, pills</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Nav &amp; footer — all 4 nav types, footer, theme selector, admin button</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Feature matrix — 68 features, 4 phases, fully sortable and filterable</div>
+            <div class="sf-item"><span class="sf-check">✓</span>ECO Requirements document — full spec with data models, RLS, tech stack</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Globe spec docs — GLOBE-001 (migration) + GLOBE-002 (day/night)</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Design review hub (this page) — 11 pages, dashboard, decisions, session log</div>
+          </div>
+          <div>
+            <div class="sf-section-label">Decisions still open from this session</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>Default theme (Deep Water vs River Depth)</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>Logo wordmark — monospace vs serif</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>Homepage hero headline (Isaiah to write)</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>Family plan price and structure</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>Globe on homepage — show or hold back</div>
+          </div>
+        </div>
+
+        <div class="session-full">
+          <div class="sf-header">
+            <span class="sf-num">Session 1 · Update</span>
+            <div><div class="sf-title">Pricing model confirmed — per-profile, one-time</div></div>
+            <span class="sf-date">19 March 2026</span>
+          </div>
+          <div class="sf-built">
+            <div class="sf-section-label">Decided &amp; built</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Human profile: $1.99 one-time (not a subscription)</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Pet profile: $0.99 one-time</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Connections between households: always free</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Marketing angle locked: "Every profile is a real person, created by someone who loves them"</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Pricing page rebuilt with per-profile model and live household calculator</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Value-first signup flow confirmed: email → household → tree → globe → invite → pay</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Signup flow page built (12-signup-flow.html) — all 7 steps including managed profiles + per-profile payment</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Decisions 19, 20, 21 locked — payment architecture finalised</div>
+          </div>
+          <div>
+            <div class="sf-section-label">Still open — answer before building payment flow</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>Decision 19: Who pays when someone is invited — inviter or invitee?</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>Decision 20: Managed profiles — can a user create a profile for someone with no device?</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>Decision 21: Deleted profiles — refund, archive, credit, or non-refundable?</div>
+          </div>
+        </div>
+
+        <div class="session-full">
+          <div class="sf-header">
+            <span class="sf-num">Session 1 · Update 2</span>
+            <div><div class="sf-title">Signup flow, river selector, invite system, ghost node model</div></div>
+            <span class="sf-date">19 March 2026</span>
+          </div>
+          <div class="sf-built">
+            <div class="sf-section-label">Built &amp; decided</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Page 12: Complete 7-step signup flow with managed profiles, per-profile payment, invitee view</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Page 13: AI-powered river selector (free-text → species) + full household roster with relationship cross-links</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Page 14: Invitation email template (3 variants) + join flow (3 paths) + ghost node state spec</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Pet profiles: any animal (free-text field, not dropdown) — dog, cat, snake, tarantula, anything</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Tree orientation: user explores freely, locks when ready — species influences layout metaphor</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Ghost nodes: 4 states locked — anonymous silhouette always visible, name revealed after invite sent</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Invite email: personal relationship leads, tree story second, one clear CTA</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Join flow: 3 paths (view free / build household / later) — view-only never second-class</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Decisions 19–23 all locked</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Homepage tagline found: "Trees of our lives and those that benefit from the shade — not just individual blades of grass" — flag for Isaiah</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Product identity confirmed: not genealogy, not family-only — anyone who shapes a life belongs on this tree</div>
+          </div>
+          <div>
+            <div class="sf-section-label">Confirmed architecture decisions</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Each household pays only for profiles they personally create</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Managed profiles: no login required for subject, creator pays and owns</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Deleted profiles: soft delete, 30-day recovery window, non-refundable</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Ghost nodes: anonymous silhouette until invite sent, named ghost after invite, full profile when paid</div>
+          </div>
+        </div>
+
+        <div class="session-full">
+          <div class="sf-header">
+            <span class="sf-num">Session 1 · Final update</span>
+            <div><div class="sf-title">Memory lifecycle, stewardship, moderation, knowledge game, product identity</div></div>
+            <span class="sf-date">19 March 2026</span>
+          </div>
+          <div class="sf-built">
+            <div class="sf-section-label">Built this update</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Page 15: Full stewardship & memory system — 4 profile states, adopt flow, shared stewardship, media upgrade, In Memoriam, privacy table</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Product identity confirmed: “Trees of our lives and those that benefit from the shade — not just individual blades of grass”</div>
+            <div class="sf-item"><span class="sf-check">✓</span>Expanded beyond blood — any meaningful connection belongs on the tree</div>
+          </div>
+          <div>
+            <div class="sf-section-label">All decisions locked this update (28–30, 32)</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 27: No data ever deleted. 90-day grace, then dormant greyed node. Media preserved forever.</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 28: Moderators & direct connections can mark In Memoriam — 7-day confirmation window.</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 29: 90-day grace period before lapsed profile greys out.</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 30: Full moderator powers — stewardship, disputes, In Memoriam, content, nominations.</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 32: Knowledge game Phase 2 partial (quiz) + Phase 3 (hidden object). Winner earns moderator status.</div>
+          </div>
+          <div style="margin-top:10px;">
+            <div class="sf-section-label">Still open for Session 2</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 31: Top 3 most active — no fixed threshold.</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 33: No default segments — user-named only.</div>
+            <div class="sf-item" style="color:#E09040;"><span style="color:#E09040;font-size:11px;flex-shrink:0;">◦</span>15 remaining open decisions from original set</div>
+          </div>
+        </div>
+
+        <div class="session-full" style="border:1px solid rgba(144,96,224,.15);background:rgba(144,96,224,.03);border-radius:10px;padding:16px;margin-top:10px;">
+          <div class="sf-header">
+            <span class="sf-num">Session 4</span>
+            <div>
+              <div class="sf-title">Partner services · Generational faces · Competitive analysis</div>
+            </div>
+            <span class="sf-date">19 March 2026</span>
+          </div>
+          <div class="session-items" style="margin-top:10px;">
+            <div class="session-item-row"><div class="si-dot"></div>app/vendor-marketplace.html — exclusive partnership model, book builder, 6 service categories, revenue model</div>
+            <div class="session-item-row"><div class="si-dot"></div>app/face-morph.html — AI generational morph, auto-play teaser, full viewer, line selector, family game</div>
+            <div class="session-item-row"><div class="si-dot"></div>Competitive analysis vs Ancestry, FamilySearch, MyHeritage — 12-feature comparison matrix</div>
+          </div>
+          <div style="margin-top:10px;">
+            <div class="sf-section-label">Decisions locked this session</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 39: Vendor marketplace — exclusive partnerships, one per category</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 40: Face morph — both trigger modes, AI line selection</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 41: Adoption line — owner decides per-sequence, no label shown</div>
+          </div>
+        </div>
+
+        <div class="session-full" style="border:1px solid rgba(0,224,64,.15);background:rgba(0,224,64,.03);border-radius:10px;padding:16px;margin-top:10px;">
+          <div class="sf-header">
+            <span class="sf-num">Session 3</span>
+            <div>
+              <div class="sf-title">Visual tree · Merge system · Complex relationships · Location model</div>
+            </div>
+            <span class="sf-date">19 March 2026</span>
+          </div>
+          <div class="session-items" style="margin-top:10px;">
+            <div class="session-item-row"><div class="si-dot"></div>River View tab added to hub — illustrated magnolia, 21 nodes, all lifecycle states</div>
+            <div class="session-item-row"><div class="si-dot"></div>Cross-tree merge: moderator-mediated, AI temp identifiers, no default winner</div>
+            <div class="session-item-row"><div class="si-dot"></div>Branch hiding: per-hide choice (person only or full branch), toggle layer in toolbar</div>
+            <div class="session-item-row"><div class="si-dot"></div>Complex relationships: divorce/remarriage, multi-parent children, same-sex, adoption (private)</div>
+            <div class="session-item-row"><div class="si-dot"></div>Location model: birth city, lived-in history (zip+dates+desc), current city, travel feed</div>
+            <div class="session-item-row"><div class="si-dot"></div>Globe: 4 independently-toggleable layers (birth, lived, current, travel)</div>
+            <div class="session-item-row"><div class="si-dot"></div>app/visual-river.html — full illustrated tree POC with simulated Adeyemi–Whitfield data</div>
+          </div>
+          <div style="margin-top:10px;">
+            <div class="sf-section-label">Decisions locked this session</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 34: Merge — moderator-mediated both sides, AI suggests canonical name</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 35: Branch hiding — user chooses per-hide: person only or full branch</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 36: Tree visual — illustrated magnolia, organic, branches = family lines</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 37: Complex relationships — all four types handled, adoption label private</div>
+            <div class="sf-item" style="color:#00A028;"><span style="color:#00A028;font-size:11px;flex-shrink:0;">✓</span>Decision 38: Globe — 4 user-selectable layers: birth · lived · current · travel</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ VISUAL TREE TAB ════════════════════════════ -->
+    <div class="tab-panel" id="tab-visualtree">
+      <iframe id="vt-frame" src="app/visual-river.html" style="width:100%;height:calc(100vh - 52px);border:none;display:block;" loading="lazy"></iframe>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── Tab switching ──────────────────────────────── */
+function handleSidebarLink(e, href) {
+  e.preventDefault();
+  var frame = document.getElementById('review-frame');
+  var grid  = document.getElementById('review-grid-area');
+  if (!frame) { window.open(href,'_blank'); return; }
+  // Switch to review tab first
+  switchTab('review', document.querySelector('.tb-tab:nth-child(3)') || document.querySelectorAll('.tb-tab')[2]);
+  frame.src = href;
+  frame.style.display = 'block';
+  // Hide all review section content while iframe is showing
+  document.querySelectorAll('#tab-review .review-section-label, #tab-review .review-grid, #tab-review .review-section').forEach(function(el){ el.style.display='none'; });
+  // Show back button
+  var back = document.getElementById('frame-back-btn');
+  if (!back) {
+    back = document.createElement('button');
+    back.id = 'frame-back-btn';
+    back.textContent = '← Back to all pages';
+    back.style.cssText = 'margin:12px 16px;height:32px;padding:0 14px;background:#0D1820;border:1px solid rgba(0,229,204,.18);color:#7AADA0;border-radius:7px;font-size:11px;cursor:pointer;font-family:DM Sans,sans-serif;';
+    back.onclick = function() {
+      frame.src = 'about:blank';
+      frame.style.display = 'none';
+      back.style.display = 'none';
+      document.querySelectorAll('#tab-review .review-section-label, #tab-review .review-grid, #tab-review .review-section').forEach(function(el){ el.style.display=''; });
+    };
+    document.getElementById('tab-review').insertBefore(back, frame.nextSibling);
+  }
+  back.style.display = 'block';
+}
+
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.tb-tab').forEach(function(b){ b.classList.remove('on'); });
+  document.getElementById('tab-'+id).classList.add('on');
+  btn.classList.add('on');
+  var sb = document.getElementById('sidebar');
+  sb.style.display = (id === 'review') ? 'block' : 'none';
+  if (id === 'decisions') buildDecisions('all');
+}
+
+/* ── Decision data ──────────────────────────────── */
+var DECISIONS = [
+  {id:1, status:'open', area:'brand', owner:'Isaiah', title:'Logo wordmark — monospace (tech) vs serif (warm)?', body:'JetBrains Mono connects ECO to the CRUNOD parent brand and reads as tech-forward. DM Serif Display feels warmer and more family-oriented. This is the most significant identity decision — it changes the emotional register of the entire brand.', options:['A: Keep JetBrains Mono — reinforces CRUNOD tech parent brand. Strong, modern, distinctive.','B: Switch to DM Serif Display italic — warmer, more organic, family-first feel. Still premium.','C: Custom drawn wordmark — commission a designer (Phase 2, not needed for pre-launch).']},
+  {id:2, status:'open', area:'brand', owner:'Both', title:'Default theme for new users?', body:'Deep Water (100% dark) is the most dramatic and closest to CRUNOD parent brand. River Depth (75% dark) is easier on extended use and may feel more welcoming to non-technical users. The choice sets the emotional first impression of the product.', options:['A: Deep Water (100%) — maximum impact, closest to brand.','B: River Depth (75%) — more accessible, recommended for family audience.','C: Auto-detect from system dark/light preference.']},
+  {id:3, status:'open', area:'copy', owner:'Isaiah', title:'Homepage hero headline — what is the one sentence?', body:'The current placeholder "Your family river is alive and growing" sets the right direction but is not final. Isaiah needs to write the real line. It should communicate the emotional value in under 8 words and land in under 3 seconds.', options:['A: "Your family river is alive and growing." (current placeholder)','B: Isaiah to write — focus: what feeling in 3 seconds?','C: A/B test two headlines at launch — measure scroll depth and signup conversion.']},
+  {id:4, status:'open', area:'business', owner:'Vikas', title:'Family plan — price and structure', body:'Personal is confirmed at $3.99/mo. The Family plan allows multiple households under one billing account. Key decisions: price point, maximum household count, whether the "family admin" can see all connected households or just their own, and whether all households get full Personal features.', options:['A: $7.99/mo — up to 5 households. Shared billing only, no shared visibility.','B: $9.99/mo — unlimited households under one family. Shared admin dashboard.','C: $1.99/mo per additional household added to a Personal plan.']},
+  {id:19, status:'closed', area:'business', owner:'Vikas', title:'Who pays when someone is invited to connect?', body:'User A invites User B (their sibling in London). User B clicks the link and joins. Who pays the $1.99 to create User B\'s profile? The answer defines the entire invite funnel and affects conversion significantly.', options:['DECIDED: Each household pays only for profiles they personally create.','Invited users join free. They pay when they build their own household.','No financial relationship between two users — always user to ECO only.']},
+  {id:20, status:'closed', area:'product', owner:'Vikas', title:'Managed profiles — can someone create a profile for a person with no device?', body:'Classic case: adult child wants to add their 82-year-old grandmother who will never own a smartphone. Managed profiles allow a paying user to create and own a profile on behalf of someone who cannot use the system themselves. This is critical for multigenerational families.', options:['DECIDED: Managed profiles allowed — no login required for subject.','Creator pays $1.99 and owns the profile. They can update it at any time.','Profile is labelled as managed in the UI. Clearly distinct from active accounts.']},
+  {id:21, status:'closed', area:'business', owner:'Vikas', title:'What happens when a user deletes a profile they paid for?', body:'A user paid $1.99 to create a profile for a family member. Now they want to delete it — perhaps due to a family dispute, a mistake, or a death. What is the policy? This affects customer support load and user trust.', options:['DECIDED: Soft delete — 30-day recovery window, then permanent. No refund.','User sees a warning: "This profile will be permanently deleted in 30 days."','Within 30 days: restore for free. After 30 days: gone permanently. $1.99 is non-refundable.']},,
+  {id:22, status:'closed', area:'product', owner:'Both', title:'Invitation email — what leads?', body:'DECIDED: Personal relationship first. The email opens with who sent it and their relationship to the recipient — Your nephew Vikas has added you to the family river. The tree species story follows as the emotional colour that makes the invitation feel special rather than generic.', options:['DECIDED: Personal relationship first — Your nephew Vikas has added you to the family river.','Then: tree species name + one-line story (Magnolia — resilient and cross-continental like your family).','Then: the invitation CTA to join.']},
+  {id:23, status:'closed', area:'product', owner:'Vikas', title:'Ghost node visibility — exactly when visible to connections?', body:'Connections see ghost silhouettes on the tree. The question is timing: are ghosts visible immediately when entered (even before invite sent), or only after the invite email is dispatched? The privacy implication: if Vikas enters Raj as pending before sending the invite, and Raj views the tree first, he sees himself as a ghost without having been formally invited.', options:['DECIDED: Anonymised until invited.','State 1 (not yet invited): anonymous silhouette visible to all connections — shape only, no name, no relationship.','State 2 (invite sent): name and relationship revealed to connections. Ghost styling maintained until they join.','State 3 (joined view-only): named node, distinct styling from paid profiles.','State 4 (paid and active): full colour node on the tree.']},
+  {id:24, status:'closed', area:'product', owner:'Both', title:'Who can adopt a silent shadow profile?', body:'DECIDED: Open stewardship. Anyone — first to pay $1.99 activates the profile. No relationship requirement. Someone in Toronto can adopt a shadow they recognise from a connected tree. This creates viral discovery: people search shadows looking for relatives they have lost touch with.', options:['DECIDED: Open stewardship — any ECO member, first to pay activates it.','Creates viral discovery mechanic — people recognise shadows on connected trees.','No gatekeeping by relationship degree.']},
+  {id:25, status:'closed', area:'product', owner:'Both', title:'Multiple stewards on one profile — allowed?', body:'DECIDED: Multiple stewards allowed with shared responsibility. All stewards can contribute media and stories. Profile becomes a collective memory — three grandchildren across three continents each adding their own version of the same grandmother. Richer than any single person could curate.', options:['DECIDED: Multiple stewards allowed — shared contribution rights.','All stewards can add media and stories.','Lead steward (first to pay) may have additional edit rights on core profile fields — to be confirmed.']},
+  {id:26, status:'closed', area:'business', owner:'Vikas', title:'Memory upgrade $5.99/month — per profile or per account?', body:'DECIDED: Per profile. Each profile that needs unlimited media pays $5.99/month separately. Standard profile includes 3 photos + 3 videos. Revenue scales with genuine depth of care — someone documenting one grandmother pays for that profile, not a blanket account fee.', options:['DECIDED: $5.99/month per profile for unlimited photos + videos.','Standard profile: 3 photos + 3 videos (included in $1.99 one-time).','Memory upgrade: unlimited photos + videos for that specific profile.','Can be paid by any steward on behalf of the profile.']},
+  {id:27, status:'closed', area:'business', owner:'Vikas', title:'If steward stops paying $5.99/month — what happens to media?', body:'Payment lapses on a memory upgrade subscription. The profile has 47 photos and 12 videos beyond the standard 3+3 limit. What happens to that media? The decision affects user trust, storage costs, and the emotional weight of the product.', options:['DECIDED: No data is ever deleted. When payment lapses a grace period applies, then the profile greys out as a dormant node.','Dormant profiles remain searchable and findable on the tree. Anyone can activate them.','Media is preserved indefinitely in dormant state — hidden from view but never deleted.','Grace period duration TBD (suggest 90 days). After grace period profile becomes a greyed node.','Only intentional deletion by account owner (30-day soft-delete) actually removes data.']},
+  {id:28, status:'closed', area:'product', owner:'Both', title:'Who can mark a profile as In Memoriam?', body:'Someone has passed away and a family member wants to mark their profile accordingly. Who has the authority to do this, and what protection exists against misuse or disputes between family members?', options:['DECIDED: Resolved by moderator system (Decision 30).','Any moderator or direct connection can mark as In Memoriam.','A 7-day confirmation window allows others on the tree to acknowledge before it is finalised.','Moderators have full authority to manage this on behalf of the tree.']},
+  {id:29, status:'closed', area:'business', owner:'Vikas', title:'Grace period duration when profile payment lapses', body:'When a profile payment stops, how long before the branch greys out into dormant state? 90 days is suggested to be generous. Could be 30 days (stricter) or 6 months (most generous).', options:['DECIDED: 90-day grace period.','After 90 days without payment the profile becomes a dormant greyed node.','Data and media are preserved indefinitely. Profile is searchable and activatable.','Protects people in financial difficulty from losing their family presence.']},
+  {id:30, status:'closed', area:'product', owner:'Vikas', title:'Moderator powers — what can they do?', body:'Family moderators manage the health of the tree. What specific powers do they have? This also likely answers Decision 28 (who can mark as In Memoriam).', options:['DECIDED: All powers — full moderator scope.','Approve stewardship adoptions for shadow/dormant profiles.','Dispute resolution — arbitrate steward conflicts over profile content.','Mark profiles as In Memoriam (with 7-day confirmation window) — resolves Decision 28.','Remove inappropriate content from any profile in their tree.','Invite new moderators from the system-nominated candidate list.']},
+  {id:31, status:'closed', area:'product', owner:'Vikas', title:'Moderator nomination algorithm — minimum thresholds', body:'The system auto-identifies moderator candidates from most active users. What minimum activity threshold qualifies someone as a candidate to be invited to volunteer?', options:['DECIDED: Top 3 most active users in the tree network — no fixed threshold. Keeps the system adaptive to tree size: a small family river and a 200-node network both get the right number of candidates automatically.','A: Logged in 10+ times in last 90 days AND added 5+ pieces of content.','B: Logged in 5+ times in last 30 days — recency weighted.','C: Top 3 most active users in the tree network — no fixed threshold.','D: Any accepted connection who has been active in the last 7 days.']},
+  {id:32, status:'closed', area:'product', owner:'Both', title:'Knowledge game — Phase 2 or Phase 3?', body:'Hidden-object game inside family photos, profile quizzes, moderator rewards. High retention value but significant build complexity. Does it need to ship with MVP or is it a post-launch growth feature?', options:['DECIDED: Phase 2 partial.','Profile quiz ships in Phase 2 — who is this person, what city did they live in, built from existing profile data.','Hidden object game (Pikachu/Waldo mechanic inside real family photos) moves to Phase 3.','Winner earns moderator candidacy — the game is a rite of passage, not just points.']},
+  {id:33, status:'closed', area:'product', owner:'Both', title:'Chosen connections — new segment type needed?', body:'The product now explicitly includes non-blood connections (partner, neighbour, colleague, mentor, chosen family). Does the segment system need a dedicated new default segment for these, distinct from Friends?', options:['DECIDED: No default segments added. Users create their own segment names entirely. Keeps the segment system clean and uncluttered — no one is forced into predefined boxes. Chosen family, neighbours, mentors, or any other relationship type gets the label the user gives it.','A: Yes — add Chosen family as a default segment alongside Family, Friends, School, Work.','B: Friends segment covers this — no new segment needed, use custom labels.','C: Let users create their own segment names — do not add more defaults.','D: Two new defaults: Chosen family (deep non-blood) and Neighbours / Community (proximity-based).']},
+  {id:34, status:'closed', area:'product', owner:'Both', title:'Cross-tree merge — conflict resolution process', body:'Two families unknowingly built separate trees of the same lineage on ECO. When they connect, how are duplicate people reconciled without creating conflicts in naming?', options:['DECIDED: Both trees\' moderators are notified and collaborate to resolve. AI (Claude API) suggests a canonical name and an AI temporary identifier (e.g. "Lagos-Adeyemi-1975-M") so both trees can reference the person before a name is agreed. Neither tree wins by default — no pay-to-win, no age-of-tree advantage.','A: AI suggests canonical name, both sides vote to approve.','B: Side-by-side review — each conflict shown one at a time, human decides.','C: The paying/older tree wins by default.','D: Temporary AI-generated identifier until both sides manually resolve.']},
+  {id:35, status:'closed', area:'product', owner:'Both', title:'Branch hiding — what happens to children when a person is hidden?', body:'A user wants to hide a family member who caused harm (estrangement, abuse, hit-and-run). What happens to that person\'s children on the tree?', options:['DECIDED: User chooses per-hide. Two options always available: (1) hide just this person — children stay connected via an anonymous placeholder node, (2) hide entire branch — person + all descendants below them removed from view. Choice is per-person, per-session.','A: Children stay visible — only the person hidden.','B: Entire branch hidden automatically.','C: User chooses per-hide — person only, or person + branch.','D: Hidden person shows as anonymous placeholder, children still connected.']},
+  {id:36, status:'closed', area:'product', owner:'Both', title:'Tree visual rendering style', body:'The tree view needs to be a rich image representation — not text, not an org chart. It should communicate family in a way that feels alive and meaningful.', options:['DECIDED: Illustrated magnolia tree. Organic, artistic. The magnolia is the brand tree — its blooms are person nodes, its branches are family lines. Generational hierarchy top to bottom. Oldest acknowledged ancestors at the crown. Built in SVG + canvas, not a standard diagram library.','A: Illustrated magnolia tree — organic, artistic, branches = family lines.','B: Clean hierarchical chart with rich visual polish.','C: Force-directed network with generational layers.','D: Hybrid: hierarchical layout with magnolia bloom nodes.']},
+  {id:37, status:'closed', area:'product', owner:'Both', title:'Complex relationship types in the river view', body:'The tree must represent real-world family complexity without excluding anyone. Which relationship types must be handled from day one?', options:['DECIDED: All four. Divorce + remarriage (person appears in two household connections), multiple-partner children (each child has their own branch, equally treated), same-sex and non-traditional partnerships (no distinction in UI), adoption (completely private — the parent decides if the label appears anywhere at all, and even then it is only ever visible to the parent. It will not appear on the tree, in connections, or in any public-facing view. We are effectively ignoring the label for all product purposes).','A: Divorce + remarriage.','B: Multiple-partner children.','C: Same-sex and non-traditional partnerships.','D: Adoption as a private parent-controlled label only.']},
+  {id:38, status:'closed', area:'product', owner:'Both', title:'Globe location layers — how many and user control?', body:'The globe shows where family members are. Multiple data types could be layered: where they were born, where they\'ve lived, where they are now, where they\'ve travelled. How much control does the user have?', options:['DECIDED: All four layers, each independently toggleable by the user. Layer 1: birth city (purple pins). Layer 2: cities lived in with date ranges — zip/city/state/country + from–to MM/YYYY + short description (amber dots). Layer 3: current city (green pins). Layer 4: trip travel with photos and family tags (animated amber trail). US zip auto-populates city/state/country.','A: Birth city + current city only.','B: Full travel history with date ranges.','C: Trip photos + geo-tagging.','D: All four layers, user-selectable.']},
+  {id:39, status:'closed', area:'business', owner:'Vikas', title:'Vendor marketplace — vetting and presentation model', body:'ECO wants to offer third-party services to users (printed family books, wedding announcements, etc.) without handling fulfillment. How should vendors be selected and presented?', options:['DECIDED: Exclusive partnerships. One vendor per category, negotiated deal. ECO hand-selects a single reputable provider per service type, negotiates terms (quality standards, pricing, referral/commission structure), and presents them as the recommended service. No open marketplace, no competing vendors per category. Keeps quality high and gives ECO real negotiating leverage. Launch categories: printed family book (hardcover, high-quality), announcement printing and mailing. More categories added as user base grows.','A: Curated directory — small trusted list, multiple vendors per category.','B: Open marketplace — vendors apply, ECO approves, users leave reviews.','C: Exclusive partnerships — one vendor per category, negotiated deal.','D: User-suggested — community nominates, ECO ratifies.']},
+  {id:40, status:'closed', area:'product', owner:'Both', title:'Face morph — trigger and participation model', body:'A banner that rotates through ancestor photos morphing face to face across generations. When does it play and who appears in the sequence?', options:['DECIDED: Both trigger modes. Subtle auto-play teaser on the profile page (loops silently), full dedicated viewer opens on demand. Participation: AI selects the most visually connected generational line automatically — analyses available photos and traces the strongest visual resemblance path through the tree. For adopted members, the owner decides per-sequence which line to trace (biological or household). People with no photo uploaded show as a silhouette placeholder in the sequence.','A: Auto-plays as a banner on the profile page.','B: User presses play — dedicated viewer only.','C: Both — subtle teaser on profile, full viewer on demand.','D: Only available as a shareable exported video/GIF.']},
+  {id:41, status:'closed', area:'product', owner:'Both', title:'Face morph — adoption line selection', body:'For an adopted child, which generational line does the AI trace for visual resemblance in the face morph sequence?', options:['DECIDED: Owner decides per-sequence. When creating or viewing a morph sequence that includes an adopted member, the owner is prompted to choose which line to trace for that person — biological or household. The choice is stored per-sequence, not globally. The tree structure and household relationships are never affected by this choice. No label is shown to viewers indicating which line was selected.','A: Trace biological line — household tree stays as-is.','B: Trace household/adopted line only — never expose biology.','C: Owner decides per-sequence which line to trace.']},
+  {id:5, status:'open', area:'product', owner:'Both', title:'Globe on homepage — show now or tease as Phase 2?', body:'The globe is the most visually striking feature and the viral sharing moment. But it is a Phase 2 feature — showing it on the homepage at launch sets an expectation we cannot immediately deliver. Options: show a teaser screenshot, show a "coming soon" label, or hold it back entirely and let the segment demo carry the homepage.', options:['A: Show the animated globe on homepage with "Coming soon" label.','B: Show a static screenshot/illustration of the globe as a tease.','C: Remove from homepage entirely — segment demo carries the visual weight.','D: Launch globe in Phase 1 alongside MVP (accelerated timeline).']},
+  {id:6, status:'open', area:'product', owner:'Both', title:'Tree selector — which 5 species for alpha/beta?', body:'The founding family spans India, UK, US — Banyan, Oak, and Magnolia cover those geographies. The alpha/beta test group may define which additional species to include. Are there other culturally significant trees we should add or swap out?', options:['A: Keep current 5 — Magnolia, Oak, Banyan, Cherry Blossom, Baobab.','B: Swap Cherry Blossom for Cedar (Canada/Middle East relevance for the beta group).','C: Add more — Olive (Mediterranean), Jacaranda (Southern Africa/Latin America), Maple.']},
+  {id:7, status:'open', area:'product', owner:'Vikas', title:'Segment toggle — hidden vs faded when off?', body:'When a segment is toggled off, connections in that layer can either disappear completely (clean, current behavior) or fade to very low opacity so the shape of the full network remains visible. The fade approach feels more "alive" but could be visually cluttered on large networks.', options:['A: Complete disappearance — clean, clear, current behavior.','B: Fade to 8% opacity — network shape visible, layer clearly deactivated.','C: User preference in settings — let each user choose their behavior.']},
+  {id:8, status:'open', area:'product', owner:'Both', title:'Migration history — how approximate can dates be?', body:'Users enter the approximate date they moved to each city. Some migration events happened decades ago and the exact year may not be known. Do we require year only (minimum), or offer a freeform "circa 1950s" option? The data quality affects the animate globe mode significantly.', options:['A: Year only — required minimum. Month optional.','B: Decade or year — "1940s" or "1947" both valid.','C: Year required but allow a ± range, e.g. "1947 ± 3 years".']},
+  {id:9, status:'open', area:'product', owner:'Vikas', title:'Privacy — should migration history be visible to all connections?', body:'A user\'s migration history tells the story of where their family came from. Should this be visible to all accepted connections by default, or should each location entry have its own privacy setting?', options:['A: Visible to all accepted connections by default — matches the open spirit of the product.','B: Each location entry has own privacy setting (public/connections only/private).','C: Migration history visible to "Family" segment only by default.']},
+  {id:10, status:'open', area:'product', owner:'Both', title:'Globe screenshot / share — what does the share card look like?', body:'The globe is designed to be screenshot and shared. When a user taps the share button, we generate a PNG. Should it include the family name, the date, statistics (18 countries, 247 connections), or just the globe itself?', options:['A: Globe only — clean, no text overlay. User screenshots their own caption.','B: Globe + family name watermark bottom-center.','C: Globe + family name + stats (countries, generations, connection count) as a data card below.']},
+  {id:11, status:'open', area:'copy', owner:'Isaiah', title:'Footer tagline — what is the line?', body:'"Made with family in mind." is the current placeholder. This is the last thing a visitor reads before leaving. It should be memorable, warm, and distinct. Isaiah should write this.', options:['A: "Made with family in mind." (current placeholder).','B: "Your family. Always connected."','C: "Where every branch matters."','D: Isaiah to write — something more personal to the origin story.']},
+  {id:12, status:'open', area:'business', owner:'Vikas', title:'Pre-launch strategy — waitlist or direct signup?', body:'Before full launch, do we run a waitlist (email capture, builds anticipation, controlled rollout) or open signup immediately and grow organically? The waitlist approach gives Isaiah a marketing focus for the pre-launch phase.', options:['A: Waitlist — email capture now, open signup at launch date.','B: Direct signup — open immediately, no artificial gate.','C: Hybrid — open signup but with an invite-only phase for the first 500 users.']},
+  {id:13, status:'open', area:'product', owner:'Both', title:'Free tier — should it have a time limit?', body:'The free tier currently allows view-only access forever. An alternative is a 30-day full trial of Personal followed by a prompt to subscribe. The trial approach dramatically increases feature discovery but adds friction.', options:['A: Free forever (view only) — current approach. No time pressure.','B: 30-day full trial → view-only free. Maximises feature discovery.','C: Free forever but with a persistent "upgrade" nudge banner.']},
+  {id:14, status:'open', area:'brand', owner:'Isaiah', title:'Brand voice — formal or conversational?', body:'The UI copy is currently in a clean, confident voice. The homepage headline approach is warm but not casual. Should ECO speak like a premium product (Apple-style) or like a friend telling you about something they love (conversational, personal)? This affects every piece of copy.', options:['A: Premium/clean — "Your living family network. Across continents."','B: Conversational — "Your family is everywhere. Now you can see them all."','C: Personal + story-led — starts with the founding family\'s story, speaks from experience.']},
+  {id:15, status:'open', area:'product', owner:'Both', title:'Connections page — single page or tabbed?', body:'Pending invites (incoming and outgoing) plus accepted connections could live on one scrollable page or be separated into tabs. Tabbed is cleaner at scale; single page is simpler for new users.', options:['A: Single page with sections — simpler, good for new users with few connections.','B: Three tabs — Pending In / Pending Out / Accepted. Cleaner at scale.']},
+  {id:16, status:'open', area:'product', owner:'Vikas', title:'Consent merge — how many approvals required?', body:'When two existing trees connect, overlapping households need to be merged. Does every single connection require explicit approval from both parties, or can users approve a "batch" of suggested connections at once?', options:['A: Each connection individually — maximum control, more friction.','B: Show all suggestions at once, approve/decline each, then one final "Apply all" button.','C: Auto-merge obvious matches (same name, same city), require approval for ambiguous ones.']},
+  {id:17, status:'open', area:'product', owner:'Both', title:'Life events — who can see an event?', body:'When a household marks a life event and broadcasts it, who sees it in their activity feed? Only direct connections? Connections of connections? The entire network in that segment?', options:['A: Direct connections only — within selected segments.','B: Connections + their direct connections (2 hops) — spreads the event further.','C: User selects at time of broadcast: "close family" vs "full network".']},
+  {id:18, status:'open', area:'business', owner:'Vikas', title:'Production hosting — Network Solutions or Cloudflare Pages?', body:'Network Solutions is already in use for other projects. Cloudflare Pages offers zero cold starts, global CDN, and no SFTP complexity — just git push to deploy. The dev environment is crunod.com/SFTP. Production could be different.', options:['A: Network Solutions — consistent with existing setup, SFTP deploy, familiar.','B: Cloudflare Pages — faster, simpler deploys, free CDN, git-push workflow.','C: Decide at go-live — keep options open, test both with a staging deploy.']},
+];
+
+function buildDecisions(filter) {
+  var list = document.getElementById('dec-list');
+  var items = DECISIONS.filter(function(d) {
+    if (filter === 'open') return d.status === 'open';
+    if (filter === 'closed') return d.status === 'closed';
+    if (filter === 'all') return true;
+    return d.area === filter;
+  });
+  list.innerHTML = items.map(function(d) {
+    var isOpen = d.status === 'open';
+    return '<div class="dec-full">'
+      + '<div class="dec-full-header">'
+      + '<div class="dec-full-num ' + (isOpen ? 'dec-open-bg' : 'dec-done-bg') + '">' + d.id + '</div>'
+      + '<div style="flex:1;">'
+      + '<div class="dec-full-area">' + d.area.toUpperCase() + ' · ' + (isOpen ? 'Open — needs decision' : 'Locked ✓') + '</div>'
+      + '<div class="dec-full-title">' + d.title + '</div>'
+      + '</div>'
+      + '</div>'
+      + '<div class="dec-full-body">' + d.body + '</div>'
+      + '<div class="dec-full-options">' + d.options.map(function(o,i) {
+          return '<div class="dec-opt"><div class="dec-opt-letter">' + String.fromCharCode(65+i) + '</div><span>' + o + '</span></div>';
+        }).join('') + '</div>'
+      + '<div class="dec-full-meta">'
+      + '<div class="dec-meta-item"><div class="dec-meta-dot" style="background:' + (isOpen?'#E09040':'#00A028') + '"></div>' + (isOpen ? 'Open' : 'Locked') + '</div>'
+      + '<div class="dec-meta-item"><div class="dec-meta-dot" style="background:#3A5A54"></div>Owner: ' + d.owner + '</div>'
+      + '<div class="dec-meta-item"><div class="dec-meta-dot" style="background:#3A5A54"></div>' + d.area + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function filterDec(f, btn) {
+  document.querySelectorAll('.df').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  buildDecisions(f);
+}
+
+/* ── Init ─────────────────────────────────────── */
+document.getElementById('sidebar').style.display = 'none';
+buildDecisions('all');
+
+/* ── Date ─────────────────────────────────────── */
+// Update version date
+</script>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO Design Review — Invitation Email + Join Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;}
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:200;}
+.nav a{font-size:13px;color:#3A5A54;text-decoration:none;}.nav a:hover{color:#00E5CC;}
+.nav-r{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.nbadge{background:rgba(0,224,64,.10);border:1px solid rgba(0,224,64,.22);color:#009828;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:999px;}
+
+/* Layout: 3 columns */
+.layout{display:grid;grid-template-columns:1fr 1fr 1fr;min-height:calc(100vh - 52px);}
+@media(max-width:960px){.layout{grid-template-columns:1fr 1fr;}}
+@media(max-width:640px){.layout{grid-template-columns:1fr;}}
+
+.col{padding:28px 24px 80px;border-right:1px solid rgba(0,229,204,.07);}
+.col:last-child{border-right:none;}
+
+.col-eyebrow{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#00E5CC;margin-bottom:8px;}
+.col-h{font-family:'DM Serif Display',serif;font-size:1.5rem;letter-spacing:-.02em;line-height:1.2;color:#E8F4F0;margin-bottom:6px;}
+.col-h em{font-style:italic;color:#00E040;}
+.col-sub{font-size:12px;color:#5A8A80;line-height:1.65;margin-bottom:20px;}
+
+/* ── EMAIL PREVIEW ─────────────────────────────── */
+.email-frame{background:#F8F7F4;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.06);}
+
+/* Email top bar — simulated client */
+.email-client-bar{background:#E8E4DE;padding:10px 14px;display:flex;align-items:center;gap:8px;}
+.ecb-dot{width:10px;height:10px;border-radius:50%;}
+.ecb-subject{font-size:11px;color:#666;flex:1;margin-left:4px;}
+
+/* Email header */
+.email-header{background:#070D14;padding:20px 24px;text-align:center;}
+.eh-logo{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.1em;color:#E8F4F0;}
+.eh-logo .cy{color:#00E5CC;}.eh-logo .gr{color:#00E040;}
+
+/* Email body — light background (email best practice) */
+.email-body{background:#FAFAF8;padding:28px 24px;}
+
+.eb-relationship{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3A7A50;margin-bottom:10px;text-align:center;}
+.eb-headline{font-family:'DM Serif Display',Georgia,serif;font-size:1.5rem;line-height:1.25;color:#1A1A1A;margin-bottom:8px;text-align:center;}
+.eb-headline em{font-style:italic;color:#0E5E30;}
+.eb-body-text{font-size:13px;color:#555;line-height:1.75;margin-bottom:16px;}
+
+/* Tree card inside email */
+.tree-card-email{background:#F0F7F2;border:1px solid #C8E0D0;border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;gap:14px;align-items:flex-start;}
+.tce-icon{flex-shrink:0;}
+.tce-name{font-size:13px;font-weight:600;color:#1A3A2A;margin-bottom:3px;}
+.tce-sci{font-size:10px;color:#5A8A70;font-style:italic;margin-bottom:5px;}
+.tce-story{font-size:12px;color:#4A6A58;line-height:1.6;}
+
+/* CTA button in email */
+.email-cta{display:block;background:#0E5E30;color:#FFFFFF;text-align:center;padding:13px 24px;border-radius:9px;font-size:13px;font-weight:700;letter-spacing:.05em;text-decoration:none;margin-bottom:14px;font-family:'DM Sans',system-ui,sans-serif;}
+.email-footer-text{font-size:11px;color:#888;text-align:center;line-height:1.6;}
+.email-sender-note{background:#F0F0EC;border-radius:7px;padding:10px 12px;font-size:11px;color:#666;line-height:1.6;margin-bottom:14px;}
+.email-sender-note strong{color:#333;}
+
+/* Email footer */
+.email-footer{background:#E8E4DE;padding:14px 24px;text-align:center;}
+.ef-text{font-size:10px;color:#888;line-height:1.6;}
+
+/* Variants switcher */
+.variant-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+.vtab{padding:4px 12px;font-size:11px;font-weight:500;border:1px solid rgba(0,229,204,.15);border-radius:999px;background:transparent;color:#3A5A54;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;transition:all .14s;}
+.vtab:hover{color:#C8D4D0;border-color:rgba(0,229,204,.30);}
+.vtab.on{background:rgba(0,229,204,.10);border-color:rgba(0,229,204,.30);color:#00E5CC;}
+
+/* ── JOIN FLOW SCREENS ─────────────────────────── */
+.screen-stack{display:flex;flex-direction:column;gap:14px;}
+.screen-card{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:12px;overflow:hidden;}
+.sc-bar{background:#132030;border-bottom:1px solid rgba(0,229,204,.08);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;}
+.sc-bar-logo{font-family:'JetBrains Mono',monospace;font-size:10px;color:#7AADA0;letter-spacing:.08em;}
+.sc-bar-logo .cy{color:#00E5CC;}.sc-bar-logo .gr{color:#00E040;}
+.sc-step-badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:999px;}
+.ssb-join{background:rgba(0,229,204,.10);color:#007A74;}
+.ssb-pay{background:rgba(0,200,100,.12);color:#009050;}
+.ssb-live{background:rgba(0,224,64,.12);color:#009028;}
+.sc-body{padding:16px;}
+.sc-body-h{font-family:'DM Serif Display',serif;font-size:1.2rem;letter-spacing:-.01em;color:#E8F4F0;margin-bottom:5px;}
+.sc-body-h em{font-style:italic;color:#00E040;}
+.sc-body-sub{font-size:12px;color:#5A8A80;line-height:1.6;margin-bottom:12px;}
+
+/* Connection preview card */
+.connection-preview{background:#0A1A10;border:1px solid rgba(0,224,64,.15);border-radius:9px;padding:12px 14px;margin-bottom:12px;}
+.cp-from{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3A6040;margin-bottom:6px;}
+.cp-body{font-size:13px;color:#C8D4D0;line-height:1.5;}
+.cp-rel{font-size:11px;color:#5A8A70;margin-top:4px;}
+
+/* Tree story preview */
+.tree-preview-join{background:#061206;border:1px solid rgba(0,224,64,.12);border-radius:8px;padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;align-items:flex-start;}
+.tpj-tree{flex-shrink:0;}
+.tpj-name{font-size:12px;font-weight:500;color:#C8D4D0;margin-bottom:2px;}
+.tpj-story{font-size:11px;color:#3A6040;line-height:1.55;}
+
+/* Mini buttons */
+.btn-join{display:block;width:100%;padding:11px;background:#00E5CC;color:#070D14;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;text-align:center;margin-bottom:6px;}
+.btn-later{display:block;width:100%;padding:9px;background:transparent;color:#3A5A54;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border-radius:9px;border:1px solid rgba(0,229,204,.12);cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;text-align:center;}
+
+/* Pay-optional section */
+.pay-optional{background:#04090E;border:1px solid rgba(0,229,204,.08);border-radius:9px;padding:12px 14px;margin-bottom:12px;}
+.po-title{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#3A5A54;margin-bottom:8px;}
+.po-option{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid rgba(0,229,204,.06);font-size:12px;}
+.po-option:last-child{border-bottom:none;}
+.po-radio{width:14px;height:14px;border-radius:50%;border:1.5px solid rgba(0,229,204,.30);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;}
+.po-radio.on{border-color:#00E5CC;background:rgba(0,229,204,.15);}
+.po-radio.on::after{content:'';width:5px;height:5px;border-radius:50%;background:#00E5CC;}
+.po-label{color:#C8D4D0;line-height:1.4;flex:1;}
+.po-sub{font-size:10px;color:#3A5A54;}
+
+/* Decision notes */
+.dnote{background:#061206;border:1px solid rgba(0,224,64,.14);border-radius:7px;padding:9px 11px;font-size:11px;color:#3A6040;line-height:1.6;margin-top:10px;display:flex;gap:7px;}
+.dn-check{color:#009828;flex-shrink:0;font-size:13px;}
+.design-note{background:#0A0A1A;border:1px solid rgba(144,96,224,.14);border-radius:7px;padding:9px 11px;font-size:11px;color:#5040A0;line-height:1.6;margin-top:8px;}
+.design-note strong{color:#8060D0;display:block;margin-bottom:2px;}
+.discuss{background:#161206;border:1px dashed rgba(224,200,80,.28);border-radius:7px;padding:9px 11px;font-size:11px;color:#8A7040;line-height:1.6;margin-top:8px;}
+.discuss strong{color:#C0A040;display:block;margin-bottom:2px;}
+
+/* ── GHOST NODE SPEC ───────────────────────────── */
+.ghost-spec{display:flex;flex-direction:column;gap:10px;}
+.gs-row{background:#0D1820;border:1px solid rgba(0,229,204,.09);border-radius:10px;padding:14px;}
+.gs-title{font-size:12px;font-weight:500;color:#E8F4F0;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.gs-body{font-size:11px;color:#5A8A80;line-height:1.6;}
+.gs-visual{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px;background:#0A1210;border-radius:7px;}
+.ghost-node{width:32px;height:32px;border-radius:50%;border:1.5px dashed;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;}
+.gn-pending{border-color:rgba(255,255,255,.18);color:#3A5A54;background:rgba(255,255,255,.03);}
+.gn-invited{border-color:rgba(0,229,204,.30);color:#3A6A64;background:rgba(0,229,204,.06);}
+.gn-paid{border-color:rgba(0,224,64,.35);color:#3A7040;background:rgba(0,224,64,.08);}
+.gn-label{font-size:11px;color:#5A8A80;line-height:1.4;}
+.gn-label strong{color:#C8D4D0;display:block;font-size:12px;}
+.status-tag{display:inline-flex;align-items:center;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:999px;margin-left:auto;}
+.st-private{background:rgba(255,255,255,.06);color:#3A5A54;border:1px solid rgba(255,255,255,.08);}
+.st-visible{background:rgba(0,229,204,.08);color:#007A74;border:1px solid rgba(0,229,204,.15);}
+.st-on-tree{background:rgba(0,224,64,.10);color:#009020;border:1px solid rgba(0,224,64,.18);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html">← Design Review Hub</a>
+  <div class="nav-r">
+    <span class="nbadge">14 — Invite Email + Join Flow</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- ══ COL 1: EMAIL TEMPLATE ══════════════════ -->
+  <div class="col">
+    <div class="col-eyebrow">Invitation email</div>
+    <h2 class="col-h">What they<br><em>receive.</em></h2>
+    <p class="col-sub">Personal relationship first. Tree story second. One clear action.</p>
+
+    <!-- Variant switcher -->
+    <div class="variant-tabs">
+      <button class="vtab on" onclick="switchVariant('nephew',this)">Nephew → Uncle</button>
+      <button class="vtab" onclick="switchVariant('grandchild',this)">Grandchild → Grandparent</button>
+      <button class="vtab" onclick="switchVariant('friend',this)">Friend → Friend</button>
+    </div>
+
+    <!-- Email preview -->
+    <div class="email-frame">
+      <div class="email-client-bar">
+        <div class="ecb-dot" style="background:#FF6058;"></div>
+        <div class="ecb-dot" style="background:#FFBD2E;"></div>
+        <div class="ecb-dot" style="background:#27C93F;"></div>
+        <span class="ecb-subject" id="email-subject">Your nephew Vikas has added you to the family river · EternalCurrent.Online</span>
+      </div>
+
+      <div class="email-header">
+        <div class="eh-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+      </div>
+
+      <div class="email-body">
+        <div class="eb-relationship" id="email-rel-badge">Your nephew has added you</div>
+        <h2 class="eb-headline" id="email-headline">
+          <em id="email-sender-name">Vikas</em> has added you<br>to the family river.
+        </h2>
+
+        <p class="eb-body-text" id="email-body-text">
+          Vikas Bakshi has created a profile for you on EternalCurrent.Online and invited you to join the Bakshi household's family river — connecting your family across San Jose, Amritsar, London, and Sydney.
+        </p>
+
+        <div class="email-sender-note" id="email-sender-note">
+          <strong>From Vikas:</strong> "I've been building the family river and wanted to make sure you're part of it. Your profile is already there — just click to activate it and see where we all are in the world."
+        </div>
+
+        <!-- Tree card -->
+        <div class="tree-card-email">
+          <div class="tce-icon">
+            <svg width="44" height="56" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+              <path d="M40 96 L40 60 Q40 50 42 38 Q43 24 42 10" stroke="#1E4020" stroke-width="4" fill="none" stroke-linecap="round"/>
+              <path d="M40 72 Q24 58 16 44" stroke="#1E4020" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+              <path d="M41 56 Q58 44 64 30" stroke="#1E4020" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <g transform="rotate(-25 18 46)"><ellipse cx="18" cy="46" rx="6" ry="9" fill="#0A3A12"/><ellipse cx="18" cy="43" rx="2.5" ry="4" fill="#1A8030"/><ellipse cx="18" cy="42.5" rx="1" ry="2" fill="#28B040"/></g>
+              <g transform="rotate(10 62 30)"><ellipse cx="62" cy="30" rx="5.5" ry="8" fill="#0A3A12"/><ellipse cx="62" cy="27" rx="2.2" ry="3.5" fill="#167030"/><ellipse cx="62" cy="26.5" rx="1" ry="1.8" fill="#22A038"/></g>
+              <g transform="rotate(5 42 10)"><ellipse cx="42" cy="10" rx="6" ry="8" fill="#0A3A12"/><ellipse cx="42" cy="7" rx="2.5" ry="4" fill="#1A8030"/><ellipse cx="42" cy="6.5" rx="1" ry="2" fill="#28B040"/></g>
+            </svg>
+          </div>
+          <div>
+            <div class="tce-name" id="email-tree-name">The Bakshi family river · Magnolia</div>
+            <div class="tce-sci">Magnolia grandiflora</div>
+            <div class="tce-story" id="email-tree-story">The magnolia blooms before its leaves appear — one of the oldest flowering trees on Earth. Treasured across North India, the American South, China, and Japan. Like your family, it crosses continents and endures.</div>
+          </div>
+        </div>
+
+        <a class="email-cta" id="email-cta-text" href="#">Join the Bakshi family river →</a>
+
+        <p class="email-footer-text">
+          Joining is free. You only pay if you choose to build your own household profiles ($1.99/person).<br>
+          This invitation was sent by Vikas Bakshi · <span style="color:#0E5E30;">Unsubscribe</span>
+        </p>
+      </div>
+
+      <div class="email-footer">
+        <div class="ef-text">
+          EternalCurrent.Online · A CRUNOD company<br>
+          Your living family network · <span style="color:#3A8060;">Privacy Policy</span> · <span style="color:#3A8060;">Terms</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dnote" style="margin-top:12px;">
+      <span class="dn-check">✓</span>
+      <span>Confirmed: personal relationship leads. "Your nephew Vikas" is the hook. The tree story (Magnolia, its cultural meaning, the family connection it represents) comes second as the emotional layer.</span>
+    </div>
+    <div class="design-note">
+      <strong>Email rendering note</strong>
+      Invitation emails render in light mode — major email clients (Gmail, Outlook, Apple Mail) have inconsistent dark mode support. The email uses a near-white background (#FAFAF8) with dark green (#0E5E30) as the brand accent. This is separate from the ECO app's dark-only theme. The CTA button uses the same green family as the app's accent colours.
+    </div>
+  </div>
+
+  <!-- ══ COL 2: JOIN FLOW ═══════════════════════ -->
+  <div class="col">
+    <div class="col-eyebrow">What they see when they click</div>
+    <h2 class="col-h">The join<br><em>experience.</em></h2>
+    <p class="col-sub">Click the email link → see who invited them + the tree → choose their level of engagement. Three paths, all valid.</p>
+
+    <div class="screen-stack">
+
+      <!-- Screen 1: Landing on the join page -->
+      <div class="screen-card">
+        <div class="sc-bar">
+          <div class="sc-bar-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+          <span class="sc-step-badge ssb-join">You're invited</span>
+        </div>
+        <div class="sc-body">
+          <div class="connection-preview">
+            <div class="cp-from">From Vikas Bakshi · your nephew</div>
+            <div class="cp-body">Vikas has added you to the Bakshi family river and invited you to join.</div>
+            <div class="cp-rel">San Jose, CA · Magnolia tree · 4 profiles active</div>
+          </div>
+          <div class="tree-preview-join">
+            <div class="tpj-tree">
+              <svg width="32" height="42" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 96 L40 58 Q42 40 42 12" stroke="#163820" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M40 70 Q24 58 16 44" stroke="#163820" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M41 56 Q58 44 64 30" stroke="#163820" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <g transform="rotate(-25 18 46)"><ellipse cx="18" cy="46" rx="5" ry="7" fill="#003A0A"/><ellipse cx="18" cy="43" rx="2" ry="3.5" fill="#00C030"/></g>
+                <g transform="rotate(5 42 12)"><ellipse cx="42" cy="12" rx="5" ry="7" fill="#003A0A"/><ellipse cx="42" cy="9.5" rx="2" ry="3" fill="#00C030"/></g>
+              </svg>
+            </div>
+            <div>
+              <div class="tpj-name">The Magnolia · Bakshi family river</div>
+              <div class="tpj-story">Blooms before its leaves. Endures across continents. Like your family.</div>
+            </div>
+          </div>
+          <h3 class="sc-body-h">You're on the tree.<br><em>Join to see it.</em></h3>
+          <p class="sc-body-sub">Vikas has already added your profile. Enter your email to see your place in the family river.</p>
+          <input style="width:100%;padding:9px 12px;background:#132030;border:1px solid rgba(0,229,204,.15);border-radius:8px;color:#E8F4F0;font-size:13px;outline:none;margin-bottom:10px;font-family:'DM Sans',system-ui,sans-serif;" placeholder="your@email.com">
+          <button class="btn-join">See my family river →</button>
+          <button class="btn-later">Decline this invitation</button>
+        </div>
+      </div>
+
+      <!-- Screen 2: They're in — see the tree -->
+      <div class="screen-card">
+        <div class="sc-bar">
+          <div class="sc-bar-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+          <span class="sc-step-badge ssb-join">Welcome</span>
+        </div>
+        <div class="sc-body">
+          <h3 class="sc-body-h">You're in the<br><em>Bakshi tree.</em></h3>
+          <p class="sc-body-sub">You can see the tree and everyone on it. Now you have a choice — explore as a guest, or build your own household so your branch of the family can grow.</p>
+
+          <!-- Three paths -->
+          <div class="pay-optional">
+            <div class="po-title">What would you like to do?</div>
+
+            <div class="po-option">
+              <div class="po-radio on"></div>
+              <div>
+                <div class="po-label">View the tree — free</div>
+                <div class="po-sub">See everyone, explore the globe. You appear on the tree but can't add connections or invite others.</div>
+              </div>
+            </div>
+
+            <div class="po-option">
+              <div class="po-radio"></div>
+              <div>
+                <div class="po-label">Build my household — $1.99/person</div>
+                <div class="po-sub">Add your own profiles, invite your connections, grow your branch of the tree.</div>
+              </div>
+            </div>
+
+            <div class="po-option">
+              <div class="po-radio"></div>
+              <div>
+                <div class="po-label">Do this later</div>
+                <div class="po-sub">Your place on the tree is saved. Come back any time.</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-join">Explore the tree now →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="dnote">
+      <span class="dn-check">✓</span>
+      <span>Invitees join free. Viewing is always free. Building their own household ($1.99/person) is optional and their choice — never forced.</span>
+    </div>
+    <div class="design-note">
+      <strong>The three join paths</strong>
+      View only (free, permanent), Build household (pay, full participant), Do later (session ends, link saved). All three are valid outcomes. The product should never make someone feel like a second-class member for choosing view-only — some of the most important people in a family river will never pay. That's fine. Their presence on the tree has value regardless.
+    </div>
+  </div>
+
+  <!-- ══ COL 3: GHOST NODE SPEC ════════════════ -->
+  <div class="col">
+    <div class="col-eyebrow">Ghost node system</div>
+    <h2 class="col-h">Pending profiles<br><em>on the tree.</em></h2>
+    <p class="col-sub">Four states. Each has a distinct visual treatment and visibility rule. Decision 23 is still open — confirm the timing before we build.</p>
+
+    <div class="ghost-spec">
+
+      <!-- State 1: Entered but not invited -->
+      <div class="gs-row">
+        <div class="gs-title">
+          State 1 — entered, not yet invited
+          <span class="status-tag st-private">Owner only</span>
+        </div>
+        <div class="gs-body">The user has typed a name and relationship into their roster but hasn't sent an invite. The profile exists in the database but no email has gone out.</div>
+        <div class="gs-visual">
+          <div class="ghost-node gn-pending">?</div>
+          <div class="gn-label">
+            <strong>Sunita Mehta · Aunt</strong>
+            Greyed silhouette · no name shown to others · invite not sent
+          </div>
+        </div>
+      </div>
+
+      <!-- State 2: Invited, awaiting response -->
+      <div class="gs-row">
+        <div class="gs-title">
+          State 2 — invite sent, not yet joined
+          <span class="status-tag st-on-tree" id="state2-tag">Locked ✓</span>
+        </div>
+        <div class="gs-body" id="state2-body">Invite email has been dispatched. The recipient hasn't clicked through yet. <strong style="color:#C8D4D0;">Name and relationship now visible to connections</strong> — the ghost node transitions from an anonymous silhouette to a named pending profile.</div>
+        <div class="gs-visual">
+          <div class="ghost-node gn-invited">S</div>
+          <div class="gn-label">
+            <strong id="state2-label">Sunita Mehta · Aunt</strong>
+            <span id="state2-sublabel">Invite sent · name now visible to connections · awaiting response</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- State 3: Joined as view-only -->
+      <div class="gs-row">
+        <div class="gs-title">
+          State 3 — joined, view-only (no household paid)
+          <span class="status-tag st-visible">Visible to all</span>
+        </div>
+        <div class="gs-body">The person clicked the invite, created a free account, and chose to view only. Their name appears on the tree but their node is styled differently from paid household profiles.</div>
+        <div class="gs-visual">
+          <div class="ghost-node gn-invited" style="border-style:solid;border-color:rgba(0,229,204,.40);">S</div>
+          <div class="gn-label">
+            <strong>Sunita Mehta · Aunt</strong>
+            Visible · view-only member · no household built yet
+          </div>
+        </div>
+      </div>
+
+      <!-- State 4: Paid and active -->
+      <div class="gs-row">
+        <div class="gs-title">
+          State 4 — profile paid and active
+          <span class="status-tag st-on-tree">On tree</span>
+        </div>
+        <div class="gs-body">A paid profile — either paid by this household, or the person built their own household. Full colour node on the tree with complete profile visibility.</div>
+        <div class="gs-visual">
+          <div class="ghost-node gn-paid" style="border-style:solid;">S</div>
+          <div class="gn-label">
+            <strong>Sunita Mehta · Aunt</strong>
+            Full profile · active · on tree in full colour
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="dnote">
+      <span class="dn-check">✓</span>
+      <span><strong>Decision 23 locked.</strong> Anonymous silhouette always visible to connections from the moment entered. Name and relationship revealed only after invite is sent. This respects the privacy of people who haven’t been contacted yet while showing the true shape of the family to those already connected.</span>
+    </div>
+
+    <div class="design-note" style="margin-top:10px;">
+      <strong>Database states needed</strong>
+      The <code>pending_profiles</code> table needs a <code>visibility_state</code> column: <code>private</code> (state 1), <code>invited</code> (state 2), <code>view_only</code> (state 3). Active paid profiles live in the main <code>profiles</code> table. The tree rendering engine reads both tables and applies the correct visual treatment per state.
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+var VARIANTS = {
+  nephew: {
+    subject: 'Your nephew Vikas has added you to the family river · EternalCurrent.Online',
+    relBadge: 'Your nephew has added you',
+    senderName: 'Vikas',
+    bodyText: 'Vikas Bakshi has created a profile for you on EternalCurrent.Online and invited you to join the Bakshi household\'s family river — connecting your family across San Jose, Amritsar, London, and Sydney.',
+    senderNote: '"I\'ve been building the family river and wanted to make sure you\'re part of it. Your profile is already there — just click to activate it and see where we all are in the world."',
+    treeName: 'The Bakshi family river · Magnolia',
+    treeStory: 'The magnolia blooms before its leaves appear — one of the oldest flowering trees on Earth. Treasured across North India, the American South, China, and Japan. Like your family, it crosses continents and endures.',
+    ctaText: 'Join the Bakshi family river →'
+  },
+  grandchild: {
+    subject: 'Your granddaughter Priya has added you to the family river · EternalCurrent.Online',
+    relBadge: 'Your granddaughter has added you',
+    senderName: 'Priya',
+    bodyText: 'Priya Sharma has created a profile for you on EternalCurrent.Online. Your family river spans four generations across three continents — and you\'re at the very top.',
+    senderNote: '"Grandpa, I made something I think you\'ll love. I\'ve put everyone in the family on a map — you can see where we all live now. You\'re at the top of the tree, right where you belong."',
+    treeName: 'The Sharma family river · Banyan',
+    treeStory: 'A single banyan tree becomes a forest as its aerial roots descend and form new trunks. Sacred across South Asia for centuries. Like your family — one origin, spreading wide, impossible to contain.',
+    ctaText: 'See your place at the top of the tree →'
+  },
+  friend: {
+    subject: 'Your friend Isaiah has added you to his family river · EternalCurrent.Online',
+    relBadge: 'Your friend has added you',
+    senderName: 'Isaiah',
+    bodyText: 'Isaiah has created a profile for you on EternalCurrent.Online — not as family, but as someone who is family in every way that matters. You\'re part of his tree.',
+    senderNote: '"Some people you choose. I chose you. You\'re on my tree."',
+    treeName: 'The Johnson family river · Live Oak',
+    treeStory: 'The live oak keeps its leaves year-round — enduring, deeply rooted, and strong enough to shelter generations. Native to the American South, it represents permanence, loyalty, and the people you can always come back to.',
+    ctaText: 'Join Isaiah\'s family river →'
+  }
+};
+
+function switchVariant(key, btn) {
+  document.querySelectorAll('.vtab').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  var v = VARIANTS[key];
+  document.getElementById('email-subject').textContent = v.subject;
+  document.getElementById('email-rel-badge').textContent = v.relBadge;
+  document.getElementById('email-sender-name').textContent = v.senderName;
+  document.getElementById('email-body-text').textContent = v.bodyText;
+  document.getElementById('email-sender-note').innerHTML = '<strong>From ' + v.senderName + ':</strong> ' + v.senderNote;
+  document.getElementById('email-tree-name').textContent = v.treeName;
+  document.getElementById('email-tree-story').textContent = v.treeStory;
+  document.getElementById('email-cta-text').textContent = v.ctaText;
+}
+</script>
+</body>
+</html>

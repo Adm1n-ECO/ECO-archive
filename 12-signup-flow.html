@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO Design Review — Signup Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;min-height:100vh;}
+
+/* ── Nav ─────────────────────────────────────────── */
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:200;}
+.nav a{font-size:13px;color:#3A5A54;text-decoration:none;transition:color .14s;}.nav a:hover{color:#00E5CC;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.nav-badge{background:rgba(0,224,64,.10);border:1px solid rgba(0,224,64,.22);color:#009828;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:999px;}
+
+/* ── Layout: step rail + screen viewer ─────────────── */
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:calc(100vh - 52px);}
+@media(max-width:680px){.layout{grid-template-columns:1fr;}}
+
+/* ── Step rail (left) ────────────────────────────── */
+.rail{border-right:1px solid rgba(0,229,204,.07);padding:28px 0 40px;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+.rail::-webkit-scrollbar{width:3px;}
+.rail::-webkit-scrollbar-thumb{background:rgba(0,229,204,.15);border-radius:3px;}
+
+.rail-title{font-size:10px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#3A5A54;padding:0 18px 10px;display:block;}
+.rail-step{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;cursor:pointer;transition:background .14s;position:relative;}
+.rail-step:hover{background:rgba(0,229,204,.04);}
+.rail-step.on{background:rgba(0,229,204,.07);}
+.rail-step.on::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#00E5CC;border-radius:0 2px 2px 0;}
+.step-circle{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;transition:all .14s;}
+.sc-pending{background:#0D1820;border:1px solid rgba(0,229,204,.15);color:#3A5A54;}
+.sc-active {background:rgba(0,229,204,.15);border:1px solid rgba(0,229,204,.35);color:#00E5CC;}
+.sc-done   {background:rgba(0,224,64,.12);border:1px solid rgba(0,224,64,.25);color:#00A028;}
+.sc-pay    {background:rgba(0,150,210,.15);border:1px solid rgba(0,150,210,.30);color:#0090D0;}
+.step-info{flex:1;}
+.step-name{font-size:12px;font-weight:500;color:#C8D4D0;line-height:1.3;}
+.step-sub {font-size:11px;color:#3A5A54;margin-top:2px;line-height:1.4;}
+.step-time{font-size:9px;font-family:'JetBrains Mono',monospace;color:#3A5A54;margin-top:3px;}
+.rail-connector{width:1px;height:14px;background:rgba(0,229,204,.10);margin:0 0 0 30px;}
+.rail-group-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#3A5A54;padding:10px 18px 4px;margin-top:4px;}
+.rail-divider{height:1px;background:rgba(0,229,204,.06);margin:8px 18px;}
+
+/* ── Screen viewer (right) ──────────────────────── */
+.viewer{padding:28px 32px 60px;max-width:640px;}
+.screen-wrap{background:#0D1820;border:1px solid rgba(0,229,204,.12);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+
+/* Screens */
+.screen{padding:36px 32px;display:none;}
+.screen.on{display:block;}
+
+/* Screen header shared */
+.sc-step-badge{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#00E5CC;background:rgba(0,229,204,.10);padding:3px 10px;border-radius:999px;display:inline-block;margin-bottom:14px;}
+.sc-step-badge.pay{background:rgba(0,150,210,.12);color:#0090D0;}
+.sc-step-badge.done{background:rgba(0,224,64,.10);color:#009828;}
+.sc-h{font-family:'DM Serif Display',serif;font-size:1.9rem;letter-spacing:-.02em;line-height:1.2;color:#E8F4F0;margin-bottom:8px;}
+.sc-h em{font-style:italic;color:#00E040;}
+.sc-sub{font-size:13px;color:#5A8A80;line-height:1.65;margin-bottom:24px;}
+
+/* Form elements */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#3A5A54;margin-bottom:7px;}
+.input{width:100%;padding:11px 14px;font-family:'DM Sans',system-ui,sans-serif;font-size:14px;color:#E8F4F0;background:#132030;border:1px solid rgba(0,229,204,.15);border-radius:9px;outline:none;transition:border-color .14s;}
+.input:focus{border-color:#00E5CC;box-shadow:0 0 0 3px rgba(0,229,204,.10);}
+.input::placeholder{color:#3A5A54;}
+.input-hint{font-size:11px;color:#3A5A54;margin-top:5px;line-height:1.5;}
+
+/* Buttons */
+.btn-primary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:#00E5CC;color:#070D14;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;transition:filter .14s;margin-top:4px;}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-secondary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:11px;background:transparent;color:#3A5A54;font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border-radius:10px;border:1px solid rgba(0,229,204,.12);cursor:pointer;font-family:'DM Sans',system-ui,sans-serif;margin-top:8px;}
+
+/* Tree picker */
+.tree-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.tree-opt{background:#132030;border:2px solid rgba(0,229,204,.09);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .14s;}
+.tree-opt:hover{border-color:rgba(0,229,204,.25);}
+.tree-opt.on{border-color:#00E040;background:rgba(0,224,64,.07);}
+.tree-opt-name{font-size:11px;font-weight:500;color:#C8D4D0;margin-top:6px;}
+.tree-opt-tick{width:16px;height:16px;border-radius:50%;background:#00E040;color:#070D14;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:5px auto 0;opacity:0;transition:opacity .14s;}
+.tree-opt.on .tree-opt-tick{opacity:1;}
+
+/* Globe preview */
+.globe-preview{background:#04090E;border-radius:10px;height:160px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;border:1px solid rgba(0,229,204,.08);position:relative;overflow:hidden;}
+.globe-svg-wrap{opacity:.9;}
+.globe-pulse{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
+
+/* Profile rows */
+.profile-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.profile-row{display:flex;align-items:center;gap:10px;background:#132030;border:1px solid rgba(0,229,204,.10);border-radius:9px;padding:10px 12px;}
+.pr-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+.pr-info{flex:1;}
+.pr-name{font-size:13px;font-weight:500;color:#C8D4D0;}
+.pr-type{font-size:11px;color:#3A5A54;}
+.pr-price{font-size:12px;font-weight:600;color:#E8F4F0;font-family:'JetBrains Mono',monospace;}
+.add-profile-btn{display:flex;align-items:center;gap:8px;background:transparent;border:1px dashed rgba(0,229,204,.18);border-radius:9px;padding:10px 14px;cursor:pointer;transition:all .14s;width:100%;}
+.add-profile-btn:hover{border-color:rgba(0,229,204,.35);background:rgba(0,229,204,.04);}
+.add-label{font-size:12px;color:#3A5A54;font-family:'DM Sans',system-ui,sans-serif;}
+.add-icon{width:24px;height:24px;border-radius:50%;background:rgba(0,229,204,.10);border:1px solid rgba(0,229,204,.20);color:#00E5CC;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* Payment summary */
+.pay-summary{background:#04090E;border:1px solid rgba(0,150,210,.15);border-radius:10px;padding:16px;margin-bottom:16px;}
+.pay-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+.pay-row{display:flex;justify-content:space-between;font-size:13px;}
+.pay-row-label{color:#5A8A80;}
+.pay-row-amount{color:#C8D4D0;font-family:'JetBrains Mono',monospace;}
+.pay-divider{height:1px;background:rgba(0,229,204,.08);margin:10px 0;}
+.pay-total{display:flex;justify-content:space-between;align-items:baseline;}
+.pay-total-label{font-size:13px;color:#7AADA0;}
+.pay-total-amount{font-size:22px;font-weight:600;color:#00E040;font-family:'DM Serif Display',serif;}
+.pay-stripe-badge{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:11px;color:#3A5A54;}
+.pay-stripe-dot{width:6px;height:6px;border-radius:50%;background:#00E040;}
+
+/* Success state */
+.success-icon{width:56px;height:56px;border-radius:50%;background:rgba(0,224,64,.12);border:2px solid rgba(0,224,64,.30);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px;}
+.success-stat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,229,204,.07);font-size:13px;}
+.success-stat:last-child{border-bottom:none;}
+.success-stat-label{color:#3A5A54;}
+.success-stat-val{color:#00E5CC;font-weight:500;}
+
+/* Step notes */
+.note-box{background:#161206;border:1px dashed rgba(224,200,80,.28);border-radius:8px;padding:12px 14px;font-size:12px;color:#8A7040;line-height:1.6;}
+.note-box strong{color:#C0A040;display:block;margin-bottom:3px;}
+.design-note{background:#0A0A1A;border:1px solid rgba(144,96,224,.15);border-radius:8px;padding:12px 14px;font-size:12px;color:#6A50A0;line-height:1.6;margin-top:10px;}
+.design-note strong{color:#9060E0;display:block;margin-bottom:3px;}
+.decision-locked{background:#061206;border:1px solid rgba(0,224,64,.15);border-radius:8px;padding:10px 12px;font-size:12px;color:#3A6040;line-height:1.6;margin-top:10px;display:flex;gap:8px;}
+.dl-check{color:#00A028;flex-shrink:0;font-size:14px;}
+
+/* Timer badge */
+.time-pill{display:inline-flex;align-items:center;gap:5px;background:rgba(0,229,204,.08);border:1px solid rgba(0,229,204,.15);border-radius:999px;padding:3px 10px;font-size:10px;font-weight:600;color:#00A090;letter-spacing:.06em;margin-bottom:14px;}
+
+/* Nav for screens */
+.screen-nav{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:#132030;border-bottom:1px solid rgba(0,229,204,.08);}
+.sn-logo{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.08em;color:#7AADA0;}
+.sn-logo .cy{color:#00E5CC;}.sn-logo .gr{color:#00E040;}
+.sn-progress{display:flex;gap:4px;align-items:center;}
+.sn-dot{width:6px;height:6px;border-radius:50%;background:rgba(0,229,204,.20);}
+.sn-dot.on{background:#00E5CC;}
+.sn-dot.done{background:#00E040;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html">← Design Review Hub</a>
+  <div class="nav-right">
+    <span class="nav-badge">Signup flow · 7 steps</span>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- ── STEP RAIL ──────────────────────────────── -->
+  <div class="rail">
+    <span class="rail-title">Signup journey</span>
+    <span class="rail-group-label">Getting in</span>
+
+    <div class="rail-step on" onclick="show(0,this)" id="rs-0">
+      <div class="step-circle sc-active">1</div>
+      <div class="step-info">
+        <div class="step-name">Email only</div>
+        <div class="step-sub">One field. Magic link. No password.</div>
+        <div class="step-time">~20 seconds</div>
+      </div>
+    </div>
+    <div class="rail-connector"></div>
+
+    <div class="rail-step" onclick="show(1,this)" id="rs-1">
+      <div class="step-circle sc-pending">2</div>
+      <div class="step-info">
+        <div class="step-name">Name your household</div>
+        <div class="step-sub">One field. Creates ownership.</div>
+        <div class="step-time">~15 seconds</div>
+      </div>
+    </div>
+    <div class="rail-connector"></div>
+
+    <div class="rail-step" onclick="show(2,this)" id="rs-2">
+      <div class="step-circle sc-pending">3</div>
+      <div class="step-info">
+        <div class="step-name">Pick your tree + city</div>
+        <div class="step-sub">Personalisation. Two fields.</div>
+        <div class="step-time">~30 seconds</div>
+      </div>
+    </div>
+    <div class="rail-connector"></div>
+
+    <div class="rail-step" onclick="show(3,this)" id="rs-3">
+      <div class="step-circle sc-pending">4</div>
+      <div class="step-info">
+        <div class="step-name">See your globe</div>
+        <div class="step-sub">The aha moment. Just one node.</div>
+        <div class="step-time">~30 seconds</div>
+      </div>
+    </div>
+
+    <div class="rail-divider"></div>
+    <span class="rail-group-label">Building your household</span>
+
+    <div class="rail-step" onclick="show(4,this)" id="rs-4">
+      <div class="step-circle sc-pending">5</div>
+      <div class="step-info">
+        <div class="step-name">Add household profiles</div>
+        <div class="step-sub">Yourself + family + pets.</div>
+        <div class="step-time">~2–5 min</div>
+      </div>
+    </div>
+    <div class="rail-connector"></div>
+
+    <div class="rail-step" onclick="show(5,this)" id="rs-5">
+      <div class="step-circle sc-pay">6</div>
+      <div class="step-info">
+        <div class="step-name">Pay for your profiles</div>
+        <div class="step-sub">$1.99/person · $0.99/pet</div>
+        <div class="step-time">~60 seconds</div>
+      </div>
+    </div>
+    <div class="rail-connector"></div>
+
+    <div class="rail-step" onclick="show(6,this)" id="rs-6">
+      <div class="step-circle sc-pending">7</div>
+      <div class="step-info">
+        <div class="step-name">Live — invite your first connection</div>
+        <div class="step-sub">Tree is active. Start growing.</div>
+        <div class="step-time">~1 min</div>
+      </div>
+    </div>
+
+    <div class="rail-divider"></div>
+    <span class="rail-group-label">When they join</span>
+    <div class="rail-step" onclick="show(7,this)" id="rs-7">
+      <div class="step-circle sc-pending">→</div>
+      <div class="step-info">
+        <div class="step-name">Invitee signup flow</div>
+        <div class="step-sub">What the other person sees.</div>
+        <div class="step-time">Separate flow</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN VIEWER ──────────────────────────── -->
+  <div class="viewer">
+
+    <!-- STEP 1: Email -->
+    <div class="screen on" id="sc-0">
+      <div class="screen-wrap">
+        <div class="screen-nav">
+          <div class="sn-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+          <div class="sn-progress">
+            <div class="sn-dot on"></div><div class="sn-dot"></div><div class="sn-dot"></div><div class="sn-dot"></div>
+          </div>
+        </div>
+        <div class="screen" style="display:block;">
+          <div class="sc-step-badge">Step 1 of 4 · Getting started</div>
+          <h2 class="sc-h">Start your<br><em>family river.</em></h2>
+          <p class="sc-sub">Enter your email and we'll send you a magic link — no password needed, ever.</p>
+          <div class="field">
+            <label>Email address</label>
+            <input class="input" type="email" placeholder="you@example.com" value="">
+          </div>
+          <button class="btn-primary">Send my magic link →</button>
+          <p style="font-size:11px;color:#3A5A54;text-align:center;margin-top:12px;line-height:1.6;">By continuing you agree to our <span style="color:#00E5CC;">Terms</span> and <span style="color:#00E5CC;">Privacy Policy</span>.<br>No spam. Unsubscribe any time.</p>
+        </div>
+      </div>
+      <div class="time-pill">⏱ ~20 seconds</div>
+      <div class="design-note">
+        <strong>Design principle — magic link only</strong>
+        No password field at signup. Ever. Supabase magic link sent to their email. They click it, they're in. No "confirm password," no "forgot password" for life. Eliminates the #1 reason people abandon signups.
+      </div>
+      <div class="decision-locked">
+        <span class="dl-check">✓</span>
+        <span>Confirmed: each user manages their own account. No social login required for MVP — email magic link only.</span>
+      </div>
+    </div>
+
+    <!-- STEP 2: Household name -->
+    <div class="screen" id="sc-1">
+      <div class="screen-wrap">
+        <div class="screen-nav">
+          <div class="sn-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+          <div class="sn-progress">
+            <div class="sn-dot done"></div><div class="sn-dot on"></div><div class="sn-dot"></div><div class="sn-dot"></div>
+          </div>
+        </div>
+        <div class="screen" style="display:block;">
+          <div class="sc-step-badge">Step 2 of 4 · Your household</div>
+          <h2 class="sc-h">Name your<br><em>household.</em></h2>
+          <p class="sc-sub">This is how your family will appear to connections — a household, not just a person.</p>
+          <div class="field">
+            <label>Household name</label>
+            <input class="input" type="text" placeholder="The Bakshi household" value="The Bakshi household">
+            <p class="input-hint">Can be your family name, a nickname, or anything that feels right. You can change this later.</p>
+          </div>
+          <button class="btn-primary">This is us →</button>
+          <button class="btn-secondary">Back</button>
+        </div>
+      </div>
+      <div class="time-pill">⏱ ~15 seconds</div>
+      <div class="design-note">
+        <strong>Why "household" not "account"</strong>
+        The product is built around households as the core unit — not individual people, not accounts. Naming it immediately creates the right mental model. "The Bakshi household" on the globe is immediately more meaningful than "vikas@email.com."
+      </div>
+    </div>
+
+    <!-- STEP 3: Tree + city -->
+    <div class="screen" id="sc-2">
+      <div class="screen-wrap">
+        <div class="screen-nav">
+          <div class="sn-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+          <div class="sn-progress">
+            <div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot on"></div><div class="sn-dot"></div>
+          </div>
+        </div>
+        <div class="screen" style="display:block;">
+          <div class="sc-step-badge">Step 3 of 4 · Your tree</div>
+          <h2 class="sc-h">Choose your<br><em>tree.</em></h2>
+          <p class="sc-sub">Every family has a tree. Yours can too.</p>
+          <div class="tree-grid">
+            <div class="tree-opt on" onclick="pickTree(this)">
+              <svg width="40" height="48" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 96 L40 60 Q40 50 42 40 Q44 28 42 14" stroke="#163820" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M40 72 Q26 60 18 48" stroke="#163820" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M41 56 Q56 46 62 32" stroke="#163820" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <g transform="rotate(-25 20 50)"><ellipse cx="20" cy="50" rx="6" ry="9" fill="#003A0A"/><ellipse cx="20" cy="47" rx="2.5" ry="4" fill="#00C030"/><ellipse cx="20" cy="46.5" rx="1" ry="2" fill="#00E040"/></g>
+                <g transform="rotate(10 60 32)"><ellipse cx="60" cy="32" rx="5.5" ry="8" fill="#003A0A"/><ellipse cx="60" cy="29" rx="2.2" ry="3.5" fill="#00B02A"/><ellipse cx="60" cy="28.5" rx="1" ry="1.8" fill="#00E040"/></g>
+                <g transform="rotate(5 42 14)"><ellipse cx="42" cy="14" rx="6" ry="8" fill="#003A0A"/><ellipse cx="42" cy="11" rx="2.5" ry="4" fill="#00C030"/><ellipse cx="42" cy="10.5" rx="1" ry="2" fill="#00E040"/></g>
+              </svg>
+              <div class="tree-opt-name">Magnolia</div>
+              <div class="tree-opt-tick">✓</div>
+            </div>
+            <div class="tree-opt" onclick="pickTree(this)">
+              <svg width="40" height="48" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 96 L40 56" stroke="#1E3010" stroke-width="6" fill="none" stroke-linecap="round"/>
+                <path d="M40 68 Q22 56 14 42" stroke="#1E3010" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M40 58 Q58 46 64 32" stroke="#1E3010" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <ellipse cx="40" cy="28" rx="26" ry="26" fill="#003A0A"/>
+                <ellipse cx="34" cy="32" rx="16" ry="18" fill="#004C10"/>
+                <ellipse cx="46" cy="26" rx="14" ry="16" fill="#005A18"/>
+                <ellipse cx="40" cy="18" rx="10" ry="12" fill="#007020"/>
+                <ellipse cx="40" cy="16" rx="4" ry="4.5" fill="#00B030"/>
+                <ellipse cx="40" cy="15" rx="1.8" ry="2" fill="#00E040"/>
+              </svg>
+              <div class="tree-opt-name">Oak</div>
+              <div class="tree-opt-tick">✓</div>
+            </div>
+            <div class="tree-opt" onclick="pickTree(this)">
+              <svg width="40" height="48" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 96 L40 60 Q38 50 38 44" stroke="#1A2C10" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <path d="M38 72 Q20 62 10 50" stroke="#1A2C10" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M40 62 Q60 52 70 40" stroke="#1A2C10" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M12 50 L12 80" stroke="#1A2C10" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path d="M68 40 L68 80" stroke="#1A2C10" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <ellipse cx="38" cy="30" rx="30" ry="22" fill="#003A0A"/>
+                <ellipse cx="28" cy="36" rx="18" ry="14" fill="#004C10"/>
+                <ellipse cx="50" cy="28" rx="16" ry="13" fill="#005818"/>
+                <ellipse cx="38" cy="20" rx="12" ry="10" fill="#007020"/>
+                <ellipse cx="38" cy="17" rx="4" ry="3.5" fill="#00A028"/>
+              </svg>
+              <div class="tree-opt-name">Banyan</div>
+              <div class="tree-opt-tick">✓</div>
+            </div>
+            <div class="tree-opt" onclick="pickTree(this)">
+              <svg width="40" height="48" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+                <path d="M40 96 C38 80 38 62 40 48 C41 34 42 18 42 6" stroke="#1A2C14" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M40 68 Q22 54 14 38" stroke="#1A2C14" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="M41 50 Q60 40 68 24" stroke="#1A2C14" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <g><ellipse cx="16" cy="36" rx="7" ry="9" fill="#003A0A"/><ellipse cx="16" cy="33" rx="3" ry="5" fill="#006018"/><ellipse cx="16" cy="32.5" rx="1.5" ry="2.5" fill="#00E040"/></g>
+                <g><ellipse cx="66" cy="26" rx="7" ry="9" fill="#003A0A"/><ellipse cx="66" cy="23" rx="3" ry="5" fill="#006018"/><ellipse cx="66" cy="22.5" rx="1.5" ry="2.5" fill="#00E040"/></g>
+                <g><ellipse cx="42" cy="6" rx="6" ry="8" fill="#003A0A"/><ellipse cx="42" cy="3.5" rx="2.5" ry="4" fill="#00C030"/></g>
+              </svg>
+              <div class="tree-opt-name">Cherry</div>
+              <div class="tree-opt-tick">✓</div>
+            </div>
+            <div class="tree-opt" onclick="pickTree(this)">
+              <svg width="40" height="48" viewBox="0 0 80 96" xmlns="http://www.w3.org/2000/svg">
+                <path d="M30 96 Q34 78 36 66 Q38 56 40 50" stroke="#1E3A10" stroke-width="10" fill="none" stroke-linecap="round"/>
+                <path d="M50 96 Q46 78 44 66 Q42 56 40 50" stroke="#1E3A10" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <path d="M40 50 Q38 38 28 28" stroke="#163010" stroke-width="4" fill="none" stroke-linecap="round"/>
+                <path d="M40 50 Q42 36 54 26" stroke="#163010" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+                <path d="M40 50 Q40 36 40 22" stroke="#163010" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <g><ellipse cx="26" cy="26" rx="10" ry="8" fill="#003A0A"/><ellipse cx="26" cy="24" rx="5" ry="4" fill="#007020"/><ellipse cx="26" cy="23.5" rx="2" ry="2" fill="#00E040"/></g>
+                <g><ellipse cx="54" cy="24" rx="10" ry="8" fill="#003A0A"/><ellipse cx="54" cy="22" rx="5" ry="4" fill="#007020"/><ellipse cx="54" cy="21.5" rx="2" ry="2" fill="#00E040"/></g>
+                <g><ellipse cx="40" cy="20" rx="9" ry="7" fill="#004A10"/><ellipse cx="40" cy="18" rx="4.5" ry="3.5" fill="#008A28"/></g>
+              </svg>
+              <div class="tree-opt-name">Baobab</div>
+              <div class="tree-opt-tick">✓</div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Your city</label>
+            <input class="input" type="text" placeholder="San Jose, CA" value="San Jose, CA">
+            <p class="input-hint">Used to place your household on the globe. You can be as specific or general as you like.</p>
+          </div>
+          <button class="btn-primary">Place me on the map →</button>
+          <button class="btn-secondary">Back</button>
+        </div>
+      </div>
+      <div class="time-pill">⏱ ~30 seconds</div>
+      <div class="design-note">
+        <strong>Personalisation before payment</strong>
+        Tree selection + city creates emotional investment before any money is discussed. The user has now made two personal choices. They've built something that is theirs. Abandonment at the next step drops sharply.
+      </div>
+    </div>
+
+    <!-- STEP 4: Globe aha moment -->
+    <div class="screen" id="sc-3">
+      <div class="screen-wrap">
+        <div class="screen-nav">
+          <div class="sn-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+          <div class="sn-progress">
+            <div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot on"></div>
+          </div>
+        </div>
+        <div class="screen" style="display:block;">
+          <div class="sc-step-badge">Step 4 of 4 · You're on the map</div>
+          <h2 class="sc-h">You're <em>on the globe.</em></h2>
+          <p class="sc-sub">Your household is now live on EternalCurrent. You're the only one here — for now. Add your family to see your tree come alive.</p>
+
+          <div class="globe-preview">
+            <svg width="140" height="140" viewBox="-70 -70 140 140" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="0" cy="0" r="58" fill="#04090E" stroke="rgba(0,229,204,0.12)" stroke-width="1"/>
+              <circle cx="0" cy="0" r="58" fill="none" stroke="rgba(0,229,204,0.06)" stroke-width="0.5"/>
+              <ellipse cx="0" cy="0" rx="58" ry="20" fill="none" stroke="rgba(0,229,204,0.05)" stroke-width="0.5"/>
+              <ellipse cx="0" cy="0" rx="58" ry="38" fill="none" stroke="rgba(0,229,204,0.04)" stroke-width="0.5"/>
+              <line x1="-58" y1="0" x2="58" y2="0" stroke="rgba(0,229,204,0.06)" stroke-width="0.5"/>
+              <line x1="0" y1="-58" x2="0" y2="58" stroke="rgba(0,229,204,0.04)" stroke-width="0.5"/>
+              <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(0,229,204,0.08)" stroke-width="2"/>
+              <g>
+                <circle cx="-18" cy="4" r="5" fill="rgba(0,229,204,0.15)" stroke="rgba(0,229,204,0.4)" stroke-width="1"/>
+                <circle cx="-18" cy="4" r="2.5" fill="#00E5CC"/>
+                <circle cx="-18" cy="4" r="9" fill="none" stroke="rgba(0,229,204,0.2)" stroke-width="1">
+                  <animate attributeName="r" values="5;14;5" dur="2.5s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+              </g>
+              <text x="-18" y="18" font-family="system-ui,sans-serif" font-size="7" fill="rgba(0,229,204,0.6)" text-anchor="middle">The Bakshi household</text>
+            </svg>
+          </div>
+
+          <p style="font-size:12px;color:#3A5A54;text-align:center;margin-bottom:20px;">San Jose, CA · Just you, so far</p>
+          <button class="btn-primary" onclick="show(4, document.getElementById('rs-4'))">Build my household profiles →</button>
+          <button class="btn-secondary">Explore the globe first</button>
+        </div>
+      </div>
+      <div class="time-pill">⏱ The aha moment</div>
+      <div class="note-box">
+        <strong>This is the most important screen in the entire product</strong>
+        A single glowing node on a dark globe. No connections yet. The emotional message is immediate: your family is out there, and this is where they'll be. The loneliness of a single node is more powerful than a full tree because it makes the invitation feel urgent.
+      </div>
+      <div class="design-note">
+        <strong>No payment asked yet</strong>
+        The user sees the globe for free. They explore it. They feel it. Then and only then do we ask them to build their household — which is when the payment conversation begins. This is the correct moment.
+      </div>
+    </div>
+
+    <!-- STEP 5: Add profiles -->
+    <div class="screen" id="sc-4">
+      <div class="screen-wrap">
+        <div class="screen-nav">
+          <div class="sn-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+          <div class="sn-progress" style="gap:2px;">
+            <div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot on"></div>
+          </div>
+        </div>
+        <div class="screen" style="display:block;">
+          <div class="sc-step-badge">Building your household</div>
+          <h2 class="sc-h">Who's in your<br><em>household?</em></h2>
+          <p class="sc-sub">Add everyone who lives with you — and anyone you manage a profile for. Each profile is $1.99, pets are $0.99. You'll pay when you're ready.</p>
+
+          <div class="profile-list">
+            <div class="profile-row">
+              <div class="pr-avatar" style="background:rgba(0,229,204,.12);color:#00E5CC;">VB</div>
+              <div class="pr-info"><div class="pr-name">Vikas Bakshi</div><div class="pr-type">Account owner · you</div></div>
+              <div class="pr-price">$1.99</div>
+            </div>
+            <div class="profile-row">
+              <div class="pr-avatar" style="background:rgba(0,224,64,.10);color:#00A028;">+</div>
+              <div class="pr-info"><div class="pr-name">Spouse / partner</div><div class="pr-type">Tap to add details</div></div>
+              <div class="pr-price" style="color:#3A5A54;">$1.99</div>
+            </div>
+            <div class="profile-row" style="border-color:rgba(224,144,64,.20);">
+              <div class="pr-avatar" style="background:rgba(255,255,255,.06);color:#5A8A80;">G</div>
+              <div class="pr-info"><div class="pr-name">Grandfather — managed</div><div class="pr-type">No device · you manage this profile</div></div>
+              <div class="pr-price">$1.99</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button class="add-profile-btn" style="flex:1;">
+              <div class="add-icon">+</div>
+              <span class="add-label">Add a person ($1.99)</span>
+            </button>
+            <button class="add-profile-btn" style="flex:1;">
+              <div class="add-icon" style="background:rgba(224,144,64,.10);border-color:rgba(224,144,64,.20);color:#E09040;">🐾</div>
+              <span class="add-label">Add a pet ($0.99)</span>
+            </button>
+          </div>
+
+          <div style="background:#0A1A0A;border:1px solid rgba(0,224,64,.12);border-radius:8px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:#3A6040;line-height:1.5;">
+            <strong style="color:#00A028;display:block;margin-bottom:3px;">Managed profiles</strong>
+            Adding your grandfather? He doesn't need an account. You pay $1.99, create his profile, and manage it on his behalf. His story becomes part of your tree.
+          </div>
+
+          <button class="btn-primary" onclick="show(5, document.getElementById('rs-5'))">Review and pay →</button>
+          <button class="btn-secondary">Save and continue later</button>
+        </div>
+      </div>
+      <div class="time-pill">⏱ 2–5 minutes</div>
+      <div class="decision-locked">
+        <span class="dl-check">✓</span>
+        <span>Confirmed: each household pays only for profiles they personally create. The grandfather's profile is paid for by the grandchild, not by the grandfather.</span>
+      </div>
+      <div class="decision-locked">
+        <span class="dl-check">✓</span>
+        <span>Confirmed: managed profiles allowed. No login required for the subject. Creator owns and maintains the profile.</span>
+      </div>
+    </div>
+
+    <!-- STEP 6: Payment -->
+    <div class="screen" id="sc-5">
+      <div class="screen-wrap">
+        <div class="screen-nav">
+          <div class="sn-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+          <div class="sn-progress" style="gap:2px;">
+            <div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot done"></div><div class="sn-dot on"></div>
+          </div>
+        </div>
+        <div class="screen" style="display:block;">
+          <div class="sc-step-badge pay">Payment</div>
+          <h2 class="sc-h">Your household<br><em>total.</em></h2>
+          <p class="sc-sub">One-time payment. No monthly fee. No subscription. Ever.</p>
+
+          <div class="pay-summary">
+            <div class="pay-rows">
+              <div class="pay-row"><span class="pay-row-label">Vikas Bakshi</span><span class="pay-row-amount">$1.99</span></div>
+              <div class="pay-row"><span class="pay-row-label">Spouse / partner</span><span class="pay-row-amount">$1.99</span></div>
+              <div class="pay-row"><span class="pay-row-label">Grandfather (managed)</span><span class="pay-row-amount">$1.99</span></div>
+            </div>
+            <div class="pay-divider"></div>
+            <div class="pay-total">
+              <div><div class="pay-total-label">Total today</div><div style="font-size:11px;color:#3A5A54;margin-top:2px;">No recurring charges</div></div>
+              <div style="text-align:right;"><div class="pay-total-amount">$5.97</div></div>
+            </div>
+            <div class="pay-stripe-badge"><div class="pay-stripe-dot"></div>Secure payment via Stripe</div>
+          </div>
+
+          <div class="field">
+            <label>Card number</label>
+            <input class="input" placeholder="•••• •••• •••• ••••" style="font-family:'JetBrains Mono',monospace;letter-spacing:.06em;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+            <div class="field" style="margin-bottom:0;">
+              <label>Expiry</label>
+              <input class="input" placeholder="MM / YY">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>CVC</label>
+              <input class="input" placeholder="•••">
+            </div>
+          </div>
+          <button class="btn-primary" style="background:#00E040;color:#070D14;" onclick="show(6, document.getElementById('rs-6'))">Pay $5.97 and activate →</button>
+          <p style="font-size:11px;color:#3A5A54;text-align:center;margin-top:10px;line-height:1.6;">You can add more profiles any time for $1.99 each.<br>Profiles deleted within 30 days can be restored for free.</p>
+        </div>
+      </div>
+      <div class="time-pill">⏱ ~60 seconds</div>
+      <div class="decision-locked">
+        <span class="dl-check">✓</span>
+        <span>Confirmed: soft delete with 30-day recovery window. Non-refundable. Text shown on payment screen so users know the policy before paying.</span>
+      </div>
+      <div class="note-box">
+        <strong>Payment framing matters</strong>
+        The screen says "one-time payment" and "no subscription" twice — in the subheading and again under the total. This is intentional. The per-profile model is a competitive differentiator and should be said explicitly at the payment moment to reinforce the value versus $X/month alternatives.
+      </div>
+    </div>
+
+    <!-- STEP 7: Live -->
+    <div class="screen" id="sc-6">
+      <div class="screen-wrap">
+        <div class="screen-nav">
+          <div class="sn-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+        </div>
+        <div class="screen" style="display:block;text-align:center;">
+          <div class="sc-step-badge done">You're live</div>
+          <div class="success-icon">✓</div>
+          <h2 class="sc-h" style="text-align:center;">Your tree is <em>alive.</em></h2>
+          <p class="sc-sub" style="text-align:center;margin:0 auto 20px;">3 profiles activated. Your household is on the globe. Now invite your first connection.</p>
+
+          <div style="background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:10px;padding:14px;margin-bottom:16px;text-align:left;">
+            <div class="success-stat"><span class="success-stat-label">Household</span><span class="success-stat-val">The Bakshi household</span></div>
+            <div class="success-stat"><span class="success-stat-label">Profiles activated</span><span class="success-stat-val">3 people</span></div>
+            <div class="success-stat"><span class="success-stat-label">Location</span><span class="success-stat-val">San Jose, CA</span></div>
+            <div class="success-stat"><span class="success-stat-label">Network</span><span class="success-stat-val">Magnolia</span></div>
+            <div class="success-stat"><span class="success-stat-label">Total paid</span><span class="success-stat-val">$5.97 · one-time</span></div>
+          </div>
+
+          <button class="btn-primary">Invite your first connection →</button>
+          <button class="btn-secondary">Explore my tree first</button>
+        </div>
+      </div>
+      <div class="time-pill">⏱ Total journey: under 10 minutes</div>
+      <div class="design-note">
+        <strong>Next action is always "invite"</strong>
+        The success screen pushes toward the first invitation immediately. An empty tree with no connections is not a compelling product. Getting to the first connection is the true activation event — this is when ECO becomes real for the user.
+      </div>
+    </div>
+
+    <!-- STEP 8: Invitee flow -->
+    <div class="screen" id="sc-7">
+      <div class="screen-wrap">
+        <div class="screen-nav">
+          <div class="sn-logo">FIND<span class="cy">MY</span>TREE<span class="gr">.ONLINE</span></div>
+        </div>
+        <div class="screen" style="display:block;">
+          <div class="sc-step-badge">Invitee view — what they see</div>
+          <h2 class="sc-h">You've been<br><em>invited.</em></h2>
+          <p class="sc-sub">Vikas Bakshi has added you to their family river on EternalCurrent.Online. Create your free account to connect.</p>
+
+          <div style="background:#0A1A14;border:1px solid rgba(0,224,64,.15);border-radius:10px;padding:14px;margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#3A6040;margin-bottom:8px;">From Vikas Bakshi</div>
+            <p style="font-size:13px;color:#7AADA0;line-height:1.65;font-style:italic;">"Join my family river — I've added you to the Bakshi household. Would love to connect our families."</p>
+          </div>
+
+          <div class="field">
+            <label>Your email</label>
+            <input class="input" type="email" placeholder="you@example.com">
+          </div>
+          <button class="btn-primary">Accept and join free →</button>
+          <p style="font-size:11px;color:#3A5A54;text-align:center;margin-top:10px;line-height:1.6;">Joining to view and connect is free.<br>Build your own household any time for $1.99/person.</p>
+        </div>
+      </div>
+      <div class="decision-locked">
+        <span class="dl-check">✓</span>
+        <span>Confirmed: invitees join for free. They see the connection, they can explore. They only pay when they choose to build and activate their own household profiles.</span>
+      </div>
+      <div class="note-box">
+        <strong>The invitee flow is a separate funnel</strong>
+        An invited person goes through a shorter flow: email → see the connection → explore → optionally build their own household (pay). This is not built yet — flagged here so the full picture is visible. The invite email and join.html page need to be designed in a future session.
+      </div>
+    </div>
+
+  </div><!-- /viewer -->
+</div><!-- /layout -->
+
+<script>
+var screens = document.querySelectorAll('.screen[id^="sc-"]');
+var railSteps = document.querySelectorAll('.rail-step');
+
+function show(idx, railEl) {
+  screens.forEach(function(s){ s.style.display='none'; s.classList.remove('on'); });
+  railSteps.forEach(function(r){ r.classList.remove('on'); });
+
+  var sc = document.getElementById('sc-'+idx);
+  if(sc){ sc.style.display='block'; sc.classList.add('on'); }
+  if(railEl){ railEl.classList.add('on'); }
+
+  // Update step circles
+  railSteps.forEach(function(r, i){
+    var circle = r.querySelector('.step-circle');
+    if(!circle) return;
+    circle.className = 'step-circle';
+    if(i < idx)      circle.classList.add('sc-done');
+    else if(i===idx) circle.classList.add('sc-active');
+    else             circle.classList.add('sc-pending');
+    // Payment step stays blue when active
+    if(i===5 && i===idx) circle.classList.add('sc-pay');
+  });
+
+  sc.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function pickTree(el){
+  document.querySelectorAll('.tree-opt').forEach(function(t){ t.classList.remove('on'); });
+  el.classList.add('on');
+}
+
+// Init
+show(0, document.getElementById('rs-0'));
+</script>
+</body>
+</html>

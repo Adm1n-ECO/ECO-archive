@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO Vocabulary Review — Cultural Expert Consultation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:#00AAFF;--green:#00CC44;--bg:#F7F5F0;--surface:#FFFFFF;
+  --ink:#1A1A18;--muted:#6B6B65;--border:rgba(26,26,24,.12);
+  --border-strong:rgba(26,26,24,.22);
+  --c-confirm:#007A40;--c-confirm-bg:#EAF5EE;
+  --c-flag:#C05000;--c-flag-bg:#FFF0E8;
+  --c-add:#0058B8;--c-add-bg:#EAF2FF;
+  --r:10px;--r-sm:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--ink);min-height:100vh}
+
+.page-header{background:var(--ink);padding:28px 40px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:24px}
+.wm{display:flex;flex-direction:column;line-height:1;margin-bottom:12px}
+.wm-e{font-size:8px;letter-spacing:.35em;color:var(--blue);font-weight:600;text-transform:uppercase}
+.wm-c{font-size:17px;letter-spacing:.04em;color:var(--green);font-weight:600;text-transform:uppercase}
+.h-title{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:400;color:#FFF;margin-bottom:6px}
+.h-sub{font-size:13px;color:rgba(255,255,255,.48);line-height:1.55;max-width:460px}
+.h-meta{text-align:right;flex-shrink:0}
+.round-badge{display:inline-block;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:5px 11px;font-size:11px;color:rgba(255,255,255,.55);letter-spacing:.06em;margin-bottom:6px}
+.round-id{font-size:13px;font-weight:600;color:var(--blue);letter-spacing:.04em}
+
+.instructions{background:var(--surface);border-bottom:1px solid var(--border);padding:18px 40px;display:flex;gap:28px}
+.instr-block{display:flex;gap:10px;align-items:flex-start;flex:1}
+.instr-icon{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.ic-ok{background:var(--c-confirm-bg);color:var(--c-confirm)}
+.ic-flag{background:var(--c-flag-bg);color:var(--c-flag)}
+.ic-add{background:var(--c-add-bg);color:var(--c-add)}
+.instr-text{font-size:12px;line-height:1.55;color:var(--muted)}
+.instr-text strong{color:var(--ink);font-weight:600}
+
+.comp-strip{background:var(--ink);padding:9px 40px;font-size:12px;color:rgba(255,255,255,.5);display:flex;gap:18px;position:sticky;top:0;z-index:10}
+.ci{display:flex;align-items:center;gap:6px}
+.cd{width:8px;height:8px;border-radius:50%}
+.cd-ok{background:var(--green)}.cd-flag{background:#FF8C42}.cd-add{background:var(--blue)}.cd-pend{background:rgba(255,255,255,.18)}
+
+.prog-wrap{padding:14px 40px 0;display:flex;align-items:center;gap:12px}
+.prog-lbl{font-size:12px;color:var(--muted);white-space:nowrap}
+.prog-track{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:2px;transition:width .4s}
+.prog-ct{font-size:12px;color:var(--muted);white-space:nowrap}
+
+.cards{padding:18px 40px 40px;display:flex;flex-direction:column;gap:14px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.card.s-confirmed{border-color:var(--c-confirm);box-shadow:0 0 0 3px rgba(0,122,64,.07)}
+.card.s-flagged{border-color:var(--c-flag);box-shadow:0 0 0 3px rgba(192,80,0,.07)}
+.card.s-context{border-color:var(--c-add);box-shadow:0 0 0 3px rgba(0,88,184,.07)}
+
+.card-top{display:grid;grid-template-columns:44px 1fr 128px;align-items:stretch}
+.card-num{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted);border-right:1px solid var(--border)}
+.card-body{padding:15px 18px}
+.term-row{display:flex;align-items:baseline;gap:11px;margin-bottom:8px;flex-wrap:wrap}
+.t-romaji{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700}
+.t-script{font-size:18px;color:var(--muted)}
+.t-badges{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto}
+.bdg{font-size:10px;font-weight:600;letter-spacing:.04em;padding:2px 7px;border-radius:4px;text-transform:uppercase;white-space:nowrap}
+.bdg-struct{background:rgba(0,170,255,.1);color:var(--blue);border:1px solid rgba(0,170,255,.25)}
+.bdg-humble{background:rgba(120,80,200,.1);color:#6040A0;border:1px solid rgba(120,80,200,.22)}
+.bdg-honorific{background:rgba(0,122,64,.1);color:var(--c-confirm);border:1px solid rgba(0,122,64,.22)}
+.bdg-neutral{background:rgba(107,107,101,.1);color:var(--muted);border:1px solid rgba(107,107,101,.18)}
+.bdg-archaic{background:rgba(192,80,0,.1);color:var(--c-flag);border:1px solid rgba(192,80,0,.22)}
+.t-english{font-size:13.5px;font-weight:500;margin-bottom:6px}
+.t-nuance{font-size:12px;color:var(--muted);line-height:1.62;font-style:italic;border-left:2px solid var(--border);padding-left:10px}
+
+.card-actions{padding:10px 12px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:5px;justify-content:center}
+.act-btn{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:var(--r-sm);border:1px solid var(--border);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:500;color:var(--muted);transition:all .15s;text-align:left;width:100%}
+.act-btn:hover{border-color:var(--border-strong);color:var(--ink)}
+.act-btn.a-confirmed{background:var(--c-confirm-bg);border-color:var(--c-confirm);color:var(--c-confirm)}
+.act-btn.a-flagged{background:var(--c-flag-bg);border-color:var(--c-flag);color:var(--c-flag)}
+.act-btn.a-context{background:var(--c-add-bg);border-color:var(--c-add);color:var(--c-add)}
+.act-icon{font-size:13px;line-height:1}
+
+.card-expand{display:none;border-top:1px solid var(--border);padding:13px 18px 13px 62px;background:rgba(247,245,240,.6)}
+.card-expand.open{display:block}
+.exp-lbl{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px}
+.exp-ta{width:100%;min-height:68px;border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);resize:vertical;outline:none;transition:border-color .15s}
+.exp-ta:focus{border-color:var(--blue)}
+.exp-ta::placeholder{color:var(--muted)}
+
+.submit-wrap{margin:0 40px 60px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:26px 30px}
+.sub-title{font-family:'Libre Baskerville',serif;font-size:18px;font-weight:400;margin-bottom:5px}
+.sub-sub{font-size:13px;color:var(--muted);margin-bottom:18px;line-height:1.5}
+.rev-fields{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px}
+.fld-wrap{display:flex;flex-direction:column;gap:4px}
+.fld-lbl{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.fld-inp{border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 11px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);background:var(--surface);outline:none;transition:border-color .15s}
+.fld-inp:focus{border-color:var(--blue)}
+.sub-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.btn-p{background:var(--ink);color:#FFF;border:none;border-radius:var(--r-sm);padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-p:hover{background:#2A2A28}
+.btn-s{background:transparent;color:var(--ink);border:1px solid var(--border-strong);border-radius:var(--r-sm);padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-s:hover{border-color:var(--ink)}
+.sub-note{font-size:11px;color:var(--muted);margin-left:auto}
+
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(26,26,24,.65);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--r);max-width:640px;width:100%;max-height:82vh;display:flex;flex-direction:column;overflow:hidden}
+.m-hdr{padding:18px 22px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.m-title{font-family:'Libre Baskerville',serif;font-size:17px;font-weight:400}
+.m-close{width:26px;height:26px;border:1px solid var(--border);border-radius:50%;background:transparent;cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.m-body{padding:14px 22px;overflow-y:auto;flex:1}
+.m-hint{font-size:12px;color:var(--muted);margin-bottom:9px}
+.rep-ta{width:100%;height:290px;font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.6;border:1px solid var(--border);border-radius:var(--r-sm);padding:11px;background:#F7F5F0;color:var(--ink);resize:none;outline:none}
+.m-ftr{padding:13px 22px;border-top:1px solid var(--border);display:flex;gap:9px;align-items:center}
+.btn-copy{background:var(--blue);color:#FFF;border:none;border-radius:var(--r-sm);padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-copy:hover{opacity:.87}
+.btn-email{background:var(--green);color:#FFF;border:none;border-radius:var(--r-sm);padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .15s}
+.btn-email:hover{opacity:.87}
+.copy-ok{font-size:12px;color:var(--c-confirm);display:none;align-items:center;gap:4px}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <div class="wm"><span class="wm-e">Eternal</span><span class="wm-c">Current</span></div>
+    <div class="h-title">Cultural Vocabulary Expert Review</div>
+    <div class="h-sub">Thank you for taking the time to review these terms. Your expertise directly shapes how EternalCurrent.Online preserves family vocabulary for diaspora communities worldwide.</div>
+  </div>
+  <div class="h-meta">
+    <div class="round-badge" id="round-badge">Loading…</div>
+    <div class="round-id" id="round-id"></div>
+  </div>
+</div>
+
+<div class="instructions">
+  <div class="instr-block"><div class="instr-icon ic-ok">✓</div><div class="instr-text"><strong>Confirm</strong> — The term, meaning, and notes are accurate as written. Nothing needs to change.</div></div>
+  <div class="instr-block"><div class="instr-icon ic-flag">!</div><div class="instr-text"><strong>Flag a correction</strong> — Something is inaccurate, incomplete, or culturally wrong. Please describe what should change.</div></div>
+  <div class="instr-block"><div class="instr-icon ic-add">+</div><div class="instr-text"><strong>Add context</strong> — The term is accurate but there is important nuance, a regional variation, or family-specific usage worth noting.</div></div>
+</div>
+
+<div class="comp-strip">
+  <div class="ci"><div class="cd cd-ok"></div><span id="ct-ok">0 confirmed</span></div>
+  <div class="ci"><div class="cd cd-flag"></div><span id="ct-flag">0 flagged</span></div>
+  <div class="ci"><div class="cd cd-add"></div><span id="ct-add">0 with context</span></div>
+  <div class="ci"><div class="cd cd-pend"></div><span id="ct-pend">15 pending</span></div>
+</div>
+
+<div class="prog-wrap">
+  <span class="prog-lbl">Progress</span>
+  <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  <span class="prog-ct" id="prog-ct">0 / 15 reviewed</span>
+</div>
+
+<div class="cards" id="cards"></div>
+
+<div class="submit-wrap">
+  <div class="sub-title">Submit your review</div>
+  <div class="sub-sub">Please enter your name and background. This helps us credit your contribution accurately and follow up with any questions.</div>
+  <div class="rev-fields">
+    <div class="fld-wrap"><label class="fld-lbl" for="r-name">Your name</label><input class="fld-inp" id="r-name" type="text" placeholder="First and last name"></div>
+    <div class="fld-wrap"><label class="fld-lbl" for="r-bg">Your background (optional)</label><input class="fld-inp" id="r-bg" type="text" placeholder="e.g. Native Japanese speaker, Osaka region, 2nd generation"></div>
+  </div>
+  <div class="sub-actions">
+    <button class="btn-p" onclick="genReport()">Generate report</button>
+    <button class="btn-s" onclick="dlJSON()">Download as JSON</button>
+    <span class="sub-note" id="sub-note"></span>
+  </div>
+</div>
+
+<div class="modal-ov" id="modal">
+  <div class="modal">
+    <div class="m-hdr">
+      <div class="m-title">Your review report</div>
+      <button class="m-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="m-body">
+      <p class="m-hint">Copy this text and email it to <strong>vikas@eternalcurrent.online</strong> — or use the email button below to open it directly in your mail app.</p>
+      <textarea class="rep-ta" id="rep-ta" readonly></textarea>
+    </div>
+    <div class="m-ftr">
+      <button class="btn-copy" onclick="copyRep()">Copy to clipboard</button>
+      <button class="btn-email" onclick="emailRep()">Open in email app</button>
+      <span class="copy-ok" id="copy-ok">✓ Copied</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const LIB = [
+  {ro:"Chichi",sc:"父",en:"Father (own, humble/internal)",st:"Father",rg:"humble",nu:"Used when referring to your own father to an outsider or in formal speech. Would never be used to address your father directly. This humble register has no direct English equivalent — English uses 'father' or 'dad' regardless of social context."},
+  {ro:"Otōsan",sc:"お父さん",en:"Father (someone else's, or warm direct address)",st:"Father",rg:"honorific",nu:"Used to address your own father warmly, or to refer to someone else's father respectfully. One word covers both — a feature Japanese has that English does not."},
+  {ro:"Haha",sc:"母",en:"Mother (own, humble/internal)",st:"Mother",rg:"humble",nu:"Refers to your own mother when speaking to outsiders. Never used as direct address. Paired with Okāsan which covers both warm address and reference to another's mother."},
+  {ro:"Okāsan",sc:"お母さん",en:"Mother (someone else's, or warm direct address)",st:"Mother",rg:"honorific",nu:"The standard warm form — to address your own mother, or to refer to someone else's. Children almost universally use this, not haha, in direct speech."},
+  {ro:"Sofu",sc:"祖父",en:"Grandfather (own, formal reference)",st:"Grandfather",rg:"humble",nu:"Formal reference to your own grandfather when speaking to outsiders. Rarely used in direct address. In practice most families use Ojīsan for both address and reference."},
+  {ro:"Ojīsan",sc:"お祖父さん",en:"Grandfather (warm address, or any elderly man)",st:"Grandfather",rg:"honorific",nu:"The living, warm form. Also used for any elderly man — which can cause confusion. Context distinguishes 'your grandfather' from 'that old man.' The long ī distinguishes it from ojisan (uncle)."},
+  {ro:"Sobo",sc:"祖母",en:"Grandmother (own, formal reference)",st:"Grandmother",rg:"humble",nu:"Formal reference to your own grandmother in third-person speech to outsiders. The humble counterpart to Obāsan."},
+  {ro:"Obāsan",sc:"お祖母さん",en:"Grandmother (warm address, or any older woman)",st:"Grandmother",rg:"honorific",nu:"The warm everyday form. Like ojīsan, also applies to any older woman generally. The long ā in obāsan distinguishes it from obasan (aunt). Easy source of confusion for learners; native speakers distinguish automatically."},
+  {ro:"Ani",sc:"兄",en:"Older brother (own, humble reference)",st:"OlderBrother",rg:"humble",nu:"Japanese has separate words for older and younger siblings — there is no neutral word for 'brother' that does not specify age order. Ani is how you refer to your older brother to outsiders; you would never address him this way."},
+  {ro:"Oniisan",sc:"お兄さん",en:"Older brother (warm address, or any older young man)",st:"OlderBrother",rg:"honorific",nu:"Also used to address any young man older than the speaker. A child might call an unknown teenage boy oniisan. The word carries the social role of older male, not just biological relationship."},
+  {ro:"Ane",sc:"姉",en:"Older sister (own, humble reference)",st:"OlderSister",rg:"humble",nu:"Formal reference to your own older sister. Encodes hierarchy — you would not address her this way directly. The humble counterpart to Onēsan."},
+  {ro:"Onēsan",sc:"お姉さん",en:"Older sister (warm address, or any older young woman)",st:"OlderSister",rg:"honorific",nu:"Warm everyday form. Also used for any young woman older than the speaker in casual social settings."},
+  {ro:"Otōto",sc:"弟",en:"Younger brother",st:"YoungerBrother",rg:"neutral",nu:"Unlike older siblings, no humble/honorific split for younger siblings — the hierarchy means you do not show deference downward. The same word is used in address and reference."},
+  {ro:"Imōto",sc:"妹",en:"Younger sister",st:"YoungerSister",rg:"neutral",nu:"The single word for younger sister with no register split. Reflects the hierarchical logic: upward deference is encoded in the word; downward relationships have no such distinction."},
+  {ro:"Oji",sc:"叔父 / 伯父",en:"Uncle (own, humble reference)",st:"Uncle",rg:"humble",nu:"Two distinct kanji exist: 伯父 (hakufu) for an uncle older than your parent, and 叔父 (shukufu) for one younger. The distinction is rarely preserved in modern speech but exists in formal writing. English 'uncle' cannot make this distinction."},
+  {ro:"Ojisan",sc:"おじさん",en:"Uncle (warm address, or any middle-aged man)",st:"Uncle",rg:"honorific",nu:"Note the short 'i' — contrasts with ojīsan (grandfather) which has a long 'ī'. The difference is a single vowel length. Easy confusion; a very common minimal pair in Japanese kinship vocabulary."},
+  {ro:"Oba",sc:"叔母 / 伯母",en:"Aunt (own, humble reference)",st:"Aunt",rg:"humble",nu:"Same older/younger split as uncle: 伯母 (hakubo) for an aunt older than your parent, 叔母 (shukubo) for a younger aunt. Rarely maintained in casual modern speech."},
+  {ro:"Obasan",sc:"おばさん",en:"Aunt (warm address, or any middle-aged woman)",st:"Aunt",rg:"honorific",nu:"Short 'a' distinguishes this from obāsan (grandmother). Also used informally for any middle-aged woman — can be mildly offensive if the person considers herself young. A generational and regional sensitivity worth flagging."},
+  {ro:"Itoko",sc:"従兄弟 / 従姉妹",en:"Cousin",st:"Cousin",rg:"neutral",nu:"No gender or age distinction in the most common spoken form. The kanji forms distinguish four types (male older/younger, female older/younger) but these are rarely used in daily speech. Diaspora families often simplify further."},
+  {ro:"Musuko",sc:"息子",en:"Son (one's own)",st:"Son",rg:"humble",nu:"The possessive is built into the word — musuko inherently means my/our son. To refer to someone else's son respectfully: musuko-san (adding the honorific suffix san)."},
+  {ro:"Musume",sc:"娘",en:"Daughter (one's own)",st:"Daughter",rg:"humble",nu:"Like musuko, inherently refers to your own daughter. Musume-san for someone else's daughter. Also carries the broader meaning of 'young woman' in Japanese usage outside family context."},
+  {ro:"Otto",sc:"夫",en:"Husband (neutral, modern preferred form)",st:"Spouse",rg:"neutral",nu:"The modern neutral term strongly preferred by younger generations and diaspora families over the traditional shujin. Widely used in contemporary Japanese across registers."},
+  {ro:"Shujin",sc:"主人",en:"Husband (traditional, literally 'master of the house')",st:"Spouse",rg:"archaic",nu:"Still used by older generations. The literal meaning — master or owner — has made it controversial. A platform serving diaspora families should document both forms and allow users to select which applies to their household's practice."},
+  {ro:"Tsuma",sc:"妻",en:"Wife (neutral, modern preferred form)",st:"Spouse",rg:"neutral",nu:"Preferred modern form. The traditional equivalent kanai (inside the house) is similarly declining in use among younger and diaspora Japanese families. Regional variation exists."},
+  {ro:"Kanai",sc:"家内",en:"Wife (traditional, literally 'inside the house')",st:"Spouse",rg:"archaic",nu:"Literally 'inside the home.' Carries similar patriarchal connotations to shujin. Still used by older generations and in some rural regions. A clear generational and cultural marker when it appears in a family network."},
+  {ro:"Giri no chichi",sc:"義理の父",en:"Father-in-law",st:"FatherInLaw",rg:"neutral",nu:"'Giri no' is the modifier meaning 'by obligation' or 'by marriage.' It attaches to any kinship term to create the in-law equivalent. Giri no haha = mother-in-law. Giri no ani = older brother-in-law. The system is consistent and modular."},
+  {ro:"Giri no haha",sc:"義理の母",en:"Mother-in-law",st:"MotherInLaw",rg:"neutral",nu:"See giri no chichi. The giri no prefix applies consistently across all kinship terms. Worth documenting as a vocabulary pattern, not just as individual terms."},
+  {ro:"Mago",sc:"孫",en:"Grandchild (one's own)",st:"Grandchild",rg:"neutral",nu:"No gender distinction in the standard form. Mago-san for someone else's grandchild. In diaspora families the word often carries deep emotional weight — grandchildren represent family continuity in a way that transcends the single-syllable brevity of the word."},
+  {ro:"Ie",sc:"家",en:"The household as a multigenerational institution",st:"Cultural_Concept",rg:"neutral",nu:"One of the most important concepts in Japanese family culture. Ie refers not to a building but to the family as a continuous institutional entity extending across generations — with a name, an ancestry, and a future. The ECO network model maps closely to this concept."},
+  {ro:"Sōzoku",sc:"相続",en:"Family succession / inheritance of household role",st:"Cultural_Concept",rg:"neutral",nu:"The formal passing of the family name, assets, or household responsibility. In traditional families the eldest son inherits the ie. Worth capturing in networks where this is practiced or remembered — it shapes who is the network's center node."}
+];
+
+const ROUND_ID = (() => {
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let id='JPN-';
+  for(let i=0;i<6;i++) id+=c[Math.floor(Math.random()*c.length)];
+  return id;
+})();
+const ROUND_NUM = Math.floor(Math.random()*4)+1;
+
+let selected=[], responses={};
+
+function init(){
+  document.getElementById('round-badge').textContent=`Round ${ROUND_NUM} of 4`;
+  document.getElementById('round-id').textContent=ROUND_ID;
+  selected=[...LIB].sort(()=>Math.random()-.5).slice(0,15);
+  selected.forEach((_,i)=>{responses[i]={status:'pending',note:''}});
+  renderCards(); updateStats();
+}
+
+function renderCards(){
+  const c=document.getElementById('cards');
+  c.innerHTML='';
+  selected.forEach((t,i)=>{
+    const rg=`bdg-${t.rg}`;
+    c.innerHTML+=`
+    <div class="card" id="card-${i}">
+      <div class="card-top">
+        <div class="card-num">${i+1}</div>
+        <div class="card-body">
+          <div class="term-row">
+            <span class="t-romaji">${t.ro}</span>
+            <span class="t-script">${t.sc}</span>
+            <div class="t-badges"><span class="bdg bdg-struct">${t.st}</span><span class="bdg ${rg}">${t.rg}</span></div>
+          </div>
+          <div class="t-english">${t.en}</div>
+          <div class="t-nuance">${t.nu}</div>
+        </div>
+        <div class="card-actions">
+          <button class="act-btn" id="bc-${i}" onclick="setStatus(${i},'confirmed')"><span class="act-icon">✓</span> Confirm</button>
+          <button class="act-btn" id="bf-${i}" onclick="setStatus(${i},'flagged')"><span class="act-icon">!</span> Flag</button>
+          <button class="act-btn" id="ba-${i}" onclick="setStatus(${i},'context')"><span class="act-icon">+</span> Add context</button>
+        </div>
+      </div>
+      <div class="card-expand" id="exp-${i}">
+        <div class="exp-lbl" id="explbl-${i}">Your notes</div>
+        <textarea class="exp-ta" id="note-${i}" placeholder="Please describe what should change, or what additional context is important…" oninput="saveNote(${i})"></textarea>
+      </div>
+    </div>`;
+  });
+}
+
+function setStatus(i,s){
+  const prev=responses[i].status;
+  responses[i].status=(prev===s)?'pending':s;
+  updateCard(i,responses[i].status);
+  updateStats();
+}
+
+function updateCard(i,s){
+  const card=document.getElementById(`card-${i}`);
+  const exp=document.getElementById(`exp-${i}`);
+  const lbl=document.getElementById(`explbl-${i}`);
+  card.className='card'+(s!=='pending'?` s-${s}`:'');
+  ['confirmed','flagged','context'].forEach(x=>{
+    const b=document.getElementById(`b${x[0]}-${i}`);
+    b.className='act-btn'+(s===x?` a-${x}`:'');
+  });
+  if(s==='flagged'||s==='context'){
+    exp.classList.add('open');
+    lbl.textContent=s==='flagged'?'What needs correcting? (please be specific)':'What additional context should we know?';
+  } else {
+    exp.classList.remove('open');
+  }
+}
+
+function saveNote(i){ responses[i].note=document.getElementById(`note-${i}`).value; }
+
+function updateStats(){
+  const ct={confirmed:0,flagged:0,context:0,pending:0};
+  Object.values(responses).forEach(r=>ct[r.status]++);
+  document.getElementById('ct-ok').textContent=`${ct.confirmed} confirmed`;
+  document.getElementById('ct-flag').textContent=`${ct.flagged} flagged`;
+  document.getElementById('ct-add').textContent=`${ct.context} with context`;
+  document.getElementById('ct-pend').textContent=`${ct.pending} pending`;
+  const rev=15-ct.pending;
+  document.getElementById('prog-fill').style.width=`${(rev/15)*100}%`;
+  document.getElementById('prog-ct').textContent=`${rev} / 15 reviewed`;
+}
+
+function buildReport(){
+  const name=document.getElementById('r-name').value.trim()||'Anonymous';
+  const bg=document.getElementById('r-bg').value.trim();
+  const date=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const ct={confirmed:0,flagged:0,context:0,pending:0};
+  Object.values(responses).forEach(r=>ct[r.status]++);
+  let L=[];
+  L.push('ECO CULTURAL VOCABULARY EXPERT REVIEW');
+  L.push('=======================================');
+  L.push(`Round ID:   ${ROUND_ID}`);
+  L.push(`Round:      ${ROUND_NUM} of 4`);
+  L.push(`Language:   Japanese`);
+  L.push(`Reviewer:   ${name}${bg?` — ${bg}`:''}`);
+  L.push(`Date:       ${date}`);
+  L.push(`Summary:    ${ct.confirmed} confirmed | ${ct.flagged} flagged | ${ct.context} with context | ${ct.pending} not reviewed`);
+  L.push('');
+  L.push('─────────────────────────────────────────');
+  L.push('TERM-BY-TERM RESPONSES');
+  L.push('─────────────────────────────────────────');
+  selected.forEach((t,i)=>{
+    const r=responses[i];
+    const sl={confirmed:'✓ CONFIRMED',flagged:'! FLAGGED — NEEDS CORRECTION',context:'+ CONTEXT ADDED',pending:'○ NOT REVIEWED'}[r.status];
+    L.push('');
+    L.push(`${i+1}. ${t.ro}  ${t.sc}`);
+    L.push(`   English:    ${t.en}`);
+    L.push(`   Type:       ${t.st}  |  Register: ${t.rg}`);
+    L.push(`   Status:     ${sl}`);
+    if(r.note.trim()) L.push(`   Note:       "${r.note.trim()}"`);
+  });
+  L.push('');
+  L.push('─────────────────────────────────────────');
+  L.push('Email to: vikas@eternalcurrent.online');
+  L.push(`Subject:  ECO Vocab Review — ${ROUND_ID} — ${name}`);
+  L.push('─────────────────────────────────────────');
+  return L.join('\n');
+}
+
+function genReport(){
+  const pend=Object.values(responses).filter(r=>r.status==='pending').length;
+  const note=document.getElementById('sub-note');
+  if(pend>0){
+    note.textContent=`${pend} term${pend>1?'s':''} still pending — you can still submit but the report will be incomplete.`;
+    note.style.color='var(--c-flag)';
+  } else { note.textContent=''; }
+  document.getElementById('rep-ta').value=buildReport();
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+function copyRep(){
+  const ta=document.getElementById('rep-ta');
+  ta.select(); document.execCommand('copy');
+  const el=document.getElementById('copy-ok');
+  el.style.display='flex';
+  setTimeout(()=>el.style.display='none',2600);
+}
+
+function emailRep(){
+  const name=document.getElementById('r-name').value.trim()||'Reviewer';
+  const sub=encodeURIComponent(`ECO Vocab Review — ${ROUND_ID} — ${name}`);
+  const body=encodeURIComponent(buildReport());
+  window.location.href=`mailto:vikas@eternalcurrent.online?subject=${sub}&body=${body}`;
+}
+
+function dlJSON(){
+  const name=document.getElementById('r-name').value.trim()||'anonymous';
+  const bg=document.getElementById('r-bg').value.trim();
+  const payload={
+    roundID:ROUND_ID,roundNumber:ROUND_NUM,language:'Japanese',
+    reviewer:{name,background:bg},date:new Date().toISOString(),
+    terms:selected.map((t,i)=>({
+      index:i+1,romaji:t.ro,script:t.sc,english:t.en,
+      structural:t.st,register:t.rg,nuance:t.nu,
+      reviewStatus:responses[i].status,reviewerNote:responses[i].note
+    }))
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`eco-vocab-review-${ROUND_ID}.json`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+window.addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+init();
+</script>
+</body>
+</html>
