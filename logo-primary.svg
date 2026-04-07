@@ -1,0 +1,171 @@
+<svg width="320" height="96" viewBox="0 0 320 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FindMyTree.Online logo">
+  <title>FindMyTree.Online</title>
+  <defs>
+    <clipPath id="mark-clip">
+      <rect x="0" y="0" width="80" height="96"/>
+    </clipPath>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════
+       TREE MARK (0,0 → 80,96)
+  ════════════════════════════════════════════ -->
+  <g clip-path="url(#mark-clip)">
+
+    <!-- Background tree — cyan family — partially visible left -->
+    <path d="M18 96 L18 62 Q17 58 20 55 Q22 52 22 48" stroke="#0A3A40" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M20 70 Q10 62 6 54"   stroke="#0A3A40" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M20 60 Q12 50 10 42"  stroke="#0A3A40" stroke-width="2"   fill="none" stroke-linecap="round"/>
+    <path d="M21 52 Q28 42 26 34"  stroke="#0A3A40" stroke-width="2"   fill="none" stroke-linecap="round"/>
+    <path d="M22 45 Q16 36 18 26"  stroke="#0A3A40" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Cyan blooms — background tree, lower opacity -->
+    <g opacity="0.52">
+      <g transform="rotate(-20 8 34)">
+        <ellipse cx="8"  cy="34" rx="5"   ry="7"   fill="#003D48"/>
+        <ellipse cx="12" cy="30" rx="4"   ry="6.5" fill="#004D58"/>
+        <ellipse cx="6"  cy="30" rx="3.5" ry="5.5" fill="#005A62"/>
+        <ellipse cx="10" cy="26" rx="4"   ry="6"   fill="#004A55"/>
+        <ellipse cx="8"  cy="34" rx="2"   ry="3"   fill="#00A0A8" opacity="0.6"/>
+        <ellipse cx="12" cy="30" rx="1.5" ry="2.5" fill="#00B0B8" opacity="0.55"/>
+        <ellipse cx="10" cy="26" rx="2"   ry="3"   fill="#009AA5" opacity="0.5"/>
+      </g>
+      <g transform="rotate(-15 4 48)">
+        <ellipse cx="4"  cy="48" rx="4.5" ry="6.5" fill="#003848"/>
+        <ellipse cx="8"  cy="44" rx="4"   ry="6"   fill="#004555"/>
+        <ellipse cx="5"  cy="44" rx="1.8" ry="2.8" fill="#009AA5" opacity="0.5"/>
+      </g>
+    </g>
+
+    <!-- Foreground tree — green family — primary -->
+    <!-- Root suggestion -->
+    <path d="M42 96 Q38 90 35 88" stroke="#0A2A10" stroke-width="3"   fill="none" stroke-linecap="round"/>
+    <path d="M42 96 Q46 90 50 88" stroke="#0A2A10" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- Trunk — double stroke for depth -->
+    <path d="M42 96 L42 68 Q41 62 44 56 Q46 50 45 44 Q44 38 46 30 Q47 22 44 14" stroke="#0F2A14" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+    <path d="M42 96 L42 68 Q41 62 44 56 Q46 50 45 44 Q44 38 46 30 Q47 22 44 14" stroke="#163820" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <!-- Main branches -->
+    <path d="M43 72 Q30 64 24 56" stroke="#163820" stroke-width="3"   fill="none" stroke-linecap="round"/>
+    <path d="M44 62 Q54 54 60 46" stroke="#163820" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M44 54 Q34 44 30 34" stroke="#163820" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M45 46 Q56 38 62 28" stroke="#163820" stroke-width="2"   fill="none" stroke-linecap="round"/>
+    <path d="M45 38 Q36 28 36 18" stroke="#163820" stroke-width="2"   fill="none" stroke-linecap="round"/>
+    <path d="M45 30 Q54 22 56 12" stroke="#163820" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- Secondary branches -->
+    <path d="M43 66 Q36 60 32 54" stroke="#163820" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M44 58 Q50 52 52 44" stroke="#163820" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M44 50 Q38 42 38 34" stroke="#163820" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M45 42 Q52 36 54 26" stroke="#163820" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+    <!-- Green magnolia blooms — foreground tree -->
+    <!-- Bloom A: lower left, large open -->
+    <g transform="rotate(-25 26 56)">
+      <ellipse cx="26" cy="56" rx="7"   ry="10"  fill="#003A0A"/>
+      <ellipse cx="24" cy="54" rx="6"   ry="9"   fill="#004A0E"/>
+      <ellipse cx="28" cy="54" rx="5.5" ry="8.5" fill="#005214"/>
+      <ellipse cx="26" cy="52" rx="5"   ry="8"   fill="#006018"/>
+      <ellipse cx="25" cy="50" rx="3"   ry="5"   fill="#00801C"/>
+      <ellipse cx="26" cy="49" rx="1.8" ry="3"   fill="#00C030"/>
+      <ellipse cx="26" cy="48.5" rx="0.9" ry="1.5" fill="#00E040"/>
+    </g>
+    <!-- Bloom B: upper right, tilted -->
+    <g transform="rotate(15 62 32)">
+      <ellipse cx="62" cy="32" rx="6.5" ry="9.5" fill="#003A0A"/>
+      <ellipse cx="60" cy="30" rx="5.5" ry="8.5" fill="#004A0E"/>
+      <ellipse cx="64" cy="30" rx="5"   ry="8"   fill="#005214"/>
+      <ellipse cx="62" cy="28" rx="4.5" ry="7.5" fill="#006018"/>
+      <ellipse cx="61" cy="26" rx="2.8" ry="4.5" fill="#008020"/>
+      <ellipse cx="62" cy="25" rx="1.6" ry="2.8" fill="#00B02A"/>
+      <ellipse cx="62" cy="24.5" rx="0.8" ry="1.4" fill="#00E040"/>
+    </g>
+    <!-- Bloom C: mid left bud -->
+    <g transform="rotate(-40 32 36)">
+      <ellipse cx="32" cy="36" rx="4.5" ry="8"   fill="#003A0A"/>
+      <ellipse cx="30" cy="34" rx="4"   ry="7.5" fill="#004A0E"/>
+      <ellipse cx="34" cy="34" rx="3.5" ry="7"   fill="#005A12"/>
+      <ellipse cx="32" cy="32" rx="3"   ry="6"   fill="#006818"/>
+      <ellipse cx="32" cy="30" rx="1.8" ry="3.5" fill="#009020"/>
+      <ellipse cx="32" cy="29" rx="0.9" ry="1.8" fill="#00D030"/>
+    </g>
+    <!-- Bloom D: top center, full open -->
+    <g transform="rotate(5 44 14)">
+      <ellipse cx="44" cy="14" rx="7"   ry="9"   fill="#003A0A"/>
+      <ellipse cx="42" cy="12" rx="6"   ry="8"   fill="#004C0E"/>
+      <ellipse cx="46" cy="12" rx="5.5" ry="7.5" fill="#005814"/>
+      <ellipse cx="44" cy="10" rx="5"   ry="7"   fill="#006A1A"/>
+      <ellipse cx="43" cy="8"  rx="3"   ry="4.8" fill="#008A22"/>
+      <ellipse cx="44" cy="7"  rx="1.8" ry="2.8" fill="#00C030"/>
+      <ellipse cx="44" cy="6.5" rx="0.9" ry="1.4" fill="#00E040"/>
+    </g>
+    <!-- Bloom E: upper right tight bud -->
+    <g transform="rotate(30 56 12)">
+      <ellipse cx="56" cy="12" rx="4"   ry="7"   fill="#003A0A"/>
+      <ellipse cx="54" cy="10" rx="3.5" ry="6.5" fill="#004A0E"/>
+      <ellipse cx="57" cy="10" rx="3"   ry="6"   fill="#005818"/>
+      <ellipse cx="56" cy="8"  rx="2.2" ry="4.5" fill="#007020"/>
+      <ellipse cx="56" cy="7"  rx="1.2" ry="2.2" fill="#00A828"/>
+      <ellipse cx="56" cy="6.5" rx="0.6" ry="1.1" fill="#00E040"/>
+    </g>
+    <!-- Bloom F: far right mid -->
+    <g transform="rotate(45 68 46)">
+      <ellipse cx="68" cy="46" rx="5.5" ry="8"   fill="#003A0A"/>
+      <ellipse cx="66" cy="44" rx="5"   ry="7.5" fill="#004A0E"/>
+      <ellipse cx="70" cy="44" rx="4.5" ry="7"   fill="#005614"/>
+      <ellipse cx="68" cy="42" rx="3.5" ry="6"   fill="#006A1A"/>
+      <ellipse cx="68" cy="40" rx="2.2" ry="4"   fill="#008820"/>
+      <ellipse cx="68" cy="39" rx="1.2" ry="2"   fill="#00C02C"/>
+      <ellipse cx="68" cy="38.5" rx="0.6" ry="1" fill="#00E040"/>
+    </g>
+    <!-- Bloom G: small accent left -->
+    <g transform="rotate(-50 24 68)">
+      <ellipse cx="24" cy="68" rx="4"   ry="6.5" fill="#003A0A"/>
+      <ellipse cx="22" cy="66" rx="3.5" ry="6"   fill="#004A0E"/>
+      <ellipse cx="24" cy="64" rx="2"   ry="4"   fill="#007020"/>
+      <ellipse cx="24" cy="63" rx="1"   ry="2"   fill="#00B028"/>
+    </g>
+    <!-- Bloom H: upper left small bud -->
+    <g transform="rotate(-15 36 18)">
+      <ellipse cx="36" cy="18" rx="3.5" ry="6"   fill="#003A0A"/>
+      <ellipse cx="34" cy="16" rx="3"   ry="5.5" fill="#004C10"/>
+      <ellipse cx="36" cy="14" rx="1.8" ry="3.5" fill="#007520"/>
+      <ellipse cx="36" cy="13" rx="0.9" ry="1.8" fill="#00B02A"/>
+    </g>
+    <!-- Fallen petal accents -->
+    <ellipse cx="50" cy="70" rx="2.5" ry="4"   fill="#004A0E" opacity="0.65" transform="rotate(40 50 70)"/>
+    <ellipse cx="68" cy="62" rx="2"   ry="3.5" fill="#005214" opacity="0.55" transform="rotate(-20 68 62)"/>
+    <ellipse cx="30" cy="80" rx="1.8" ry="3"   fill="#004010" opacity="0.5"  transform="rotate(55 30 80)"/>
+
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       WORDMARK (starts at x=92)
+  ════════════════════════════════════════════ -->
+  <!-- Main logotype -->
+  <text x="92" y="52"
+    font-family="'JetBrains Mono', 'Courier New', monospace"
+    font-size="28" font-weight="500"
+    letter-spacing="3"
+    fill="#E8F4F0">FIND</text>
+  <text x="176" y="52"
+    font-family="'JetBrains Mono', 'Courier New', monospace"
+    font-size="28" font-weight="500"
+    letter-spacing="3"
+    fill="#00E5CC">MY</text>
+  <text x="220" y="52"
+    font-family="'JetBrains Mono', 'Courier New', monospace"
+    font-size="28" font-weight="500"
+    letter-spacing="3"
+    fill="#E8F4F0">TREE</text>
+  <text x="92" y="70"
+    font-family="'JetBrains Mono', 'Courier New', monospace"
+    font-size="28" font-weight="500"
+    letter-spacing="3"
+    fill="#00E040">.ONLINE</text>
+
+  <!-- Tagline -->
+  <text x="94" y="85"
+    font-family="'DM Sans', system-ui, sans-serif"
+    font-size="10" font-weight="400"
+    letter-spacing="3.5"
+    fill="#3A5A54">YOUR LIVING FAMILY NETWORK</text>
+
+</svg>

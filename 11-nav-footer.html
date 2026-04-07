@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO — Navigation & footer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;min-height:100vh;display:flex;flex-direction:column;}
+.dev-banner{background:rgba(224,144,64,.08);border-bottom:1px solid rgba(224,144,64,.15);padding:5px 16px;font-size:10px;color:#A06020;}
+.dev-banner strong{color:#E09040;}
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 20px;gap:10px;}
+.nav a{font-size:12px;color:#3A5A54;text-decoration:none;} .nav a:hover{color:#00E5CC;}
+.body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;}
+.icon{width:72px;height:72px;border-radius:20px;background:#00E5CC18;border:1px solid #00E5CC33;display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 24px;}
+.eyebrow{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#00E5CC;margin-bottom:10px;}
+h1{font-family:'DM Serif Display',serif;font-size:1.8rem;letter-spacing:-.02em;color:#E8F4F0;margin-bottom:12px;}
+.desc{font-size:13px;color:#5A8A80;line-height:1.8;max-width:500px;margin:0 auto 28px;}
+.live-badge{display:inline-flex;align-items:center;gap:8px;background:#0D1820;border:1px solid rgba(0,229,204,.18);border-radius:10px;padding:10px 18px;font-size:12px;color:#5A8A80;margin-bottom:16px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#00E040;flex-shrink:0;animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+.live-url{font-family:'JetBrains Mono',monospace;font-size:11px;color:#007A74;}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#3A5A54;text-decoration:none;border:1px solid rgba(0,229,204,.14);border-radius:7px;padding:7px 14px;transition:all .13s;margin-top:8px;}
+.back-link:hover{color:#00E5CC;border-color:rgba(0,229,204,.28);}
+.session-note{font-size:10px;color:#3A5A54;margin-top:24px;font-family:'JetBrains Mono',monospace;}
+</style>
+</head>
+<body>
+<div class="dev-banner"><strong>Session 1 page</strong> · This page lives on the staging server · <a href="index.html" style="color:#A06020;">← Back to hub</a></div>
+<nav class="nav">
+  <a href="index.html">← Design Review Hub</a>
+</nav>
+<div class="body">
+  <div class="icon">🌳</div>
+  <div class="eyebrow">Design review · Session 1</div>
+  <h1>Navigation & footer</h1>
+  <p class="desc">App nav, main nav, admin nav, minimal nav. Footer with links. All states: logged-out, logged-in, admin.</p>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    <div>
+      <div style="margin-bottom:2px;">This page is live on the staging server</div>
+      <div class="live-url">crunod.com/sites/ECO/design-review/</div>
+    </div>
+  </div>
+  <a class="back-link" href="index.html">← Back to design review hub</a>
+  <div class="session-note">Session 1 · Live at crunod.com/sites/ECO/design-review/</div>
+</div>
+</body>
+</html>

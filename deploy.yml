@@ -1,0 +1,55 @@
+name: Deploy to [YOUR_PROJECT_NAME]
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        run: sudo apt-get install -y lftp
+
+      - name: Write version.txt
+        run: |
+          echo "commit=$(git rev-parse HEAD)" > version.txt
+          echo "short=$(git rev-parse --short HEAD)" >> version.txt
+          echo "deployed=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> version.txt
+          echo "branch=main" >> version.txt
+
+      - name: Deploy via SFTP (lftp)
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USERNAME }}
+          SFTP_PASS: ${{ secrets.SFTP_PASSWORD }}
+        run: |
+          echo "set sftp:auto-confirm yes" > /tmp/lftp.txt
+          echo "set net:timeout 30" >> /tmp/lftp.txt
+          echo "set net:max-retries 3" >> /tmp/lftp.txt
+          echo "mirror --reverse --verbose --exclude ^\.git/ --exclude ^\.github/ --exclude ^supabase/ --exclude ^node_modules/ --exclude ^scripts/ --exclude ^docs/ --exclude ^_tools/ --exclude ^sql/ . /" >> /tmp/lftp.txt
+          echo "bye" >> /tmp/lftp.txt
+          lftp -u "$SFTP_USER","$SFTP_PASS" sftp://"$SFTP_HOST" < /tmp/lftp.txt
+
+  deploy-functions:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy Edge Functions
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          supabase functions deploy your-function-name   --project-ref "$PROJECT_REF" --no-verify-jwt  # add your edge functions here

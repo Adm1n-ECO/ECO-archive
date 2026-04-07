@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO Dashboard Mockup — EternalCurrent.Online</title>
+<style>
+/* ── THEME SYSTEM — theme.css owns all tokens ── */
+:root, [data-theme="4"] {
+  --color-bg: #080D14;
+  --color-bg-surface: rgba(255,255,255,0.04);
+  --color-bg-surface-2: rgba(255,255,255,0.08);
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: rgba(255,255,255,0.55);
+  --color-text-muted: rgba(255,255,255,0.28);
+  --color-eternal: #00AAFF;
+  --color-current: #00CC44;
+  --color-star: #FF6688;
+  --color-passed: #AA66FF;
+  --color-border: rgba(255,255,255,0.10);
+  --color-border-strong: rgba(255,255,255,0.20);
+  --color-border-brand: rgba(0,170,255,0.40);
+  --font-display: Arial Black, Arial, sans-serif;
+  --font-body: Arial, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-bold: 900;
+  --radius-lg: 14px;
+  --radius-pill: 20px;
+  --duration-breathe: 3500ms;
+}
+[data-theme="3"] {
+  --color-bg: #14171E; --color-bg-surface: rgba(255,255,255,0.06);
+  --color-text-primary: #F0F2F5; --color-text-secondary: rgba(240,242,245,0.55);
+  --color-text-muted: rgba(240,242,245,0.30); --color-eternal: #00AAFF;
+  --color-current: #00CC44; --color-star: #FF6688; --color-passed: #AA66FF;
+  --color-border: rgba(255,255,255,0.12); --color-border-brand: rgba(0,170,255,0.42);
+}
+[data-theme="2"] {
+  --color-bg: #2A2D35; --color-bg-surface: rgba(255,255,255,0.07);
+  --color-text-primary: #ECEEF2; --color-text-secondary: rgba(236,238,242,0.58);
+  --color-text-muted: rgba(236,238,242,0.32); --color-eternal: #00AAFF;
+  --color-current: #00CC44; --color-star: #FF6688; --color-passed: #AA66FF;
+  --color-border: rgba(255,255,255,0.14); --color-border-brand: rgba(0,170,255,0.45);
+}
+[data-theme="1"] {
+  --color-bg: #F4F2ED; --color-bg-surface: rgba(0,0,0,0.04);
+  --color-text-primary: #0D1117; --color-text-secondary: rgba(13,17,23,0.58);
+  --color-text-muted: rgba(13,17,23,0.32); --color-eternal: #0066CC;
+  --color-current: #007A2A; --color-star: #CC2244; --color-passed: #6633BB;
+  --color-border: rgba(0,0,0,0.10); --color-border-brand: rgba(0,102,204,0.45);
+}
+
+@keyframes breathe {
+  0%,100% { border-color: var(--color-border); box-shadow: none; }
+  50% { border-color: var(--color-border-brand); box-shadow: 0 0 14px 2px rgba(0,170,255,0.12); }
+}
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-bold);
+  min-height: 100vh;
+  transition: background 0.4s;
+}
+
+/* ── HEADER ── */
+.hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--color-border);
+}
+.wm { display: flex; flex-direction: column; line-height: 1.1; }
+.wm .et { font-size: 9px; letter-spacing: .3em; color: var(--color-eternal); font-weight: var(--font-weight-bold); }
+.wm .cu { font-size: 16px; letter-spacing: .06em; color: var(--color-current); font-weight: var(--font-weight-bold); }
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+.rb {
+  font-size: 9px; letter-spacing: .07em; padding: 3px 10px;
+  border-radius: var(--radius-pill); cursor: pointer;
+  font-weight: var(--font-weight-bold); font-family: var(--font-display);
+  border: 1px solid transparent; transition: all 0.2s;
+}
+.rb-active { background: rgba(0,170,255,0.12); border-color: var(--color-border-brand); color: var(--color-eternal); }
+.rb-inactive { background: var(--color-bg-surface); border-color: var(--color-border); color: var(--color-text-muted); }
+.av {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid var(--color-star);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; color: var(--color-star); font-weight: var(--font-weight-bold);
+  background: rgba(255,102,136,0.15); flex-shrink: 0;
+  font-family: var(--font-display);
+}
+.eco-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--color-bg-surface); border: 1px solid var(--color-border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; position: relative;
+  transition: border-color 0.2s;
+}
+.eco-btn:hover { border-color: var(--color-border-brand); }
+.menu-drop {
+  position: absolute; top: 40px; right: 0;
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); padding: 6px 0;
+  min-width: 170px; z-index: 100; display: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+.menu-drop.open { display: block; }
+.mi { font-family: var(--font-body); font-size: 13px; font-weight: var(--font-weight-regular); color: var(--color-text-primary); padding: 9px 14px; cursor: pointer; }
+.mi:hover { background: var(--color-bg-surface); }
+.ms { height: 1px; background: var(--color-border); margin: 4px 0; }
+
+/* ── HERO ── */
+.hero { text-align: center; padding: 22px 20px 16px; }
+.logo { font-size: 52px; letter-spacing: .08em; line-height: 1; margin-bottom: 6px; color: var(--color-text-primary); }
+.logo .lb { color: var(--color-eternal); }
+.logo .lg { color: var(--color-current); }
+.tag { font-size: 9px; letter-spacing: .16em; color: var(--color-text-muted); font-weight: var(--font-weight-bold); text-transform: uppercase; }
+.tag .tb { color: var(--color-eternal); }
+.tag .tg { color: var(--color-current); }
+.tag .tw { color: var(--color-text-secondary); }
+
+/* ── AI QUESTION ── */
+.qs { padding: 16px 22px 0; }
+.qt { font-family: var(--font-body); font-weight: var(--font-weight-regular); font-size: 14px; line-height: 1.78; color: var(--color-text-primary); margin-bottom: 5px; }
+.qt .src { color: var(--color-text-muted); font-style: italic; }
+.qc { font-family: var(--font-body); font-size: 11px; color: var(--color-current); opacity: 0.65; margin-bottom: 16px; letter-spacing: .04em; }
+
+/* ── INPUT BOX ── */
+.iw { padding: 0 22px 18px; }
+.ib {
+  border: 1.5px solid var(--color-border); border-radius: var(--radius-lg);
+  padding: 16px 20px; min-height: 58px; display: flex; align-items: center;
+  animation: breathe var(--duration-breathe) ease-in-out infinite;
+  cursor: text; background: var(--color-bg-surface); transition: background 0.4s;
+}
+.ph-wrap { position: relative; height: 22px; flex: 1; overflow: hidden; }
+.ph {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  font-family: var(--font-body); font-size: 13px; color: var(--color-text-muted);
+  font-weight: var(--font-weight-regular); transition: opacity 0.8s ease;
+}
+.ph.out { opacity: 0; }
+.ph.in { opacity: 1; }
+
+/* ── MINI VISUALIZATIONS ── */
+.vr { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; padding: 0 22px; margin-bottom: 14px; }
+.vc { background: var(--color-bg-surface); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 10px; cursor: pointer; transition: background 0.4s; }
+.vc:hover { background: var(--color-bg-surface-2, rgba(255,255,255,0.07)); }
+.vl { font-size: 7px; letter-spacing: .16em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 6px; font-weight: var(--font-weight-bold); }
+.vi { width: 100%; height: 80px; border-radius: 8px; overflow: hidden; background: var(--color-bg); }
+
+/* ── DISCOVERY BANNER ── */
+.bn { margin: 0 22px 12px; background: var(--color-bg-surface); border-left: 2px solid var(--color-eternal); border-radius: 0 10px 10px 0; padding: 12px 14px; transition: background 0.4s; }
+.bc { font-family: var(--font-body); font-size: 9px; color: var(--color-text-muted); margin-bottom: 4px; letter-spacing: .06em; }
+.bt { font-family: var(--font-body); font-weight: var(--font-weight-regular); font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 5px; }
+.bt .hl { color: var(--color-eternal); font-weight: var(--font-weight-bold); }
+.bm { font-size: 9px; letter-spacing: .1em; color: var(--color-eternal); font-weight: var(--font-weight-bold); cursor: pointer; }
+
+/* ── UPCOMING FEATURES TEASER ── */
+.teaser { margin: 0 22px 22px; border-left: 2px solid var(--color-current); border-radius: 0 10px 10px 0; padding: 10px 14px; background: rgba(0,204,68,0.04); }
+.tl { font-family: var(--font-body); font-size: 9px; color: var(--color-current); opacity: 0.7; margin-bottom: 3px; letter-spacing: .06em; }
+.tt { font-family: var(--font-body); font-weight: var(--font-weight-regular); font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+.tt .hl { color: var(--color-current); }
+
+/* ── THEME SELECTOR ── */
+.theme-sel { position: fixed; bottom: 20px; right: 22px; display: flex; align-items: center; gap: 7px; }
+.td { width: 13px; height: 13px; border-radius: 50%; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.2); transition: all 0.2s; }
+.td[data-t="1"] { background: #F4F2ED; border-color: rgba(0,0,0,0.2); }
+.td[data-t="2"] { background: #2A2D35; }
+.td[data-t="3"] { background: #14171E; }
+.td[data-t="4"] { background: #080D14; border-color: rgba(255,255,255,0.3); }
+.td.active { border-color: var(--color-eternal) !important; transform: scale(1.3); }
+.theme-label { font-family: var(--font-body); font-size: 9px; color: var(--color-text-muted); letter-spacing: .1em; }
+</style>
+</head>
+<body>
+
+<div id="app" data-theme="4">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="wm">
+      <span class="et">Eternal</span>
+      <span class="cu">Current</span>
+    </div>
+    <div class="hdr-right">
+      <div style="display:flex;gap:5px">
+        <div class="rb rb-active">Conductor</div>
+        <div class="rb rb-inactive">Keeper</div>
+      </div>
+      <div class="av">VB</div>
+      <div class="eco-btn" id="mbtn">
+        <svg width="18" height="17" viewBox="0 0 18 17" fill="none" style="pointer-events:none">
+          <line x1="9" y1="2.5" x2="2.5" y2="13.5" stroke="#00AAFF" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="9" y1="2.5" x2="15.5" y2="13.5" stroke="#00CC44" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="2.5" y1="13.5" x2="15.5" y2="13.5" stroke="rgba(255,255,255,0.45)" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="9" cy="2.5" r="2.2" fill="white"/>
+          <circle cx="2.5" cy="13.5" r="2.2" fill="#00AAFF"/>
+          <circle cx="15.5" cy="13.5" r="2.2" fill="#00CC44"/>
+        </svg>
+        <div class="menu-drop" id="mdrop">
+          <div class="mi">My network</div>
+          <div class="mi">Network directory</div>
+          <div class="mi">My data</div>
+          <div class="ms"></div>
+          <div class="mi">Preferences</div>
+          <div class="mi">Help</div>
+          <div class="ms"></div>
+          <div class="mi">Sign out</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="logo"><span class="lb">E</span><span class="lg">C</span>O</div>
+    <div class="tag">
+      <span class="tb">Your Eternal.</span>&nbsp;
+      <span class="tg">Your Current.</span>&nbsp;
+      <span class="tw">Only Yours.&nbsp;Forever.</span>
+    </div>
+  </div>
+
+  <!-- AI QUESTION -->
+  <div class="qs">
+    <div class="qt">When Sahiba — <span class="src">or maybe one of her parents, or her sister, or someone else who knows her</span> — added her to the network, her upcoming wedding sounds like a fun and exciting chance for the whole family to get together. As her mama, which activities will you have a chance to participate in? Is there anything about this wedding you are especially excited about?</div>
+    <div class="qc">Sahiba's milestone · your network · upcoming</div>
+  </div>
+
+  <!-- INPUT BOX -->
+  <div class="iw">
+    <div class="ib">
+      <div class="ph-wrap">
+        <div class="ph in" id="pha"></div>
+        <div class="ph out" id="phb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THREE MINI VISUALIZATIONS -->
+  <div class="vr">
+    <!-- Globe -->
+    <div class="vc">
+      <div class="vl">Globe</div>
+      <div class="vi">
+        <svg width="100%" height="100%" viewBox="0 0 120 80">
+          <circle cx="60" cy="41" r="30" fill="#0a1628" stroke="rgba(0,170,255,0.18)" stroke-width="0.5"/>
+          <ellipse cx="60" cy="41" rx="30" ry="9" fill="none" stroke="rgba(0,170,255,0.09)" stroke-width="0.5"/>
+          <ellipse cx="60" cy="41" rx="30" ry="18" fill="none" stroke="rgba(0,170,255,0.07)" stroke-width="0.5"/>
+          <path d="M33 31 Q50 18 66 32 Q78 42 86 38" fill="none" stroke="#E09040" stroke-width="1.8" opacity="0.9"/>
+          <path d="M31 55 Q45 35 66 32" fill="none" stroke="#40C8E0" stroke-width="1.6" opacity="0.85"/>
+          <path d="M36 33 Q48 24 58 30" fill="none" stroke="#AA66FF" stroke-width="1.4" opacity="0.8"/>
+          <circle cx="33" cy="31" r="2" fill="#00AAFF" opacity="0.9"/>
+          <circle cx="31" cy="55" r="2" fill="#00AAFF" opacity="0.9"/>
+          <circle cx="86" cy="38" r="2.5" fill="#00CC44" opacity="0.9"/>
+          <circle cx="66" cy="32" r="3.5" fill="#FF6688"/>
+        </svg>
+      </div>
+    </div>
+    <!-- Constellation -->
+    <div class="vc">
+      <div class="vl">Constellation</div>
+      <div class="vi">
+        <svg width="100%" height="100%" viewBox="0 0 120 80">
+          <line x1="60" y1="41" x2="40" y2="25" stroke="rgba(0,170,255,0.22)" stroke-width="0.8"/>
+          <line x1="60" y1="41" x2="80" y2="25" stroke="rgba(64,200,224,0.22)" stroke-width="0.8"/>
+          <line x1="60" y1="41" x2="28" y2="51" stroke="rgba(0,170,255,0.22)" stroke-width="0.8"/>
+          <line x1="60" y1="41" x2="92" y2="51" stroke="rgba(64,200,224,0.22)" stroke-width="0.8"/>
+          <line x1="60" y1="41" x2="60" y2="65" stroke="rgba(0,204,68,0.22)" stroke-width="0.8"/>
+          <line x1="40" y1="25" x2="22" y2="14" stroke="rgba(0,170,255,0.12)" stroke-width="0.5"/>
+          <line x1="40" y1="25" x2="34" y2="10" stroke="rgba(170,102,255,0.18)" stroke-width="0.5"/>
+          <line x1="80" y1="25" x2="96" y2="14" stroke="rgba(64,200,224,0.12)" stroke-width="0.5"/>
+          <circle cx="60" cy="41" r="5" fill="#FF6688"/>
+          <circle cx="40" cy="25" r="3" fill="#00AAFF" opacity="0.9"/>
+          <circle cx="80" cy="25" r="3" fill="#40C8E0" opacity="0.9"/>
+          <circle cx="28" cy="51" r="2.5" fill="#00AAFF" opacity="0.8"/>
+          <circle cx="92" cy="51" r="2.5" fill="#40C8E0" opacity="0.8"/>
+          <circle cx="60" cy="65" r="2.5" fill="#00CC44" opacity="0.8"/>
+          <circle cx="22" cy="14" r="1.8" fill="#AA66FF" opacity="0.7"/>
+          <circle cx="34" cy="10" r="1.8" fill="#AA66FF" opacity="0.7"/>
+          <circle cx="96" cy="14" r="1.8" fill="#40C8E0" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+    <!-- Network Directory -->
+    <div class="vc">
+      <div class="vl">Network</div>
+      <div class="vi" style="display:flex;align-items:center;justify-content:center">
+        <svg width="90" height="64" viewBox="0 0 90 64">
+          <rect x="4" y="4" width="82" height="11" rx="3" fill="rgba(0,170,255,0.15)" stroke="rgba(0,170,255,0.3)" stroke-width="0.5"/>
+          <text x="9" y="12.5" font-size="5" fill="#00AAFF" font-family="Arial" font-weight="bold" letter-spacing="0.5">NAME</text>
+          <text x="37" y="12.5" font-size="5" fill="#00AAFF" font-family="Arial" font-weight="bold" letter-spacing="0.5">CITY</text>
+          <text x="62" y="12.5" font-size="5" fill="#00AAFF" font-family="Arial" font-weight="bold" letter-spacing="0.5">ORIGIN</text>
+          <rect x="4" y="17" width="82" height="10" rx="2" fill="rgba(255,255,255,0.03)"/>
+          <circle cx="11" cy="22" r="3" fill="#FF6688"/>
+          <text x="17" y="24" font-size="5" fill="rgba(255,255,255,0.75)" font-family="Arial">Vikas B.</text>
+          <text x="37" y="24" font-size="5" fill="rgba(255,255,255,0.5)" font-family="Arial">San Francisco</text>
+          <rect x="61" y="18.5" width="18" height="6" rx="2" fill="rgba(224,144,64,0.25)"/>
+          <text x="63" y="23" font-size="4.5" fill="#E09040" font-family="Arial">India</text>
+          <rect x="4" y="29" width="82" height="10" rx="2" fill="rgba(255,255,255,0.03)"/>
+          <circle cx="11" cy="34" r="3" fill="#40C8E0"/>
+          <text x="17" y="36" font-size="5" fill="rgba(255,255,255,0.75)" font-family="Arial">Reema B.</text>
+          <text x="37" y="36" font-size="5" fill="rgba(255,255,255,0.5)" font-family="Arial">San Francisco</text>
+          <rect x="61" y="30.5" width="14" height="6" rx="2" fill="rgba(64,200,224,0.25)"/>
+          <text x="63" y="35" font-size="4.5" fill="#40C8E0" font-family="Arial">Fiji</text>
+          <rect x="4" y="41" width="82" height="10" rx="2" fill="rgba(255,255,255,0.03)"/>
+          <circle cx="11" cy="46" r="3" fill="#00AAFF"/>
+          <text x="17" y="48" font-size="5" fill="rgba(255,255,255,0.75)" font-family="Arial">Nirupma B.</text>
+          <text x="37" y="48" font-size="5" fill="rgba(255,255,255,0.5)" font-family="Arial">London</text>
+          <rect x="61" y="42.5" width="18" height="6" rx="2" fill="rgba(224,144,64,0.25)"/>
+          <text x="63" y="47" font-size="4.5" fill="#E09040" font-family="Arial">India</text>
+          <rect x="4" y="53" width="82" height="8" rx="2" fill="rgba(255,255,255,0.02)"/>
+          <circle cx="11" cy="57" r="3" fill="rgba(255,255,255,0.18)"/>
+          <text x="17" y="59" font-size="5" fill="rgba(255,255,255,0.4)" font-family="Arial">Karishma S.</text>
+          <text x="37" y="59" font-size="5" fill="rgba(255,255,255,0.3)" font-family="Arial">San Jose</text>
+          <rect x="82" y="54" width="6" height="6" rx="1.5" fill="rgba(0,204,68,0.25)"/>
+          <text x="83.5" y="58.5" font-size="5" fill="#00CC44" font-family="Arial" font-weight="bold">K</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCOVERY BANNER -->
+  <div class="bn">
+    <div class="bc">Cultural bridge · world traditions</div>
+    <div class="bt">At Mexican weddings, <span class="hl">el lazo</span> — the lasso ceremony — wraps the couple in a figure-eight loop of flowers or rosary beads, uniting them as one. A tradition worth knowing.</div>
+    <div class="bm">+ Learn more</div>
+  </div>
+
+  <!-- UPCOMING FEATURES TEASER -->
+  <div class="teaser" id="teaser">
+    <div class="tl">Coming to ECO</div>
+    <div class="tt" id="teaser-text"></div>
+  </div>
+
+</div>
+
+<!-- THEME SELECTOR -->
+<div class="theme-sel">
+  <span class="theme-label">Theme</span>
+  <div class="td" data-t="1" title="Dawn"></div>
+  <div class="td" data-t="2" title="Dusk"></div>
+  <div class="td" data-t="3" title="Depth"></div>
+  <div class="td active" data-t="4" title="Void"></div>
+</div>
+
+<script>
+/* ── PLACEHOLDER ROTATION ── */
+const phrases = ["Let's talk.","Talk to me.","What's on your mind?","Tell me more.","I'm listening.","What do you remember?","Who are you thinking about?","Go ahead.","Share something.","What happened next?","Tell me about them.","I'm here.","Start anywhere."];
+const elA = document.getElementById('pha'), elB = document.getElementById('phb');
+let pIdx = 0, pActive = elA, pInactive = elB;
+function nextPhrase() {
+  pIdx = (pIdx + 1) % phrases.length;
+  pInactive.textContent = phrases[pIdx];
+  pInactive.classList.remove('out'); pInactive.classList.add('in');
+  pActive.classList.remove('in'); pActive.classList.add('out');
+  const t = pActive; pActive = pInactive; pInactive = t;
+  setTimeout(nextPhrase, 5000 + Math.random() * 3000);
+}
+elA.textContent = phrases[0]; elA.classList.add('in');
+setTimeout(nextPhrase, 5000 + Math.random() * 3000);
+
+/* ── UPCOMING FEATURES TEASER ROTATION ── */
+const teasers = [
+  "Soon: <span class='hl'>ask the elders before it's too late</span> — a direct line to the people who remember.",
+  "Coming: <span class='hl'>your family's recipes, locked in forever</span> — ingredients, technique, and the story behind them.",
+  "Next: <span class='hl'>leave something for someone who isn't born yet</span> — a time capsule that waits.",
+  "Coming: <span class='hl'>the decisions that hold families together</span> — recorded, confirmed, permanent.",
+  "Soon: <span class='hl'>ask your whole network in one message</span> — without sharing a single email address.",
+  "Coming: <span class='hl'>skills and projects worth documenting</span> — what you make, how you make it.",
+  "Next: <span class='hl'>your family's footprint on the globe</span> — every place, every journey, one line each.",
+];
+let tIdx = 0;
+const tEl = document.getElementById('teaser-text');
+function nextTeaser() {
+  tEl.style.opacity = '0';
+  setTimeout(() => {
+    tIdx = (tIdx + 1) % teasers.length;
+    tEl.innerHTML = teasers[tIdx];
+    tEl.style.opacity = '1';
+  }, 600);
+}
+tEl.innerHTML = teasers[0];
+tEl.style.transition = 'opacity 0.6s ease';
+setInterval(nextTeaser, 12000);
+
+/* ── MENU ── */
+const mbtn = document.getElementById('mbtn'), mdrop = document.getElementById('mdrop');
+mbtn.addEventListener('click', e => { e.stopPropagation(); mdrop.classList.toggle('open'); });
+document.addEventListener('click', () => mdrop.classList.remove('open'));
+
+/* ── THEME SELECTOR ── */
+document.querySelectorAll('.td').forEach(d => {
+  d.addEventListener('click', () => {
+    const t = d.getAttribute('data-t');
+    document.getElementById('app').setAttribute('data-theme', t);
+    document.querySelectorAll('.td').forEach(x => x.classList.remove('active'));
+    d.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>

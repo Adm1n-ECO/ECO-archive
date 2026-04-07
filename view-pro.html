@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eternal Currents | Master v9.5 RESTORED</title>
+    <style>
+        :root { --gold:#ffcc00; --header-bg:#0d1117; } 
+        body,html { margin:0;padding:0; transition: background 0.8s; font-family:'Segoe UI',sans-serif; overflow:hidden; height:100vh; width:100vw; }
+        #ui-header { position:fixed;top:0;left:0;width:100%; padding:12px 20px;z-index:2000;display:flex;align-items:center; justify-content:center;gap:12px; background: var(--header-bg); border-bottom:2px solid #333; }
+        .nav-group { display:flex; gap:8px; border-right:1px solid #444; padding-right:15px; margin-right:15px; }
+
+        /* ── THEME BUTTON STYLES ── */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        @keyframes shimmer-sweep { 0%{left:-100%} 100%{left:200%} }
+        @keyframes pulse-glow { 0%,100%{box-shadow:var(--btn-shadow)} 50%{box-shadow:var(--btn-shadow-pulse)} }
+
+        .theme-btn {
+            position: relative; background: rgba(255,255,255,0.06); border: 1px solid var(--btn-color, #666);
+            color: var(--btn-color, #fff); padding: 7px 14px 7px 10px; cursor: pointer; border-radius: 5px;
+            text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 1.2px;
+            transition: all 0.25s ease; display: flex; align-items: center; gap: 6px; overflow: hidden;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .theme-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+        }
+        .theme-btn:hover::before { animation: shimmer-sweep 0.6s ease forwards; }
+        .theme-btn.active {
+            background: color-mix(in srgb, var(--btn-color) 18%, transparent) !important;
+            border-color: var(--btn-color) !important; color: #fff !important;
+            box-shadow: 0 0 18px var(--btn-color) !important; animation: pulse-glow 2.5s ease-in-out infinite;
+        }
+        #btn-organic { --btn-color:#52c96e; --btn-shadow: 0 0 10px #52c96e; --btn-shadow-pulse: 0 0 24px #52c96e; }
+        #btn-ripple   { --btn-color:#00c8ff; --btn-shadow: 0 0 10px #00c8ff; --btn-shadow-pulse: 0 0 24px #00c8ff; }
+        #btn-circuit  { --btn-color:#39ff14; --btn-shadow: 0 0 10px #39ff14; --btn-shadow-pulse: 0 0 24px #39ff14; }
+        #btn-cosmic   { --btn-color:#bf7fff; --btn-shadow: 0 0 10px #bf7fff; --btn-shadow-pulse: 0 0 24px #bf7fff; }
+
+        /* REFINED TEXT ENGINE */
+        .label { font-weight:900; text-transform:uppercase; pointer-events:none; transition: 0.3s; }
+        .label-bg { paint-order: stroke fill; stroke: #000; stroke-width: 8px; stroke-linejoin: round; }
+        .label-fg { fill: #fff; }
+        .organic-mode .label-fg { fill: #000; }
+        .organic-mode .label-bg { stroke: #fff; }
+
+        .dim { opacity: 0.03 !important; transition: opacity 0.5s; }
+        .highlight-edge { stroke-width: 12px !important; opacity: 1 !important; stroke: var(--gold) !important; filter: drop-shadow(0 0 12px var(--gold)); }
+        .highlight-node { stroke: #fff !important; stroke-width: 6px !important; opacity: 1 !important; }
+
+        button:not(.theme-btn) { background:rgba(255,255,255,0.1); border:1px solid #666; color:#fff; padding:6px 12px; cursor:pointer; border-radius:4px; text-transform:uppercase; font-size:10px; transition: 0.2s; font-weight: bold; }
+        button:not(.theme-btn).active { background: #fff !important; color:#000 !important; border-color: var(--gold) !important; box-shadow: 0 0 10px var(--gold); }
+        #version-stamp { position:fixed; top:15px; left:20px; color:var(--gold); font-size:12px; font-weight:bold; z-index:2100; pointer-events:none; }
+        #dev-log-container { position:fixed; bottom:0; left:0; width:100%; background:rgba(13,17,23,0.95); border-top:1px solid #444; z-index:2000; height:110px; display:flex; flex-direction:column; }
+        #dev-log-header { padding:5px 15px; font-size:10px; color:var(--gold); font-weight:bold; border-bottom:1px solid #333; }
+        #dev-log-text { flex:1; background:transparent; border:none; color:#aaa; padding:10px; font-family:monospace; font-size:12px; resize:none; outline:none; }
+        
+        #mainSVG { width:100vw;height:100vh;display:block; cursor: grab; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        .star { animation: twinkle var(--d) infinite ease-in-out; }
+    </style>
+</head>
+<body style="background: #fcfaf5;">
+
+<div id="version-stamp">VERSION: v9.5 RESTORED</div>
+
+<div id="ui-header">
+    <div class="nav-group">
+        <button id="btn-organic" class="theme-btn" onclick="setTheme('organic')"><span>🌿 Organic</span></button>
+        <button id="btn-ripple" class="theme-btn" onclick="setTheme('ripple')"><span>〰 Ripple</span></button>
+        <button id="btn-circuit" class="theme-btn" onclick="setTheme('circuit')"><span>⚡ Circuitry</span></button>
+        <button id="btn-cosmic" class="theme-btn" onclick="setTheme('cosmic')"><span>✦ Cosmic</span></button>
+    </div>
+    <div class="nav-group" style="border:none;">
+        <button id="focus-all" class="active" onclick="setFocus('all')">All</button>
+        <button id="focus-left" onclick="setFocus('left')">Family</button>
+        <button id="focus-right" onclick="setFocus('right')">Social</button>
+    </div>
+    <button onclick="autoFit()" style="border-color:var(--gold); color:var(--gold);">Reset View</button>
+</div>
+
+<div id="dev-log-container">
+    <div id="dev-log-header">EMERGENCY CORE RESTORATION</div>
+    <textarea id="dev-log-text">v9.5: Fixed render collapse from v9.4. Universe restored. Text readability engine re-enabled. Bridge Guard active.</textarea>
+</div>
+
+<svg id="mainSVG">
+<defs>
+    <filter id="org-shadow"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-opacity="0.4"/></filter>
+    <filter id="rip-warp"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="circuit-glow"><feGaussianBlur stdDeviation="1.5" result="b1"/><feMerge><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="cosmic-glow"><feGaussianBlur stdDeviation="5" result="b1"/><feMerge><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="30%" stop-color="#fffce0"/><stop offset="100%" stop-color="#ffaa00"/></radialGradient>
+    <radialGradient id="warpBG" cx="50%" cy="50%" r="80%"><stop offset="0%" stop-color="#1a237e"/><stop offset="60%" stop-color="#0a0e1a"/><stop offset="100%" stop-color="#020408"/></radialGradient>
+    <radialGradient id="circuitBG" cx="50%" cy="50%" r="90%"><stop offset="0%" stop-color="#061a06"/><stop offset="100%" stop-color="#020802"/></radialGradient>
+    <radialGradient id="cosmicBG" cx="50%" cy="50%" r="90%"><stop offset="0%" stop-color="#162c46"/><stop offset="100%" stop-color="#000000"/></radialGradient>
+    <pattern id="grid" width="150" height="150" patternUnits="userSpaceOnUse"><path d="M 150 0 L 0 0 0 150" fill="none" stroke="rgba(57,255,20,0.06)" stroke-width="1.5"/></pattern>
+</defs>
+<g id="camera-layer">
+    <rect id="full-bg" x="-20000" y="-20000" width="40000" height="40000" fill="none" onclick="clearHighlights()" />
+    <g id="star-layer"></g><g id="bg-layer"></g><g id="edge-layer"></g><g id="node-layer"></g><g id="sun-layer"></g><g id="label-layer"></g>
+</g>
+</svg>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTTLmITxQh9BwN87E_exKPGS5FSSdmU7MJkXd3IC2hsmXxSiHnoX1XduMGdt3cAxQi/exec";
+const SVG_W=10000, SVG_H=8000, CX=SVG_W/2, CY=SVG_H/2;
+let NODES = [], currentTheme = 'organic', currentFocus = 'all', currentRootID = 'VB';
+let scale = 0.35, tx = 0, ty = 0, isDragging = false, startX, startY;
+
+const camera = document.getElementById('camera-layer');
+const svg = document.getElementById('mainSVG');
+
+function isVikas(n) { return n.id === 'VB' || (n.name && n.name.includes('Vikas')); }
+
+function computePositions() {
+    const pos = {};
+    const root = NODES.find(isVikas) || {id:'VB'};
+    pos[root.id] = { x: CX, y: CY };
+
+    if (currentTheme === 'circuit') {
+        const sides = { left: NODES.filter(n=>n.side==='left' && !isVikas(n)), right: NODES.filter(n=>n.side==='right' && !isVikas(n)) };
+        ['left','right'].forEach(s => {
+            const dir = s==='left' ? -1 : 1;
+            const sorted = sides[s].sort((a,b)=>parseFloat(a.tier)-parseFloat(b.tier));
+            sorted.forEach((n, idx) => {
+                const depth = n.tier.toString().split('.').length;
+                let spacing = 450;
+                if (n.hid && idx > 0 && sorted[idx-1].hid === n.hid) spacing = 180;
+                pos[n.id] = { x: CX + (idx * 420), y: CY + (dir * depth * 850), r: 35, idxInSide: idx };
+            });
+        });
+    } else {
+        NODES.forEach(n => {
+            if (isVikas(n)) return;
+            const t = parseFloat(n.tier), depth = n.tier.toString().split('.').length, isR = n.side === 'right';
+            const list = NODES.filter(s => s.p === n.p && s.side === n.side);
+            const idx = list.indexOf(n);
+            let orbit = (currentTheme==='cosmic'?1050: (currentTheme==='ripple'?900:750)) + (t*480) + (depth*130);
+            let arc = (currentTheme==='ripple'?155:115);
+            let start = isR ? (currentTheme==='organic'?0:-75) : (currentTheme==='organic'?180:105);
+            let angle = (start + (idx/Math.max(1,list.length-1))*arc) * Math.PI/180;
+            if(n.hid && NODES.filter(s => s.hid === n.hid).length > 1) orbit -= 50; 
+            pos[n.id] = { x: CX + Math.cos(angle)*orbit, y: CY + Math.sin(angle)*orbit*0.9, r: (t<1.1?55:35) };
+        });
+    }
+    return pos;
+}
+
+function autoFit() {
+    const pos = computePositions();
+    const visibleNodes = NODES.filter(n => currentFocus==='all' || n.side===currentFocus || isVikas(n));
+    if(!visibleNodes.length) return;
+    let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
+    visibleNodes.forEach(n => {
+        const p = pos[n.id]; if(!p) return;
+        minX = Math.min(minX, p.x - 600); maxX = Math.max(maxX, p.x + 600);
+        minY = Math.min(minY, p.y - 600); maxY = Math.max(maxY, p.y + 600);
+    });
+    scale = Math.min(window.innerWidth/(maxX-minX), window.innerHeight/(maxY-minY)) * 0.95;
+    tx = (window.innerWidth/2) - (CX * scale);
+    ty = (window.innerHeight/2) - (CY * scale);
+    updateTransform();
+}
+
+function highlightLineage(nodeID) {
+    if(!nodeID) return;
+    const related = new Set();
+    const findLineage = (id) => {
+        if(related.has(id)) return;
+        related.add(id);
+        if(id === 'VB') return;
+        const person = NODES.find(x => x.id === id);
+        if(!person) return;
+        if(person.p && person.p !== 'VB') findLineage(person.p);
+        if(person.hid && person.hid.trim() !== "") NODES.filter(x => x.hid === person.hid).forEach(mate => related.add(mate.id));
+        NODES.filter(x => x.p === id || (person.hid && x.p === person.hid)).forEach(child => findLineage(child.id));
+    };
+    findLineage(nodeID);
+    document.querySelectorAll('circle, rect, path, .label-group').forEach(el => {
+        const id = el.getAttribute('data-id') || el.getAttribute('data-to');
+        if(!related.has(id) && id !== 'VB') el.classList.add('dim'); 
+        else el.classList.add(el.tagName==='path'?'highlight-edge':'highlight-node');
+    });
+}
+
+function clearHighlights() {
+    document.querySelectorAll('.dim, .highlight-node, .highlight-edge').forEach(el => el.classList.remove('dim','highlight-node','highlight-edge'));
+}
+
+function render() {
+    ['bg-layer','edge-layer','node-layer','sun-layer','label-layer'].forEach(id => document.getElementById(id).innerHTML = '');
+    const pos = computePositions(), root = NODES.find(isVikas) || {id:'VB'}, theme = currentTheme;
+    const isC = theme==='cosmic', isOrg = theme==='organic', isCircuit = theme==='circuit';
+    
+    document.body.className = isOrg ? 'organic-mode' : '';
+    document.body.style.background = isOrg ? "#fcfaf5" : (isCircuit?"#020802":(isC?"#000":"#020408"));
+    document.getElementById('full-bg').setAttribute('fill', isCircuit?'url(#grid)':(isC?'url(#cosmicBG)':(theme==='ripple'?'url(#warpBG)':'none')));
+    document.getElementById('star-layer').style.display = isC ? 'block' : 'none';
+
+    NODES.forEach(n => {
+        if (!pos[n.id] || (currentFocus !== 'all' && n.side !== currentFocus && !isVikas(n))) return;
+        const {x, y, r} = pos[n.id];
+        let col = n.side==='left' ? (isC?"#4fc3f7":"#00f2ff") : (isC?"#e91e63":"#ff00ff");
+        if(isOrg) col = n.side==='left'?(n.tier=="1"?"#1b4332":"#40916c"):(n.tier=="1"?"#582f0e":"#936639");
+        if(isCircuit) col = n.side==='left'?"#39ff14":"#ffcc00";
+
+        if(isOrg && !isVikas(n)) document.getElementById('bg-layer').appendChild(el('ellipse',{cx:x,cy:y,rx:220,ry:85,fill:n.side==='left'?"#cce3cb":"#f0e1d1",opacity:0.6,transform:`rotate(${(x+y)%360},${x},${y})`}));
+
+        if(!isVikas(n)) {
+            const s = pos[n.p] || pos[root.id];
+            let d = isC ? `M${s.x},${s.y} C${s.x+(x-s.x)*0.2},${s.y+(y-s.y)*0.8} ${x},${s.y} ${x},${y}` :
+                    isCircuit ? `M${s.x},${s.y} L${s.x},${s.y+((n.side==='left'?-1:1)*(200+(pos[n.id].idxInSide%10*25)))} L${x},${s.y+((n.side==='left'?-1:1)*(200+(pos[n.id].idxInSide%10*25)))} L${x},${y}` :
+                    isOrg ? `M${s.x},${s.y} C${s.x+(x-s.x)*0.5},${s.y} ${s.x+(x-s.x)*0.5},${y} ${x},${y}` :
+                    `M${s.x},${n.side==='left'?s.y+130:s.y-130} Q${n.side==='left'?s.x-550:s.x+550},${(s.y+(n.side==='left'?130:-130)+y)/2} ${x},${y}`;
+            const path = el('path',{d, fill:'none', stroke:col, 'stroke-width':isC?5:6.5, opacity:0.8, 'data-to':n.id, filter:isC?'url(#cosmic-glow)':(isCircuit?'url(#circuit-glow)':(isOrg?'url(#org-shadow)':'url(#rip-warp)'))});
+            document.getElementById('edge-layer').appendChild(path);
+        }
+
+        const node = el(isCircuit?'rect':'circle', {cx:x,cy:y,r:isVikas(n)?130:r, x:x-45,y:y-25,width:90,height:50, fill:isVikas(n)?'url(#sunGrad)':(isC?'#fff':col), stroke:isVikas(n)?'#ffaa00':col, 'stroke-width':isVikas(n)?6:3, 'data-id':n.id});
+        node.onclick = (e) => { e.stopPropagation(); clearHighlights(); highlightLineage(n.id); };
+        document.getElementById(isVikas(n)?'sun-layer':'node-layer').appendChild(node);
+
+        const group = el('g', {class:'label-group', 'data-id':n.id});
+        const txt = n.nickname ? `${n.nickname} (${n.lastname})` : n.name;
+        const ly = isVikas(n)?y+170:(isCircuit?(pos[n.id].idxInSide%2===0?y-70:y+90):(y>CY?y+105:y-85));
+        
+        group.appendChild(el('text',{x, y:ly, 'text-anchor':'middle', class:'label label-bg', 'font-size':'23px'}, txt));
+        group.appendChild(el('text',{x, y:ly, 'text-anchor':'middle', class:'label label-fg', 'font-size':'23px'}, txt));
+        document.getElementById('label-layer').appendChild(group);
+    });
+    updateTransform();
+}
+
+const NS="http://www.w3.org/2000/svg";
+function el(tag, a, t) { const e=document.createElementNS(NS, tag); for(let k in a) e.setAttribute(k, a[k]); if(t) e.textContent=t; return e; }
+function createStarfield() { const layer=document.getElementById('star-layer'); layer.innerHTML=''; for(let i=0;i<650;i++){ const star=el('circle',{cx:Math.random()*20000-10000+CX,cy:Math.random()*20000-10000+CY,r:Math.random()*3+1,fill:'#fff',class:'star'}); star.style.setProperty("--d",(Math.random()*3+1)+'s'); layer.appendChild(star); } }
+function loadData() { fetch(SCRIPT_URL).then(res=>res.json()).then(data=>{ NODES=data.slice(1).map(d=>({id:d[0]?d[0].toString():"",name:d[4]||"",nickname:d[23]||"",lastname:d[3]||"",p:d[5]||"VB",side:d[12]||"left",tier:d[13]||"1",hid:d[17]?d[17].toString():""})); createStarfield(); setTheme('organic'); }); }
+function setTheme(t) { currentTheme=t; document.querySelectorAll('.nav-group:nth-child(1) .theme-btn').forEach(b=>b.classList.remove('active')); document.getElementById('btn-'+t).classList.add('active'); render(); autoFit(); }
+function setFocus(s) { currentFocus=s; document.querySelectorAll('.nav-group:nth-child(2) button').forEach(b=>b.classList.remove('active')); document.getElementById('focus-'+s).classList.add('active'); render(); autoFit(); }
+function updateTransform() { camera.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`); }
+svg.onwheel=(e)=>{ e.preventDefault(); scale*=e.deltaY>0?0.9:1.1; updateTransform(); };
+svg.onmousedown=(e)=>{ isDragging=true; startX=e.clientX-tx; startY=e.clientY-ty; };
+window.onmousemove=(e)=>{ if(isDragging){ tx=e.clientX-startX; ty=e.clientY-startY; updateTransform(); } };
+window.onmouseup=()=>{ isDragging=false; };
+window.onload = loadData;
+</script>
+</body>
+</html>

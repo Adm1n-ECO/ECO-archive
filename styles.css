@@ -1,0 +1,251 @@
+/* -----------------------------------------------------------
+   GLOBAL THEME
+----------------------------------------------------------- */
+:root {
+  --bg: #05060a;
+  --panel-bg: #0f1118;
+  --accent: #f5c84c;
+  --accent-soft: rgba(245, 200, 76, 0.2);
+  --text-main: #f7f7f7;
+  --text-muted: #a0a4b8;
+  --border-subtle: #262938;
+
+  --parent: #4da3ff;
+  --self: #f5c84c;
+  --other: #9ea2b8;
+
+  --link: #555a70;
+  --link-strong: #f5c84c;
+}
+
+/* -----------------------------------------------------------
+   RESET
+----------------------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top, #151827 0, #05060a 55%);
+  color: var(--text-main);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* -----------------------------------------------------------
+   APP LAYOUT
+----------------------------------------------------------- */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 12px 16px;
+  gap: 8px;
+}
+
+/* -----------------------------------------------------------
+   HEADER
+----------------------------------------------------------- */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #101321, #15192a);
+  border: 1px solid #262a3a;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.02), 0 18px 45px rgba(0,0,0,0.6);
+}
+
+header h1 {
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* -----------------------------------------------------------
+   LAYOUT SWITCHER
+----------------------------------------------------------- */
+#layoutSwitcher {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: #05060a;
+  border: 1px solid #262a3a;
+  gap: 2px;
+}
+
+#layoutSwitcher button {
+  border: none;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+
+#layoutSwitcher button.active {
+  background: radial-gradient(circle at top, #f5c84c, #f0a93a);
+  color: #05060a;
+  font-weight: 600;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.6), 0 0 18px rgba(245,200,76,0.4);
+}
+
+#layoutSwitcher button:hover:not(.active) {
+  background: rgba(245,200,76,0.08);
+  color: #f7f7f7;
+}
+
+/* -----------------------------------------------------------
+   MAIN LAYOUT
+----------------------------------------------------------- */
+main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 340px);
+  gap: 10px;
+  min-height: 0;
+}
+
+/* -----------------------------------------------------------
+   VISUALIZATION PANEL
+----------------------------------------------------------- */
+#vizContainer {
+  position: relative;
+  border-radius: 14px;
+  background: radial-gradient(circle at top, #151827 0, #05060a 60%);
+  border: 1px solid #262a3a;
+  overflow: hidden;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.7);
+}
+
+#viz {
+  width: 100%;
+  height: 100%;
+}
+
+/* -----------------------------------------------------------
+   SIDE PANEL
+----------------------------------------------------------- */
+#sidePanel {
+  border-radius: 14px;
+  background: radial-gradient(circle at top, #151827 0, #05060a 60%);
+  border: 1px solid #262a3a;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.7);
+}
+
+#sidePanel h2 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+#nodeName {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+#nodeRole {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+#nodeTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+#nodeTags .tag {
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  border: 1px solid #262a3a;
+  background: rgba(10,12,20,0.9);
+  color: var(--text-muted);
+}
+
+#nodeTags .tag.highlight {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* -----------------------------------------------------------
+   RELATIONSHIPS
+----------------------------------------------------------- */
+#relationshipList {
+  font-size: 11px;
+  color: var(--text-muted);
+  max-height: 140px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/* -----------------------------------------------------------
+   LEGEND
+----------------------------------------------------------- */
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.legend .swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.swatch.parent { background: var(--parent); }
+.swatch.self   { background: var(--self); }
+.swatch.other  { background: var(--other); }
+
+.legend .line {
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.line.normal { background: var(--link); }
+.line.strong { background: var(--link-strong); }
+
+/* -----------------------------------------------------------
+   FOOTER
+----------------------------------------------------------- */
+footer {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-top: 4px;
+  text-align: right;
+}
+
+/* -----------------------------------------------------------
+   RESPONSIVE
+----------------------------------------------------------- */
+@media (max-width: 900px) {
+  main {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 2fr) minmax(220px, 1.4fr);
+  }
+}

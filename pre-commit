@@ -1,0 +1,39 @@
+#!/bin/bash
+# F4F Pre-commit hook — catches JS syntax errors before they reach production
+
+ERRORS=0
+
+# Check all staged JS files
+STAGED_JS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.js$')
+
+if [ -n "$STAGED_JS" ]; then
+  echo "🔍 Checking JS syntax..."
+  for file in $STAGED_JS; do
+    if ! node --check "$file" 2>/dev/null; then
+      echo "❌ Syntax error in: $file"
+      node --check "$file"
+      ERRORS=$((ERRORS + 1))
+    fi
+  done
+fi
+
+# Check for accidental console.log in JS (warn only, don't block)
+CONSOLE_HITS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.js$' | xargs grep -l "console\.log" 2>/dev/null)
+if [ -n "$CONSOLE_HITS" ]; then
+  echo "⚠️  console.log found in: $CONSOLE_HITS (not blocking, just FYI)"
+fi
+
+# Check for hardcoded localhost in staged files
+LOCALHOST_HITS=$(git diff --cached --name-only --diff-filter=ACM | xargs grep -l "localhost" 2>/dev/null | grep -v "node_modules")
+if [ -n "$LOCALHOST_HITS" ]; then
+  echo "⚠️  'localhost' found in: $LOCALHOST_HITS (confirm this is intentional)"
+fi
+
+if [ $ERRORS -gt 0 ]; then
+  echo ""
+  echo "🚫 Commit blocked — fix $ERRORS syntax error(s) above."
+  exit 1
+fi
+
+echo "✅ Pre-commit checks passed."
+exit 0

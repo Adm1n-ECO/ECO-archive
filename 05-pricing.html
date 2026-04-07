@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECO Design Review — Pricing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',system-ui,sans-serif;background:#070D14;color:#E8F4F0;-webkit-font-smoothing:antialiased;}
+.nav{background:#0D1820;border-bottom:1px solid rgba(0,229,204,.10);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;position:sticky;top:0;z-index:100;}
+.nav a{font-size:13px;color:#3A5A54;text-decoration:none;transition:color .14s;}.nav a:hover{color:#00E5CC;}
+.nav-title{font-size:13px;font-weight:500;color:#E8F4F0;margin-left:auto;}
+.wrap{max-width:900px;margin:0 auto;padding:40px 24px 80px;}
+h1{font-family:'DM Serif Display',serif;font-size:2.6rem;line-height:1.15;letter-spacing:-.02em;color:#E8F4F0;margin-bottom:10px;}
+h1 em{font-style:italic;color:#00E040;}
+.hero-sub{font-size:1rem;color:#5A8A80;line-height:1.7;max-width:520px;margin-bottom:12px;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(0,224,64,.10);border:1px solid rgba(0,224,64,.22);color:#009828;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:4px 12px;border-radius:999px;margin-bottom:36px;}
+.section-title{font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#3A5A54;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(0,229,204,.08);}
+
+/* Price anchors */
+.anchors{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:36px;}
+.anchor{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:14px;padding:20px 22px;flex:1;min-width:160px;position:relative;}
+.anchor.primary{border-color:rgba(0,224,64,.28);border-width:2px;}
+.anchor-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:#00E040;color:#070D14;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 12px;border-radius:999px;white-space:nowrap;}
+.anchor-price{font-family:'DM Serif Display',serif;font-size:3rem;line-height:1;color:#E8F4F0;margin-bottom:2px;}
+.anchor-price sup{font-size:1.4rem;vertical-align:super;}
+.anchor-label{font-size:13px;font-weight:500;color:#7AADA0;margin-bottom:6px;}
+.anchor-sub{font-size:12px;color:#3A5A54;line-height:1.5;}
+
+/* Calculator */
+.calc-box{background:#0D1820;border:1px solid rgba(0,229,204,.10);border-radius:14px;padding:24px;margin-bottom:24px;}
+.calc-title{font-size:14px;font-weight:500;color:#E8F4F0;margin-bottom:18px;}
+.calc-rows{display:flex;flex-direction:column;gap:0;}
+.calc-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,229,204,.06);}
+.calc-row:last-of-type{border-bottom:none;}
+.calc-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;}
+.calc-name{font-size:13px;color:#C8D4D0;flex:1;}
+.calc-type{font-size:11px;color:#3A5A54;}
+.calc-price{font-size:13px;font-weight:500;color:#E8F4F0;font-family:'JetBrains Mono',monospace;}
+.calc-divider{height:1px;background:rgba(0,229,204,.08);margin:10px 0;}
+.calc-total-row{display:flex;justify-content:space-between;align-items:baseline;}
+.calc-total-label{font-size:13px;color:#5A8A80;}
+.calc-total-amount{font-size:26px;font-weight:600;color:#00E040;font-family:'DM Serif Display',serif;}
+.calc-total-note{font-size:11px;color:#3A5A54;text-align:right;margin-top:2px;}
+
+/* Live calculator */
+.live-calc{background:#0A1A0A;border:1px solid rgba(0,224,64,.15);border-radius:14px;padding:22px;margin-bottom:24px;}
+.live-title{font-size:13px;font-weight:500;color:#00E040;margin-bottom:16px;}
+.slider-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.slider-label{font-size:12px;color:#5A8A80;min-width:180px;}
+.slider-val{font-size:13px;font-weight:500;color:#E8F4F0;min-width:28px;text-align:right;font-family:'JetBrains Mono',monospace;}
+input[type=range]{flex:1;accent-color:#00E040;}
+.live-total{display:flex;justify-content:space-between;align-items:flex-end;padding-top:14px;border-top:1px solid rgba(0,224,64,.10);margin-top:4px;}
+.live-total-label{font-size:12px;color:#3A5A54;}
+.live-total-breakdown{font-size:11px;color:#3A5A54;margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.live-total-amount{font-size:28px;font-weight:600;color:#00E040;font-family:'DM Serif Display',serif;}
+.live-total-note{font-size:11px;color:#3A5A54;text-align:right;}
+
+/* Trust signal */
+.trust{background:#070D14;border:1px solid rgba(0,229,204,.10);border-radius:14px;padding:22px;margin-bottom:24px;}
+.trust-quote{font-family:'DM Serif Display',serif;font-size:1.35rem;line-height:1.45;color:#E8F4F0;margin-bottom:10px;}
+.trust-quote em{font-style:italic;color:#00E5CC;}
+.trust-body{font-size:13px;color:#5A8A80;line-height:1.7;}
+
+/* Discuss boxes */
+.discuss{background:#161206;border:1px dashed rgba(224,200,80,.35);border-radius:8px;padding:12px 14px;font-size:13px;color:#8A7040;line-height:1.6;margin-top:12px;}
+.discuss strong{color:#C0A040;display:block;margin-bottom:3px;}
+.open-decision{background:#160A00;border:1px solid rgba(224,144,64,.25);border-radius:8px;padding:12px 14px;margin-bottom:8px;}
+.od-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#E09040;margin-bottom:5px;}
+.od-text{font-size:12px;color:#8A7040;line-height:1.6;}
+.od-options{margin-top:8px;display:flex;flex-direction:column;gap:4px;}
+.od-opt{font-size:12px;color:#5A7060;display:flex;gap:8px;}
+.od-opt-key{color:#E09040;font-family:'JetBrains Mono',monospace;font-size:11px;flex-shrink:0;}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="index.html">← Design Review Hub</a>
+  <div class="nav-title">05 — Pricing · Per-Profile Model</div>
+</nav>
+<div class="wrap">
+
+  <h1>Pay for people,<br><em>not subscriptions.</em></h1>
+  <p class="hero-sub">Every profile on EternalCurrent.Online is a real person, created by someone who loves them. That's not just a pricing model — it's a quality guarantee.</p>
+  <div class="hero-tag">✓ Vetted data · Real people only</div>
+
+  <!-- Price anchors -->
+  <div class="section-title">What you pay</div>
+  <div class="anchors">
+    <div class="anchor primary">
+      <div class="anchor-badge">Human profile</div>
+      <div class="anchor-price"><sup>$</sup>1.99</div>
+      <div class="anchor-label">per person · one-time</div>
+      <div class="anchor-sub">Any person you create a profile for — yourself, spouse, children, parents, grandparents.</div>
+    </div>
+    <div class="anchor">
+      <div class="anchor-price" style="font-size:2.5rem;"><sup>$</sup>0.99</div>
+      <div class="anchor-label">pet profile · one-time</div>
+      <div class="anchor-sub">Because Bruno is family too. Dogs, cats, any beloved pet deserves a place on the tree.</div>
+    </div>
+    <div class="anchor">
+      <div class="anchor-price" style="color:#3A5A54;">$0</div>
+      <div class="anchor-label">connections · always free</div>
+      <div class="anchor-sub">Linking your household to another is always free. You pay for profiles you create, not relationships.</div>
+    </div>
+  </div>
+
+  <!-- Example scenario -->
+  <div class="section-title">A real example</div>
+  <div class="calc-box">
+    <div class="calc-title">The Bakshi household — family of 4 + dog</div>
+    <div class="calc-rows">
+      <div class="calc-row">
+        <div class="calc-avatar" style="background:rgba(0,229,204,.12);color:#00E5CC;">VB</div>
+        <div><div class="calc-name">Vikas Bakshi</div><div class="calc-type">Account owner · primary profile</div></div>
+        <div class="calc-price">$1.99</div>
+      </div>
+      <div class="calc-row">
+        <div class="calc-avatar" style="background:rgba(0,224,64,.12);color:#00E040;">S</div>
+        <div><div class="calc-name">Spouse</div><div class="calc-type">Household member</div></div>
+        <div class="calc-price">$1.99</div>
+      </div>
+      <div class="calc-row">
+        <div class="calc-avatar" style="background:rgba(255,255,255,.07);color:#7AADA0;">C1</div>
+        <div><div class="calc-name">Child one</div><div class="calc-type">Household member</div></div>
+        <div class="calc-price">$1.99</div>
+      </div>
+      <div class="calc-row">
+        <div class="calc-avatar" style="background:rgba(255,255,255,.07);color:#7AADA0;">C2</div>
+        <div><div class="calc-name">Child two</div><div class="calc-type">Household member</div></div>
+        <div class="calc-price">$1.99</div>
+      </div>
+      <div class="calc-row">
+        <div class="calc-avatar" style="background:rgba(224,144,64,.12);color:#E09040;">🐕</div>
+        <div><div class="calc-name">Bruno (the dog)</div><div class="calc-type">Pet profile</div></div>
+        <div class="calc-price">$0.99</div>
+      </div>
+    </div>
+    <div class="calc-divider"></div>
+    <div class="calc-total-row">
+      <div class="calc-total-label">Total · one-time payment</div>
+      <div><div class="calc-total-amount">$8.95</div><div class="calc-total-note">No monthly fee. No subscription. Ever.</div></div>
+    </div>
+  </div>
+
+  <!-- Live calculator -->
+  <div class="live-calc">
+    <div class="live-title">Build your household — see your cost</div>
+    <div class="slider-row">
+      <span class="slider-label">People in your household</span>
+      <input type="range" min="1" max="12" value="4" step="1" id="s-people" oninput="calc()">
+      <span class="slider-val" id="v-people">4</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-label">Managed profiles (elderly / kids)</span>
+      <input type="range" min="0" max="8" value="0" step="1" id="s-managed" oninput="calc()">
+      <span class="slider-val" id="v-managed">0</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-label">Pets</span>
+      <input type="range" min="0" max="6" value="1" step="1" id="s-pets" oninput="calc()">
+      <span class="slider-val" id="v-pets">1</span>
+    </div>
+    <div class="live-total">
+      <div>
+        <div class="live-total-label">Your household total</div>
+        <div class="live-total-breakdown" id="breakdown">4 people · 0 managed · 1 pet</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="live-total-amount" id="total">$8.95</div>
+        <div class="live-total-note">one-time · no monthly fee</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trust signal -->
+  <div class="section-title">The quality guarantee</div>
+  <div class="trust">
+    <div class="trust-quote">"Every profile on EternalCurrent.Online is a <em>real person</em>, created by someone who loves them."</div>
+    <p class="trust-body">Because creating a profile requires a small payment, our users only build profiles for people who genuinely matter to them. There are no ghost profiles, no placeholder entries, no junk data. When you search for a family member on EternalCurrent.Online, every result you see is a real human being — vetted by the person who loves them most.</p>
+  </div>
+
+  <!-- Open decisions -->
+  <div class="section-title">Decisions still needed — pricing specifics</div>
+
+  <div class="open-decision">
+    <div class="od-label">Open decision · Who pays for invited profiles?</div>
+    <div class="od-text">When you invite your brother in London to connect — does he pay $1.99 to create his own profile, or do you pay to add him to your tree?</div>
+    <div class="od-options">
+      <div class="od-opt"><span class="od-opt-key">A</span>Invitee pays — each person pays $1.99 to create their own profile when they accept.</div>
+      <div class="od-opt"><span class="od-opt-key">B</span>Inviter pays — you pay $1.99 to add someone, they join free.</div>
+      <div class="od-opt"><span class="od-opt-key">C</span>Each household only pays for profiles they personally create.</div>
+    </div>
+  </div>
+
+  <div class="open-decision">
+    <div class="od-label">Open decision · Managed profiles (elderly, non-device users)</div>
+    <div class="od-text">A user wants to add their 82-year-old grandmother who will never have a phone. Can they create and own her profile for $1.99, or does every profile need its own login?</div>
+    <div class="od-options">
+      <div class="od-opt"><span class="od-opt-key">A</span>Managed profiles allowed — child creates and owns the profile, no login required for subject.</div>
+      <div class="od-opt"><span class="od-opt-key">B</span>Every profile requires its own email and login.</div>
+      <div class="od-opt"><span class="od-opt-key">C</span>Managed allowed but limited — no ability to accept connections independently.</div>
+    </div>
+  </div>
+
+  <div class="open-decision">
+    <div class="od-label">Open decision · Deleted profiles</div>
+    <div class="od-text">A user paid $1.99 to create a profile and now wants to delete it. What happens?</div>
+    <div class="od-options">
+      <div class="od-opt"><span class="od-opt-key">A</span>Non-refundable — profile deleted, payment kept (like a seat purchase).</div>
+      <div class="od-opt"><span class="od-opt-key">B</span>Soft delete — 30 days to restore, then permanent. No refund.</div>
+      <div class="od-opt"><span class="od-opt-key">C</span>Archive — data preserved but hidden. Restore for free any time.</div>
+      <div class="od-opt"><span class="od-opt-key">D</span>Credit returned to account balance for use on a new profile.</div>
+    </div>
+  </div>
+
+  <div class="discuss" style="margin-top:16px;">
+    <strong>Discuss — payment timing in the signup flow</strong>
+    In the value-first signup flow, payment is triggered when a user tries to invite their first connection. At that moment they pay for their own profile plus any household members they want to add. The question is: do they pay for everyone upfront at that moment, or add profiles one at a time and pay as they go?
+  </div>
+
+</div>
+<script>
+function calc(){
+  var p=parseInt(document.getElementById('s-people').value);
+  var m=parseInt(document.getElementById('s-managed').value);
+  var pets=parseInt(document.getElementById('s-pets').value);
+  document.getElementById('v-people').textContent=p;
+  document.getElementById('v-managed').textContent=m;
+  document.getElementById('v-pets').textContent=pets;
+  var total=(p*1.99)+(m*1.99)+(pets*0.99);
+  document.getElementById('total').textContent='$'+total.toFixed(2);
+  var parts=[];
+  if(p) parts.push(p+' '+(p===1?'person':'people'));
+  if(m) parts.push(m+' managed');
+  if(pets) parts.push(pets+' '+(pets===1?'pet':'pets'));
+  document.getElementById('breakdown').textContent=parts.join(' · ')||'—';
+}
+</script>
+</body>
+</html>

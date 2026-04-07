@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eternal Currents | Master v10.8 STABLE</title>
+    <style>
+        :root { --gold:#ffcc00; --header-bg:#0d1117; } 
+        body,html { margin:0;padding:0; transition: background 0.8s; font-family:'Segoe UI',sans-serif; overflow:hidden; height:100vh; width:100vw; background: #0d1117; }
+        #ui-header { position:fixed;top:0;left:0;width:100%; padding:12px 20px;z-index:2000;display:flex;align-items:center; justify-content:center;gap:12px; background: var(--header-bg); border-bottom:2px solid #333; }
+        .nav-group { display:flex; gap:8px; border-right:1px solid #444; padding-right:15px; margin-right:15px; }
+
+        button { background:rgba(255,255,255,0.1); border:1px solid #666; color:#fff; padding:6px 12px; cursor:pointer; border-radius:4px; text-transform:uppercase; font-size:10px; transition: 0.2s; font-weight: bold; }
+        button.active { background: #fff !important; color:#000 !important; border-color: var(--gold) !important; box-shadow: 0 0 10px var(--gold); }
+        
+        .label { font-weight:900; text-transform:uppercase; pointer-events:none; transition: 0.3s; font-size: 22px; }
+        .label-bg { paint-order: stroke fill; stroke: #000; stroke-width: 6px; stroke-linejoin: round; }
+        .label-fg { fill: #fff; }
+        .organic-mode .label-fg { fill: #000; }
+        .organic-mode .label-bg { stroke: #fff; }
+
+        .dim { opacity: 0.05 !important; transition: opacity 0.5s; }
+        .highlight-edge { stroke-width: 12px !important; opacity: 1 !important; stroke: var(--gold) !important; filter: drop-shadow(0 0 10px var(--gold)); }
+        .highlight-node { stroke: #fff !important; stroke-width: 6px !important; opacity: 1 !important; }
+        
+        #mainSVG { width:100vw;height:100vh;display:block; cursor: grab; }
+    </style>
+</head>
+<body>
+
+<div id="ui-header">
+    <div class="nav-group">
+        <button id="btn-organic" class="active" onclick="setTheme('organic')">Organic</button>
+        <button id="btn-ripple" onclick="setTheme('ripple')">Ripple</button>
+        <button id="btn-circuit" onclick="setTheme('circuit')">Circuitry</button>
+        <button id="btn-cosmic" onclick="setTheme('cosmic')">Cosmic</button>
+    </div>
+    <div class="nav-group" style="border:none;">
+        <button id="focus-all" class="active" onclick="setFocus('all')">All</button>
+        <button id="focus-left" onclick="setFocus('left')">Family</button>
+        <button id="focus-right" onclick="setFocus('right')">Social</button>
+    </div>
+    <button onclick="autoFit()" style="border-color:var(--gold); color:var(--gold);">Reset View</button>
+</div>
+
+<svg id="mainSVG">
+<defs>
+    <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="35%" stop-color="#fffce0"/><stop offset="100%" stop-color="#ffaa00"/></radialGradient>
+</defs>
+<g id="camera-layer">
+    <rect id="bg-click" x="-20000" y="-20000" width="40000" height="40000" fill="transparent" onclick="clearHighlights()" />
+    <g id="edge-layer"></g> <g id="node-layer"></g> <g id="sun-layer"></g> <g id="label-layer"></g>
+</g>
+</svg>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTTLmITxQh9BwN87E_exKPGS5FSSdmU7MJkXd3IC2hsmXxSiHnoX1XduMGdt3cAxQi/exec";
+const SVG_W=10000, SVG_H=8000, CX=SVG_W/2, CY=SVG_H/2;
+let NODES = [], currentTheme = 'organic', currentFocus = 'all', activeRootID = 'VB';
+let scale = 0.3, tx = 0, ty = 0, isDragging = false, startX, startY;
+
+const camera = document.getElementById('camera-layer');
+const svg = document.getElementById('mainSVG');
+
+function computePositions() {
+    const pos = {};
+    const root = NODES.find(n => n.id === activeRootID) || NODES[0] || {id:'VB'};
+    pos[root.id] = { x: CX, y: CY };
+
+    NODES.forEach((n, idx) => {
+        if (n.id === root.id) return;
+        const tier = parseFloat(n.tier || 1);
+        const sideMult = n.side === 'right' ? 1 : -1;
+        
+        // STABLE FAN LOGIC: Spread nodes in a clear arc
+        const angle = (n.side === 'right' ? -40 : 140) + (idx % 15 * 10);
+        const rad = angle * Math.PI / 180;
+        const orbit = 800 + (tier * 600);
+        
+        pos[n.id] = { 
+            x: CX + Math.cos(rad) * orbit, 
+            y: CY + Math.sin(rad) * orbit * 0.9, 
+            r: 35 
+        };
+    });
+    return pos;
+}
+
+function autoFit() {
+    const pos = computePositions();
+    tx = (window.innerWidth / 2) - (CX * scale);
+    ty = (window.innerHeight / 2) - (CY * scale);
+    updateTransform();
+}
+
+function highlightLineage(nodeID) {
+    if(!nodeID) return;
+    const related = new Set([nodeID]);
+    const person = NODES.find(x => x.id === nodeID);
+    if(person && person.p) related.add(person.p);
+    NODES.filter(x => x.p === nodeID).forEach(c => related.add(c.id));
+
+    document.querySelectorAll('circle, line, .label-group').forEach(el => {
+        const id = el.getAttribute('data-id') || el.getAttribute('data-to');
+        if(!related.has(id) && id !== activeRootID) el.classList.add('dim');
+        else el.classList.add('highlight-node');
+    });
+}
+
+function clearHighlights() { document.querySelectorAll('.dim, .highlight-node').forEach(el => el.classList.remove('dim','highlight-node')); }
+
+function render() {
+    ['edge-layer','node-layer','sun-layer','label-layer'].forEach(id => document.getElementById(id).innerHTML = '');
+    const pos = computePositions();
+    const root = NODES.find(n => n.id === activeRootID) || NODES[0];
+
+    NODES.forEach((n, idx) => {
+        if (!pos[n.id]) return;
+        const {x, y, r} = pos[n.id];
+        const isCenter = (n.id === activeRootID);
+
+        if(!isCenter) {
+            const s = pos[n.p] || pos[activeRootID];
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", s.x); line.setAttribute("y1", s.y);
+            line.setAttribute("x2", x); line.setAttribute("y2", y);
+            line.setAttribute("stroke", n.side === 'right' ? "#e91e63" : "#00f2ff");
+            line.setAttribute("stroke-width", "3");
+            document.getElementById('edge-layer').appendChild(line);
+        }
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", x); circle.setAttribute("cy", y);
+        circle.setAttribute("r", isCenter ? 140 : 40);
+        circle.setAttribute("fill", isCenter ? "url(#sunGrad)" : (n.side === 'right' ? "#ff00ff" : "#52c96e"));
+        circle.setAttribute("data-id", n.id);
+        circle.onclick = (e) => { e.stopPropagation(); clearHighlights(); highlightLineage(n.id); };
+        document.getElementById(isCenter ? 'sun-layer' : 'node-layer').appendChild(circle);
+
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.setAttribute("class", "label-group");
+        group.setAttribute("data-id", n.id);
+        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        txt.setAttribute("x", x); txt.setAttribute("y", isCenter ? y+180 : y+80);
+        txt.setAttribute("te<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eternal Currents | Master v10.9 DIRECT-HIT</title>
+    <style>
+        :root { --gold:#ffcc00; --header-bg:#0d1117; } 
+        body,html { margin:0;padding:0; height:100vh; width:100vw; overflow:hidden; background: #0a0e14; font-family:'Segoe UI',sans-serif; }
+        #ui-header { position:fixed;top:0;left:0;width:100%; padding:12px 20px;z-index:2000;display:flex;align-items:center; justify-content:center;gap:12px; background: var(--header-bg); border-bottom:2px solid #333; }
+        .nav-group { display:flex; gap:8px; border-right:1px solid #444; padding-right:15px; margin-right:15px; }
+        button { background:rgba(255,255,255,0.1); border:1px solid #666; color:#fff; padding:6px 12px; cursor:pointer; border-radius:4px; text-transform:uppercase; font-size:10px; font-weight: bold; }
+        button.active { background: #fff !important; color:#000 !important; border-color: var(--gold) !important; box-shadow: 0 0 10px var(--gold); }
+        #mainSVG { width:100vw;height:100vh;display:block; cursor: grab; }
+        .label { font-weight:900; text-transform:uppercase; pointer-events:none; fill: #fff; stroke: #000; stroke-width: 4px; paint-order: stroke fill; font-size: 22px; }
+    </style>
+</head>
+<body>
+
+<div id="ui-header">
+    <div class="nav-group">
+        <button id="btn-organic" class="active" onclick="setTheme('organic')">Organic</button>
+        <button id="btn-ripple" onclick="setTheme('ripple')">Ripple</button>
+        <button id="btn-circuit" onclick="setTheme('circuit')">Circuitry</button>
+        <button id="btn-cosmic" onclick="setTheme('cosmic')">Cosmic</button>
+    </div>
+    <button onclick="reCenter()" style="border-color:var(--gold); color:var(--gold);">SNAP TO CENTER</button>
+</div>
+
+<svg id="mainSVG">
+    <defs>
+        <radialGradient id="sunGrad" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffffff"/><stop offset="35%" stop-color="#fffce0"/><stop offset="100%" stop-color="#ffaa00"/></radialGradient>
+    </defs>
+    <g id="camera-layer">
+        <rect x="-10000" y="-10000" width="20000" height="20000" fill="transparent" onclick="clearHighlights()" />
+        <g id="edge-layer"></g> <g id="node-layer"></g> <g id="label-layer"></g>
+    </g>
+</svg>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTTLmITxQh9BwN87E_exKPGS5FSSdmU7MJkXd3IC2hsmXxSiHnoX1XduMGdt3cAxQi/exec";
+let NODES = [], activeRootID = 'VB';
+let scale = 0.5, tx = window.innerWidth/2, ty = window.innerHeight/2, isDragging = false, startX, startY;
+
+const camera = document.getElementById('camera-layer');
+const svg = document.getElementById('mainSVG');
+
+function updateTransform() { camera.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`); }
+function reCenter() { tx = window.innerWidth/2; ty = window.innerHeight/2; scale = 0.5; updateTransform(); }
+
+function render() {
+    ['edge-layer','node-layer','label-layer'].forEach(id => document.getElementById(id).innerHTML = '');
+    
+    NODES.forEach((n, idx) => {
+        const isCenter = (n.id === activeRootID);
+        // Simple organized spread math
+        const angle = (idx / NODES.length) * 2 * Math.PI;
+        const dist = isCenter ? 0 : 500 + (parseFloat(n.tier || 1) * 300);
+        n.x = Math.cos(angle) * dist;
+        n.y = Math.sin(angle) * dist;
+
+        if(!isCenter) {
+            const edge = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            edge.setAttribute("x1", 0); edge.setAttribute("y1", 0);
+            edge.setAttribute("x2", n.x); edge.setAttribute("y2", n.y);
+            edge.setAttribute("stroke", "#00f2ff"); edge.setAttribute("stroke-width", "3");
+            document.getElementById('edge-layer').appendChild(edge);
+        }
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y);
+        circle.setAttribute("r", isCenter ? 120 : 40);
+        circle.setAttribute("fill", isCenter ? "url(#sunGrad)" : "#52c96e");
+        circle.onclick = () => { activeRootID = n.id; render(); };
+        document.getElementById('node-layer').appendChild(circle);
+
+        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        txt.setAttribute("x", n.x); txt.setAttribute("y", n.y + (isCenter ? 160 : 70));
+        txt.setAttribute("text-anchor", "middle"); txt.setAttribute("class", "label");
+        txt.textContent = n.name;
+        document.getElementById('label-layer').appendChild(txt);
+    });
+    updateTransform();
+}
+
+fetch(SCRIPT_URL).then(res => res.json()).then(data => {
+    NODES = data.slice(1).map(d => ({id:d[0], name:d[4], tier:d[13]}));
+    activeRootID = NODES[0].id;
+    render();
+    reCenter();
+});
+
+svg.onmousedown = (e) => { isDragging = true; startX = e.clientX - tx; startY = e.clientY - ty; };
+window.onmousemove = (e) => { if(isDragging) { tx = e.clientX - startX; ty = e.clientY - startY; updateTransform(); } };
+window.onmouseup = () => { isDragging = false; };
+svg.onwheel = (e) => { e.preventDefault(); scale *= e.deltaY > 0 ? 0.9 : 1.1; updateTransform(); };
+window.onload = reCenter;
+</script>
+</body>
+</html>xt-anchor", "middle"); txt.setAttribute("class", "label label-fg");
+        txt.textContent = n.name;
+        group.appendChild(txt);
+        document.getElementById('label-layer').appendChild(group);
+    });
+    updateTransform();
+}
+
+function updateTransform() { camera.setAttribute('transform', `translate(${tx},${ty}) scale(${scale})`); }
+
+fetch(SCRIPT_URL).then(res => res.json()).then(data => {
+    NODES = data.slice(1).map(d => ({id:d[0], name:d[4], p:d[5], side:d[12], tier:d[13]}));
+    render(); autoFit();
+});
+
+svg.onmousedown = (e) => { isDragging = true; startX = e.clientX - tx; startY = e.clientY - ty; };
+window.onmousemove = (e) => { if(isDragging) { tx = e.clientX - startX; ty = e.clientY - startY; updateTransform(); } };
+window.onmouseup = () => { isDragging = false; };
+svg.onwheel = (e) => { e.preventDefault(); scale *= e.deltaY > 0 ? 0.9 : 1.1; updateTransform(); };
+</script>
+</body>
+</html>
